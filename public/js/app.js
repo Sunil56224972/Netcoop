@@ -17,7 +17,7 @@ const OUTCOME = {
 };
 
 let appState = {
-  activeTab: 'studio',
+  activeTab: 'boot',
   result: null,
   scenarios: [],
   messages: [],
@@ -785,6 +785,12 @@ function paintTopology() {
   hydrateIcons(container);
 }
 
+// ─── Switch Tab Programmatically ──────────────────────────────────────────
+export function switchTab(target) {
+  const tab = $(`.tab[data-tab="${target}"]`);
+  if (tab) tab.click();
+}
+
 // ─── Boot Sequence Orchestrator ───────────────────────────────────────────
 function runBootSequence(options = {}) {
   const bootScreen = $('#netcoop-boot-screen');
@@ -818,7 +824,58 @@ function runBootSequence(options = {}) {
     if (options.isReboot) {
       toast('System rebooted', 'NetCoop AI initialized successfully', 'ok');
     }
-  }, 1800);
+  }, 1900);
+}
+
+// ─── Tab-Level Interactive Boot Diagnostics ───────────────────────────────
+function runTabBootSequence() {
+  const statusText = $('#tab-boot-status-text');
+  const percentText = $('#tab-boot-percent');
+  const progressBar = $('#tab-boot-progress-bar');
+  const logContainer = $('#tab-boot-log');
+  const logo = $('#boot-tab-interactive-logo');
+
+  if (logo) {
+    logo.style.transform = 'scale(1.08)';
+    setTimeout(() => { logo.style.transform = ''; }, 600);
+  }
+
+  if (progressBar) progressBar.style.width = '0%';
+  if (percentText) percentText.textContent = '0%';
+  if (statusText) statusText.textContent = 'Rebooting multi-agent telemetry subsystem…';
+
+  const logSteps = [
+    { p: 15, tag: 'INIT', tagCls: 'boot-log-tag--sync', t: 'Core Multi-Agent Kernel restarted (JSON-RPC v1.0.0 bus ready)', delay: 150 },
+    { p: 35, tag: 'BOOT', tagCls: 'boot-log-tag--ok', t: 'Core Switch Agent reconnected -> core-router-01 (ASR 9000, 10.0.0.1) latency 0.3ms', delay: 350 },
+    { p: 55, tag: 'BOOT', tagCls: 'boot-log-tag--ok', t: 'Distribution Switch Agent reconnected -> dist-switch-01 (Catalyst 9500, 10.0.1.1)', delay: 600 },
+    { p: 70, tag: 'BOOT', tagCls: 'boot-log-tag--ok', t: 'Wi-Fi AP Agent reconnected -> ap-academic-01 (Aruba AP-555, 10.0.2.10)', delay: 850 },
+    { p: 85, tag: 'BOOT', tagCls: 'boot-log-tag--ok', t: 'DNS/DHCP Agent reconnected -> srv-dns-01 & srv-dhcp-01 (10.0.0.53/67)', delay: 1100 },
+    { p: 95, tag: 'SYNC', tagCls: 'boot-log-tag--sync', t: 'Fault Correlation Engine synchronized with Groq LPU gpt-oss-120b inference bridge', delay: 1350 },
+    { p: 100, tag: 'READY', tagCls: 'boot-log-tag--ok', t: 'ALL AGENTS BOOTED: Standing by for telemetry input & fault diagnosis', delay: 1600 }
+  ];
+
+  if (logContainer) logContainer.innerHTML = '';
+
+  logSteps.forEach(({ p, tag, tagCls, t, delay }) => {
+    setTimeout(() => {
+      if (progressBar) progressBar.style.width = `${p}%`;
+      if (percentText) percentText.textContent = `${p}%`;
+      if (statusText) statusText.textContent = t;
+      if (logContainer) {
+        const line = document.createElement('div');
+        line.className = 'boot-log-line';
+        const d = new Date();
+        const timeStr = `[${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}:${String(Math.floor(d.getMilliseconds() / 10)).padStart(2, '0')}]`;
+        line.innerHTML = `<span class="boot-log-time">${timeStr}</span> <span class="boot-log-tag ${tagCls}">${tag}</span> ${esc(t)}`;
+        logContainer.appendChild(line);
+        logContainer.scrollTop = logContainer.scrollHeight;
+      }
+    }, delay);
+  });
+
+  setTimeout(() => {
+    toast('Boot Complete', 'All 6 diagnostic agents operational', 'ok');
+  }, 1750);
 }
 
 window.netcoopReboot = () => runBootSequence({ isReboot: true });
@@ -839,6 +896,19 @@ function boot() {
   const statusPillBtn = $('#status-pill-btn');
   if (statusPillBtn) statusPillBtn.onclick = () => window.netcoopReboot();
 
+  // Tab-level Booting triggers
+  const btnRebootTab = $('#btn-reboot-tab');
+  if (btnRebootTab) btnRebootTab.onclick = () => runTabBootSequence();
+
+  const bootTabLogo = $('#boot-tab-interactive-logo');
+  if (bootTabLogo) bootTabLogo.onclick = () => runTabBootSequence();
+
+  const btnTabToStudio = $('#btn-tab-to-studio');
+  if (btnTabToStudio) btnTabToStudio.onclick = () => switchTab('studio');
+
+  const btnTabToTopo = $('#btn-tab-to-topology');
+  if (btnTabToTopo) btnTabToTopo.onclick = () => switchTab('topology');
+
   // Run diagnosis button
   const runBtn = $('#nc-run');
   if (runBtn) runBtn.onclick = () => runDiagnosis();
@@ -851,7 +921,7 @@ function boot() {
       $('#nc-results').innerHTML = '';
       $('#nc-status').textContent = '';
       appState.result = null;
-      $$('.nc-sc').forEach(b => b.style.background = '');
+      $('.nc-sc').forEach(b => b.style.background = '');
       toast('Cleared', 'Input and results cleared');
     };
   }
