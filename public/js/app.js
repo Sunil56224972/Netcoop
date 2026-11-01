@@ -220,6 +220,24 @@ async function runDiagnosis() {
   statusEl.textContent = 'Multi-agent analysis in progress…';
   topStatus.textContent = 'Agents diagnosing via Groq LPU…';
 
+  $('#nc-results').innerHTML = `
+    <div class="diagnosis-pulse-card reveal">
+      <div class="diagnosis-logo-wrap">
+        <div class="diagnosis-logo-glow"></div>
+        <img src="images/netcoop-emblem.png" alt="NetCoop AI Logo" class="diagnosis-logo-img" />
+      </div>
+      <div class="diagnosis-status-title">Cooperative Multi-Agent Diagnosis in Progress</div>
+      <p class="diagnosis-status-sub">Distributing telemetry across 5 IIT Bhubaneswar domain agents and orchestrating diagnosis with Groq LPUs…</p>
+      <div class="diagnosis-agent-chips">
+        <span class="diagnosis-chip"><span class="diagnosis-chip-dot"></span> Core Switch Agent</span>
+        <span class="diagnosis-chip"><span class="diagnosis-chip-dot"></span> Distribution Agent</span>
+        <span class="diagnosis-chip"><span class="diagnosis-chip-dot"></span> Wi-Fi AP Agent</span>
+        <span class="diagnosis-chip"><span class="diagnosis-chip-dot"></span> DNS/DHCP Agent</span>
+        <span class="diagnosis-chip"><span class="diagnosis-chip-dot"></span> Groq LLM Agent</span>
+      </div>
+    </div>
+  `;
+
   try {
     let telemetry = raw;
     try { telemetry = JSON.parse(raw); } catch (_e) { /* treat as string */ }
@@ -767,13 +785,59 @@ function paintTopology() {
   hydrateIcons(container);
 }
 
+// ─── Boot Sequence Orchestrator ───────────────────────────────────────────
+function runBootSequence(options = {}) {
+  const bootScreen = $('#netcoop-boot-screen');
+  const statusText = $('#boot-status-text');
+  const percentText = $('#boot-percent');
+  const progressBar = $('#boot-progress-bar');
+  if (!bootScreen) return;
+
+  bootScreen.classList.remove('is-loaded');
+  if (progressBar) progressBar.style.width = '0%';
+  if (percentText) percentText.textContent = '0%';
+
+  const steps = [
+    { p: 25, t: 'Booting multi-agent telemetry mesh…', delay: 180 },
+    { p: 50, t: 'Connecting IIT Bhubaneswar node telemetry…', delay: 480 },
+    { p: 75, t: 'Synchronizing JSON-RPC v1.0.0 bus…', delay: 820 },
+    { p: 90, t: 'Groq LPU neural inference ready…', delay: 1150 },
+    { p: 100, t: 'NetCoop AI initialized and operational.', delay: 1480 }
+  ];
+
+  steps.forEach(({ p, t, delay }) => {
+    setTimeout(() => {
+      if (progressBar) progressBar.style.width = `${p}%`;
+      if (percentText) percentText.textContent = `${p}%`;
+      if (statusText) statusText.textContent = t;
+    }, delay);
+  });
+
+  setTimeout(() => {
+    bootScreen.classList.add('is-loaded');
+    if (options.isReboot) {
+      toast('System rebooted', 'NetCoop AI initialized successfully', 'ok');
+    }
+  }, 1800);
+}
+
+window.netcoopReboot = () => runBootSequence({ isReboot: true });
+
 // ─── Initialize Application ───────────────────────────────────────────────
 function boot() {
+  runBootSequence();
   hydrateIcons();
   initClock();
   initTheme();
   initTabs();
   loadScenarios();
+
+  // Reboot triggers
+  const rebootBtn = $('#boot-reboot-btn');
+  if (rebootBtn) rebootBtn.onclick = () => window.netcoopReboot();
+
+  const statusPillBtn = $('#status-pill-btn');
+  if (statusPillBtn) statusPillBtn.onclick = () => window.netcoopReboot();
 
   // Run diagnosis button
   const runBtn = $('#nc-run');

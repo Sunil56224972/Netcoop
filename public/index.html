@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>NetCoop AI — Multi-Agent Network Fault Diagnosis</title>
   <meta name="description" content="Multi-agent cooperative network fault diagnosis and root cause localization.">
+  <link rel="icon" type="image/png" sizes="128x128" href="images/favicon.png">
+  <link rel="apple-touch-icon" href="images/netcoop-emblem.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,6 +14,7 @@
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/views.css">
+  <link rel="stylesheet" href="css/boot.css">
   <script>
     (function() {
       const saved = localStorage.getItem('netcoop-theme');
@@ -24,18 +27,54 @@
   </script>
 </head>
 <body>
+  <!-- NetCoop AI Booting Screen Overlay -->
+  <div id="netcoop-boot-screen" class="boot-screen" aria-label="NetCoop AI System Booting">
+    <div class="boot-card">
+      <div class="boot-glow"></div>
+      <div class="boot-logo-wrap">
+        <div class="boot-emblem-ring"></div>
+        <img src="images/netcoop-emblem.png" alt="NetCoop AI Logo" class="boot-logo" />
+      </div>
+      <div class="boot-brand">
+        <h1 class="boot-title">NETCOOP AI</h1>
+        <p class="boot-subtitle">Multi-Agent Network Intelligence System</p>
+        <span class="boot-facility">IIT Bhubaneswar Campus Infrastructure • Node Alpha</span>
+      </div>
+      <div class="boot-status-box">
+        <div class="boot-status-row">
+          <span class="boot-pulse-dot"></span>
+          <span id="boot-status-text" class="boot-status-text">Booting multi-agent telemetry mesh…</span>
+          <span id="boot-percent" class="boot-percent">0%</span>
+        </div>
+        <div class="boot-progress-track">
+          <div id="boot-progress-bar" class="boot-progress-bar"></div>
+        </div>
+      </div>
+      <div class="boot-meta">
+        <span>JSON-RPC v1.0.0</span>
+        <span>•</span>
+        <span>Groq LPUs (gpt-oss-120b)</span>
+        <span>•</span>
+        <span>6 AI Agents</span>
+      </div>
+    </div>
+  </div>
+
   <div class="shell" style="min-height:100vh;display:flex;flex-direction:column">
     <!-- NetCoop AI Topbar -->
     <header class="topbar">
-      <div class="crumbs">
-        <span>IIT Bhubaneswar</span>
-        <span>/</span>
-        <b>NetCoop AI</b>
+      <div class="topbar__brand" id="boot-reboot-btn" role="button" tabindex="0" title="NetCoop AI — Click to reboot system">
+        <img src="images/netcoop-emblem.png" alt="NetCoop Logo" class="topbar-logo" />
+        <div class="crumbs">
+          <span>IIT Bhubaneswar</span>
+          <span>/</span>
+          <b>NetCoop AI</b>
+        </div>
       </div>
 
       <div class="topbar__spacer"></div>
 
-      <div class="status-pill">
+      <div class="status-pill" id="status-pill-btn" style="cursor:pointer" title="Click to inspect system telemetry boot status">
         <span class="status-dot"></span>
         <span id="top-status">AI idle</span>
       </div>
@@ -56,6 +95,7 @@
     <!-- Main View Content Area -->
     <main class="view" style="padding-top:16px">
       <div class="page-head">
+        <img src="images/netcoop-emblem.png" alt="NetCoop AI Logo" class="page-head__logo" />
         <div class="page-head__text">
           <h1 class="page-title">NetCoop AI</h1>
           <p class="page-sub">Multi-agent cooperative network fault diagnosis &amp; root cause localization.</p>
