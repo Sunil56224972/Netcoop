@@ -141,11 +141,33 @@
 .toolbar .input-icon { flex: 1; min-width: 200px; max-width: 320px; }
 .toolbar__end { margin-left: auto; display: flex; gap: 8px; align-items: center; }
 
-.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); padding: 0 8px; overflow-x: auto; }
-.tab { border: 0; background: none; height: 40px; padding: 0 10px; font-weight: 500; font-size: 13px; color: var(--ink-3); position: relative; white-space: nowrap; }
+.tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--line); padding: 0 12px; overflow-x: auto; align-items: center; }
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: none;
+  height: 40px;
+  padding: 0 12px;
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--ink-3);
+  position: relative;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+.tab svg {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  display: inline-block;
+  vertical-align: middle;
+}
 .tab:hover { color: var(--ink); }
-.tab.is-on { color: var(--ink); }
-.tab.is-on::after { content: ""; position: absolute; left: 8px; right: 8px; bottom: -1px; height: 2px; background: var(--accent); }
+.tab.is-on { color: var(--ink); font-weight: 600; }
+.tab.is-on::after { content: ""; position: absolute; left: 6px; right: 6px; bottom: -1px; height: 2px; background: var(--accent); }
 
 /* Lists ------------------------------------------------------------------ */
 .list__item { display: grid; grid-template-columns: 84px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 9px 14px; border-bottom: 1px solid var(--line); }
