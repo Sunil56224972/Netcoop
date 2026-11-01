@@ -41,7 +41,7 @@ async function runTests() {
   assert.strictEqual(normCsv.dataset.sampleCount, 2);
   console.log('  ✓ CSV telemetry parsed correctly');
 
-  // 3. Scenario List
+  // 3. Scenario Registry
   console.log('\n[3/5] Testing Scenario Registry...');
   const scenarios = listScenarios();
   assert.ok(scenarios.length >= 8, 'Expected 8 built-in test scenarios');
@@ -53,7 +53,6 @@ async function runTests() {
     const raw = generateScenario(sc.key);
     const result = await diagnose(raw);
     const r = result.report;
-    const meta = result.meta;
 
     if (sc.key !== 'interop_failure') {
       assert.ok(result.messages.length > 0, `Scenario ${sc.key} produced no messages`);
