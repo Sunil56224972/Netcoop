@@ -174,60 +174,60 @@
               <span style="margin-left:auto;font-size:11px">LIVE FEED</span>
             </div>
             <div class="boot-tab-console__body" id="tab-boot-log">
-              <div class="boot-log-line"><span class="boot-log-time">[00:00:01]</span> <span class="boot-log-tag boot-log-tag--sync">INIT</span> Core Multi-Agent Kernel loaded (Node.js v18+, Express v4.21, JSON-RPC v1.0.0)</div>
-              <div class="boot-log-line"><span class="boot-log-time">[00:00:02]</span> <span class="boot-log-tag boot-log-tag--ok">BOOT</span> Core Switch Agent initialized &rarr; monitoring core-router-01 (Cisco ASR 9000, 10.0.0.1)</div>
-              <div class="boot-log-line"><span class="boot-log-time">[00:00:03]</span> <span class="boot-log-tag boot-log-tag--ok">BOOT</span> Distribution Switch Agent initialized &rarr; monitoring dist-switch-01 (Cisco 9500, 10.0.1.1)</div>
-              <div class="boot-log-line"><span class="boot-log-time">[00:00:04]</span> <span class="boot-log-tag boot-log-tag--ok">BOOT</span> Wi-Fi AP Agent initialized &rarr; monitoring ap-academic-01 (Aruba AP-555, 10.0.2.10)</div>
-              <div class="boot-log-line"><span class="boot-log-time">[00:00:05]</span> <span class="boot-log-tag boot-log-tag--ok">BOOT</span> DNS/DHCP Agent initialized &rarr; monitoring srv-dns-01 &amp; srv-dhcp-01 (10.0.0.53/67)</div>
-              <div class="boot-log-line"><span class="boot-log-time">[00:00:06]</span> <span class="boot-log-tag boot-log-tag--sync">SYNC</span> Fault Correlation &amp; Hypothesis Arbitration Engine online (threshold matrix active)</div>
-              <div class="boot-log-line"><span class="boot-log-time">[00:00:07]</span> <span class="boot-log-tag boot-log-tag--ok">READY</span> Groq LPU Neural Acceleration ready &rarr; ultra-fast gpt-oss-120b inference connected</div>
+              <div class="boot-log-line"><span class="boot-log-time">[00:00:01]</span> <span class="boot-log-tag boot-log-tag--sync">INIT</span> Core Multi-Agent Kernel loaded (Node.js v18+, Express v4.21, JSON-RPC v1.0.0 bus ready)</div>
+              <div class="boot-log-line"><span class="boot-log-time">[00:00:02]</span> <span class="boot-log-tag boot-log-tag--ok">BOOT</span> Telemetry &amp; Performance Agent (performance_agent) online &rarr; latency, jitter, loss, utilization</div>
+              <div class="boot-log-line"><span class="boot-log-time">[00:00:03]</span> <span class="boot-log-tag boot-log-tag--ok">BOOT</span> Infrastructure Health Agent (infrastructure_agent) online &rarr; CPU, RAM, queue drops, interface errors</div>
+              <div class="boot-log-line"><span class="boot-log-time">[00:00:04]</span> <span class="boot-log-tag boot-log-tag--ok">BOOT</span> Connectivity Analysis Agent (connectivity_agent) online &rarr; campus topology graph &amp; blast radius</div>
+              <div class="boot-log-line"><span class="boot-log-time">[00:00:05]</span> <span class="boot-log-tag boot-log-tag--sync">BOOT</span> Fault Correlation Agent (correlation_agent) online &rarr; multi-hypothesis ranking &amp; challenge bus</div>
+              <div class="boot-log-line"><span class="boot-log-time">[00:00:06]</span> <span class="boot-log-tag boot-log-tag--ok">BOOT</span> Recommendation &amp; Reporting Agent (reporting_agent) online &rarr; Section 6 schema &amp; guardrails active</div>
+              <div class="boot-log-line"><span class="boot-log-time">[00:00:07]</span> <span class="boot-log-tag boot-log-tag--ok">READY</span> Groq LLM Reasoning Agent (groq_llm_agent) online &rarr; ultra-fast gpt-oss-120b inference connected</div>
               <div class="boot-log-line"><span class="boot-log-time">[00:00:08]</span> <span class="boot-log-tag boot-log-tag--ok">READY</span> IIT Bhubaneswar Campus Telemetry Mesh: ONLINE • Standing by for telemetry input</div>
             </div>
           </div>
 
-          <!-- 6 Cooperative Agent Cards Grid -->
+          <!-- 6 Cooperative Agent Cards Grid (Conforming to Problem Statement Architecture) -->
           <div class="boot-agent-grid">
             <div class="boot-agent-card">
               <div class="boot-agent-card__head">
-                <span class="boot-agent-card__name"><i data-icon="cpu"></i> Core Switch Agent</span>
-                <span class="pill pill--CONTAINED">Healthy</span>
+                <span class="boot-agent-card__name"><i data-icon="activity"></i> Performance Agent</span>
+                <span class="pill pill--CONTAINED">Active</span>
               </div>
-              <div class="boot-agent-card__meta">Target: core-router-01 &bull; 10.0.0.1 &bull; Latency: 0.3ms</div>
+              <div class="boot-agent-card__meta">performance_agent &bull; Latency, Loss, Jitter, Utilization</div>
             </div>
             <div class="boot-agent-card">
               <div class="boot-agent-card__head">
-                <span class="boot-agent-card__name"><i data-icon="server"></i> Distribution Agent</span>
-                <span class="pill pill--CONTAINED">Healthy</span>
+                <span class="boot-agent-card__name"><i data-icon="cpu"></i> Infrastructure Agent</span>
+                <span class="pill pill--CONTAINED">Active</span>
               </div>
-              <div class="boot-agent-card__meta">Target: dist-switch-01 &bull; 10.0.1.1 &bull; Latency: 0.7ms</div>
+              <div class="boot-agent-card__meta">infrastructure_agent &bull; CPU, RAM, Queue Drops, Errors</div>
             </div>
             <div class="boot-agent-card">
               <div class="boot-agent-card__head">
-                <span class="boot-agent-card__name"><i data-icon="wifi"></i> Wi-Fi AP Agent</span>
-                <span class="pill pill--CONTAINED">Healthy</span>
+                <span class="boot-agent-card__name"><i data-icon="network"></i> Connectivity Agent</span>
+                <span class="pill pill--CONTAINED">Active</span>
               </div>
-              <div class="boot-agent-card__meta">Target: ap-academic-01 &bull; 10.0.2.10 &bull; Signal: -52 dBm</div>
-            </div>
-            <div class="boot-agent-card">
-              <div class="boot-agent-card__head">
-                <span class="boot-agent-card__name"><i data-icon="database"></i> DNS/DHCP Agent</span>
-                <span class="pill pill--CONTAINED">Healthy</span>
-              </div>
-              <div class="boot-agent-card__meta">Target: srv-dns-01 &bull; 10.0.0.53 &bull; Resolv: 4.2ms</div>
+              <div class="boot-agent-card__meta">connectivity_agent &bull; Campus Topology &amp; Blast Radius</div>
             </div>
             <div class="boot-agent-card">
               <div class="boot-agent-card__head">
                 <span class="boot-agent-card__name"><i data-icon="layers"></i> Fault Correlation</span>
-                <span class="pill pill--CONTAINED">Healthy</span>
+                <span class="pill pill--CONTAINED">Active</span>
               </div>
-              <div class="boot-agent-card__meta">Engine: Multi-Hypothesis Arbitration &bull; In-Memory</div>
+              <div class="boot-agent-card__meta">correlation_agent &bull; Hypothesis Ranking &amp; Challenges</div>
             </div>
             <div class="boot-agent-card">
               <div class="boot-agent-card__head">
-                <span class="boot-agent-card__name"><i data-icon="zap"></i> Groq LPU Agent</span>
+                <span class="boot-agent-card__name"><i data-icon="file"></i> Reporting Agent</span>
+                <span class="pill pill--CONTAINED">Active</span>
+              </div>
+              <div class="boot-agent-card__meta">reporting_agent &bull; Section 6 JSON Report &amp; Guardrails</div>
+            </div>
+            <div class="boot-agent-card">
+              <div class="boot-agent-card__head">
+                <span class="boot-agent-card__name"><i data-icon="zap"></i> Groq LLM Agent</span>
                 <span class="pill pill--admin">Groq LPU</span>
               </div>
-              <div class="boot-agent-card__meta">Model: gpt-oss-120b &bull; IIT BBS CLI Synthesizer</div>
+              <div class="boot-agent-card__meta">groq_llm_agent &bull; gpt-oss-120b CLI Runbook Synthesis</div>
             </div>
           </div>
         </section>

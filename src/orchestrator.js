@@ -31,15 +31,37 @@ async function diagnose(input, opts = {}) {
   const norm = normalizeInput(raw);
   if (!norm.ok) {
     const errText = (norm.errors || []).map(e => typeof e === 'string' ? e : e.message || JSON.stringify(e)).join('; ');
+    const fallbackIncId = 'INC-' + (Math.abs(String(runId).split('').reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0)) % 9000 + 1000);
     return {
       report: {
-        schema: REPORT_SCHEMA, run_id: runId, timestamp: new Date().toISOString(),
-        status: 'error', error: errText,
-        root_cause: null, confidence: 0, category: 'unknown',
-        evidence: [], alternatives: [], scope: { impaired: [], total: 0 },
-        recommended_actions: [], data_quality: norm.quality, scoring_method: SCORING
+        schema: REPORT_SCHEMA,
+        incident_id: fallbackIncId,
+        run_id: runId,
+        timestamp: new Date().toISOString(),
+        status: 'error',
+        error: errText,
+        suspected_root_cause: `Input validation failed: ${errText}`,
+        confidence: 0,
+        confidence_category: 'low',
+        affected_devices: [],
+        supporting_evidence: [],
+        alternative_causes: [],
+        recommended_actions: [
+          'Verify that input telemetry complies with netcoop.telemetry/1.0 schema version',
+          'Ensure all metric names and numeric units follow standard specifications',
+          'Review input formatting for syntax errors or corrupted records'
+        ],
+        evidence_sources: [],
+        limitations: [
+          errText,
+          'Diagnosis halted at normalization boundary; multi-agent analysis was not executed.'
+        ],
+        data_quality: norm.quality,
+        scoring_method: SCORING
       },
-      messages: [], quality: norm.quality, meta: { elapsed_ms: Date.now() - t0, agents: 0, messages: 0 },
+      messages: [],
+      quality: norm.quality,
+      meta: { elapsed_ms: Date.now() - t0, agents: 0, messages: 0 },
       error: errText
     };
   }
@@ -134,7 +156,7 @@ async function diagnose(input, opts = {}) {
       schema: REPORT_SCHEMA,
       run_id: runId,
       timestamp: new Date().toISOString(),
-      status: 'complete',
+      status: 'diagnosed',
       ...reportMsg.payload,
       data_quality: norm.quality,
       scoring_method: SCORING
@@ -142,18 +164,23 @@ async function diagnose(input, opts = {}) {
   } else {
     // fallback — build a minimal report from the correlation result
     const corr = lastCorr && lastCorr.payload ? lastCorr.payload : {};
+    const fallbackIncId = 'INC-' + (Math.abs(String(runId).split('').reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0)) % 9000 + 1000);
     report = {
       schema: REPORT_SCHEMA,
+      incident_id: env.incidentId || fallbackIncId,
       run_id: runId,
       timestamp: new Date().toISOString(),
-      status: 'complete',
-      root_cause: corr.root_cause || corr.hypothesis || 'undetermined',
+      status: corr.status || 'diagnosed',
+      suspected_root_cause: corr.suspected_root_cause || corr.root_cause || corr.hypothesis || 'undetermined',
       confidence: corr.confidence || 0,
-      category: corr.category || 'unknown',
-      evidence: corr.evidence || [],
-      alternatives: corr.alternatives || [],
+      confidence_category: corr.confidence_category || 'low',
+      affected_devices: corr.affected_devices || (corr.scope && corr.scope.impaired) || [],
+      supporting_evidence: corr.supporting_evidence || corr.evidence || [],
+      alternative_causes: corr.alternative_causes || corr.alternatives || [],
       scope: corr.scope || { impaired: devices.filter(d => ds.ancestors(d).length > 0), total: devices.length },
       recommended_actions: corr.recommended_actions || [],
+      evidence_sources: corr.sources || ['performance_agent', 'infrastructure_agent'],
+      limitations: ['Diagnostic fallback path invoked; further verification required.'],
       data_quality: norm.quality,
       scoring_method: SCORING
     };
@@ -214,4 +241,3 @@ function listScenarios() {
 }
 
 module.exports = { diagnose, generateScenario, listScenarios, PROTOCOL, SCORING, ROLES };
-

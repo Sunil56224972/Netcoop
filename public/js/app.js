@@ -738,14 +738,14 @@ function paintProtocol(data) {
 function paintTopology() {
   const container = $('#topology-container');
   const nodes = [
-    { id: 'core-router-01', type: 'Core Router', location: 'Central Datacenter', role: 'Campus Backbone Gateway', ip: '10.0.0.1/24', vendor: 'Cisco ASR 9000', status: 'Healthy' },
-    { id: 'dist-switch-01', type: 'Dist Switch', location: 'Academic Complex', role: 'Distribution Aggregation', ip: '10.0.1.1/24', vendor: 'Cisco Catalyst 9500', status: 'Monitored' },
-    { id: 'ap-academic-01', type: 'Access Point', location: 'Lecture Hall Complex', role: '802.11ax Wireless AP', ip: '10.0.2.10/24', vendor: 'Aruba AP-555', status: 'Monitored' },
-    { id: 'sw-hostel-01', type: 'Access Switch', location: 'Mahanadi Hall of Residence', role: 'Hostel LAN Aggregation', ip: '10.0.3.1/24', vendor: 'Juniper EX4300', status: 'Healthy' },
-    { id: 'srv-dns-01', type: 'DNS Server', location: 'Server Farm Room 102', role: 'Campus Primary Resolver', ip: '10.0.0.53/24', vendor: 'BIND 9 Linux', status: 'Monitored' },
-    { id: 'srv-dhcp-01', type: 'DHCP Server', location: 'Server Farm Room 102', role: 'Campus Scope Pool', ip: '10.0.0.67/24', vendor: 'ISC Kea Linux', status: 'Healthy' },
-    { id: 'laptop-01', type: 'Endpoint Client', location: 'Academic Office', role: 'Admin Workstation', ip: '10.0.1.45/24', vendor: 'Windows 11', status: 'Monitored' },
-    { id: 'laptop-02', type: 'Wireless Client', location: 'LH-101 Seminar Room', role: 'Student Laptop', ip: '10.0.2.88/24', vendor: 'Ubuntu 24.04', status: 'Monitored' }
+    { id: 'IITBBS_CORE_RTR_01', type: 'Core Router', location: 'Central Datacenter', role: 'Campus Backbone Gateway', ip: '10.0.0.1/24', vendor: 'Cisco ASR 9000', status: 'Healthy' },
+    { id: 'HOSTEL_CORE_SW_01', type: 'Hostel Core Switch', location: 'Hostel Distribution Complex', role: 'Hostel LAN Aggregation', ip: '10.0.1.1/24', vendor: 'Cisco Catalyst 9500', status: 'Monitored' },
+    { id: 'DEPT_CSE_SW_01', type: 'Access Switch', location: 'School of Electrical Sciences (CSE)', role: 'Department LAN Distribution', ip: '10.0.2.1/24', vendor: 'Juniper EX4300', status: 'Monitored' },
+    { id: 'HOSTEL_BRAHMAPUTRA_AP_04', type: 'Access Point', location: 'Hostel Brahmaputra Wing B', role: '802.11ax High-Density Wi-Fi', ip: '10.0.1.44/24', vendor: 'Aruba AP-555', status: 'Monitored' },
+    { id: 'LHC_HALL_101_AP_01', type: 'Access Point', location: 'Lecture Hall Complex 101', role: '802.11ax Lecture Hall Wi-Fi', ip: '10.0.3.10/24', vendor: 'Aruba AP-555', status: 'Healthy' },
+    { id: 'CAMPUS_DNS_SRV_01', type: 'DNS Server', location: 'Server Farm Room 102', role: 'Campus Primary Recursive Resolver', ip: '10.0.0.53/24', vendor: 'BIND 9 Linux', status: 'Monitored' },
+    { id: 'CAMPUS_DHCP_SRV_01', type: 'DHCP Server', location: 'Server Farm Room 102', role: 'Campus Dynamic Scope Pool', ip: '10.0.0.67/24', vendor: 'ISC Kea Linux', status: 'Healthy' },
+    { id: 'STUDENT_LAPTOP_01', type: 'Endpoint Client', location: 'Hostel Brahmaputra Room 312', role: 'Student Wireless Client', ip: '10.0.1.105/24', vendor: 'Ubuntu 24.04', status: 'Monitored' }
   ];
 
   container.innerHTML = `
@@ -846,12 +846,13 @@ function runTabBootSequence() {
 
   const logSteps = [
     { p: 15, tag: 'INIT', tagCls: 'boot-log-tag--sync', t: 'Core Multi-Agent Kernel restarted (JSON-RPC v1.0.0 bus ready)', delay: 150 },
-    { p: 35, tag: 'BOOT', tagCls: 'boot-log-tag--ok', t: 'Core Switch Agent reconnected -> core-router-01 (ASR 9000, 10.0.0.1) latency 0.3ms', delay: 350 },
-    { p: 55, tag: 'BOOT', tagCls: 'boot-log-tag--ok', t: 'Distribution Switch Agent reconnected -> dist-switch-01 (Catalyst 9500, 10.0.1.1)', delay: 600 },
-    { p: 70, tag: 'BOOT', tagCls: 'boot-log-tag--ok', t: 'Wi-Fi AP Agent reconnected -> ap-academic-01 (Aruba AP-555, 10.0.2.10)', delay: 850 },
-    { p: 85, tag: 'BOOT', tagCls: 'boot-log-tag--ok', t: 'DNS/DHCP Agent reconnected -> srv-dns-01 & srv-dhcp-01 (10.0.0.53/67)', delay: 1100 },
-    { p: 95, tag: 'SYNC', tagCls: 'boot-log-tag--sync', t: 'Fault Correlation Engine synchronized with Groq LPU gpt-oss-120b inference bridge', delay: 1350 },
-    { p: 100, tag: 'READY', tagCls: 'boot-log-tag--ok', t: 'ALL AGENTS BOOTED: Standing by for telemetry input & fault diagnosis', delay: 1600 }
+    { p: 32, tag: 'BOOT', tagCls: 'boot-log-tag--ok', t: 'Telemetry & Performance Agent (performance_agent) initialized -> latency, loss, jitter, utilization', delay: 350 },
+    { p: 50, tag: 'BOOT', tagCls: 'boot-log-tag--ok', t: 'Infrastructure Health Agent (infrastructure_agent) initialized -> CPU, RAM, queue drops, errors', delay: 600 },
+    { p: 68, tag: 'BOOT', tagCls: 'boot-log-tag--ok', t: 'Connectivity Analysis Agent (connectivity_agent) initialized -> topology graph & downstream scope', delay: 850 },
+    { p: 82, tag: 'SYNC', tagCls: 'boot-log-tag--sync', t: 'Fault Correlation Agent (correlation_agent) online -> multi-hypothesis ranking & challenge bus', delay: 1100 },
+    { p: 92, tag: 'BOOT', tagCls: 'boot-log-tag--ok', t: 'Recommendation & Reporting Agent (reporting_agent) online -> Section 6 JSON report schema active', delay: 1350 },
+    { p: 98, tag: 'READY', tagCls: 'boot-log-tag--ok', t: 'Groq LLM Reasoning Agent (groq_llm_agent) ready -> gpt-oss-120b inference bridge online', delay: 1500 },
+    { p: 100, tag: 'READY', tagCls: 'boot-log-tag--ok', t: 'ALL 6 AGENTS OPERATIONAL: Standing by for telemetry input & fault diagnosis', delay: 1650 }
   ];
 
   if (logContainer) logContainer.innerHTML = '';

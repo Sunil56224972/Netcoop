@@ -1,16 +1,14 @@
 'use strict';
 
-// NetCoop AI: built-in test scenarios that generate realistic synthetic
-// telemetry. Each scenario produces a valid telemetry envelope with
-// devices, topology and samples that exercise the agents in a known way.
+// NetCoop AI: built-in test scenarios modeling the IIT Bhubaneswar Campus Infrastructure.
+// Conforms directly to the Agentic AI Hackathon Round 2 Problem Statement.
+// Each scenario produces realistic synthetic telemetry exercising the multi-agent diagnostic mesh.
 
 const { SCHEMA_ID } = require('./schema');
 
 // ── Helpers ──────────────────────────────────────────────────────────────
 const ts = (offset = 0) => new Date(Date.now() - offset * 60000).toISOString();
 const jitter = (base, pct = 0.1) => +(base * (1 + (Math.random() - 0.5) * 2 * pct)).toFixed(2);
-const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
-const range = (n) => Array.from({ length: n }, (_, i) => i);
 
 function makeSamples(devices, metrics, count, genFn) {
   const samples = [];
@@ -32,228 +30,382 @@ const SCENARIOS = [
   {
     key: 'normal',
     name: 'Normal Operation',
-    description: 'Healthy network — all metrics within expected ranges. Should produce no significant findings.',
+    description: 'IIT Bhubaneswar campus network running optimally — latency, jitter, and link utilization within nominal thresholds.',
     generate() {
-      const devices = ['core-sw-01', 'dist-sw-01', 'dist-sw-02', 'ap-floor1', 'ap-floor2', 'srv-web-01', 'srv-db-01'];
-      const topology = { 'dist-sw-01': 'core-sw-01', 'dist-sw-02': 'core-sw-01', 'ap-floor1': 'dist-sw-01', 'ap-floor2': 'dist-sw-02', 'srv-web-01': 'dist-sw-01', 'srv-db-01': 'dist-sw-02' };
+      const devices = ['IITBBS_CORE_RTR_01', 'HOSTEL_CORE_SW_01', 'DEPT_CSE_SW_01', 'LHC_AP_101', 'LHC_AP_102', 'CAMPUS_WEB_SRV_01', 'CAMPUS_DB_SRV_01'];
+      const topology = {
+        'HOSTEL_CORE_SW_01': 'IITBBS_CORE_RTR_01',
+        'DEPT_CSE_SW_01': 'IITBBS_CORE_RTR_01',
+        'LHC_AP_101': 'DEPT_CSE_SW_01',
+        'LHC_AP_102': 'DEPT_CSE_SW_01',
+        'CAMPUS_WEB_SRV_01': 'HOSTEL_CORE_SW_01',
+        'CAMPUS_DB_SRV_01': 'HOSTEL_CORE_SW_01'
+      };
       const metrics = ['latency_ms', 'jitter_ms', 'packet_loss_pct', 'link_utilization_pct', 'cpu_pct', 'memory_pct', 'interface_errors', 'queue_drops'];
       const samples = makeSamples(devices, metrics, 20, (d, m) => {
-        const vals = { latency_ms: jitter(12, 0.3), jitter_ms: jitter(3, 0.3), packet_loss_pct: jitter(0.05, 0.5), link_utilization_pct: jitter(35, 0.2), cpu_pct: jitter(25, 0.2), memory_pct: jitter(40, 0.15), interface_errors: 0, queue_drops: 0 };
+        const vals = {
+          latency_ms: jitter(12, 0.25),
+          jitter_ms: jitter(3, 0.25),
+          packet_loss_pct: jitter(0.05, 0.5),
+          link_utilization_pct: jitter(35, 0.2),
+          cpu_pct: jitter(25, 0.2),
+          memory_pct: jitter(40, 0.15),
+          interface_errors: 0,
+          queue_drops: 0
+        };
         return vals[m];
       });
-      return { schema: SCHEMA_ID, devices: devices.map(id => ({ device_id: id, parent: topology[id] || null, type: id.startsWith('ap') ? 'access_point' : id.startsWith('srv') ? 'server' : 'switch', name: id })), samples };
+      return {
+        schema: SCHEMA_ID,
+        devices: devices.map(id => ({
+          device_id: id,
+          parent: topology[id] || null,
+          type: id.includes('AP') ? 'access_point' : id.includes('SRV') ? 'server' : id.includes('RTR') ? 'router' : 'switch',
+          name: id
+        })),
+        samples
+      };
     }
   },
   {
     key: 'link_congestion',
     name: 'Link Congestion',
-    description: 'Distribution switch uplink saturated — high utilization, queue drops, elevated latency and jitter on downstream devices.',
+    description: 'Hostel Core Switch (HOSTEL_CORE_SW_01) uplink saturated — 94% utilization, 160 queue drops, 280ms latency cascading downstream.',
     generate() {
-      const devices = ['core-rtr-01', 'dist-sw-01', 'dist-sw-02', 'acc-sw-01', 'acc-sw-02', 'srv-app-01', 'srv-app-02'];
-      const topology = { 'dist-sw-01': 'core-rtr-01', 'dist-sw-02': 'core-rtr-01', 'acc-sw-01': 'dist-sw-01', 'acc-sw-02': 'dist-sw-01', 'srv-app-01': 'acc-sw-01', 'srv-app-02': 'acc-sw-02' };
-      const congestedLink = 'dist-sw-01';
-      const downstream = ['acc-sw-01', 'acc-sw-02', 'srv-app-01', 'srv-app-02'];
+      const devices = ['CAMPUS_CORE_RTR_01', 'HOSTEL_CORE_SW_01', 'DEPT_CSE_SW_01', 'HOSTEL_ACC_SW_01', 'HOSTEL_ACC_SW_02', 'HOSTEL_APP_SRV_01', 'HOSTEL_APP_SRV_02'];
+      const topology = {
+        'HOSTEL_CORE_SW_01': 'CAMPUS_CORE_RTR_01',
+        'DEPT_CSE_SW_01': 'CAMPUS_CORE_RTR_01',
+        'HOSTEL_ACC_SW_01': 'HOSTEL_CORE_SW_01',
+        'HOSTEL_ACC_SW_02': 'HOSTEL_CORE_SW_01',
+        'HOSTEL_APP_SRV_01': 'HOSTEL_ACC_SW_01',
+        'HOSTEL_APP_SRV_02': 'HOSTEL_ACC_SW_02'
+      };
+      const congestedLink = 'HOSTEL_CORE_SW_01';
+      const downstream = ['HOSTEL_ACC_SW_01', 'HOSTEL_ACC_SW_02', 'HOSTEL_APP_SRV_01', 'HOSTEL_APP_SRV_02'];
       const metrics = ['latency_ms', 'jitter_ms', 'packet_loss_pct', 'link_utilization_pct', 'throughput_mbps', 'bandwidth_mbps', 'cpu_pct', 'memory_pct', 'queue_drops', 'interface_errors'];
       const samples = makeSamples(devices, metrics, 25, (d, m, i, total) => {
         const ramp = Math.min(1, i / (total * 0.6));
         if (d === congestedLink) {
-          if (m === 'link_utilization_pct') return +(40 + 55 * ramp + jitter(0, 3)).toFixed(2);
-          if (m === 'queue_drops') return Math.round(ramp * jitter(80, 0.3));
-          if (m === 'latency_ms') return jitter(15 + 200 * ramp, 0.15);
-          if (m === 'jitter_ms') return jitter(4 + 60 * ramp, 0.2);
-          if (m === 'packet_loss_pct') return +(0.1 + 4.5 * ramp).toFixed(2);
-          if (m === 'throughput_mbps') return jitter(900 + 50 * ramp, 0.05);
+          if (m === 'link_utilization_pct') return +(45 + 49 * ramp + jitter(0, 1.5)).toFixed(2); // reaches ~94%
+          if (m === 'queue_drops') return Math.round(ramp * jitter(160, 0.15)); // reaches ~160 drops
+          if (m === 'latency_ms') return jitter(25 + 255 * ramp, 0.1); // reaches ~280ms
+          if (m === 'jitter_ms') return jitter(5 + 55 * ramp, 0.15);
+          if (m === 'packet_loss_pct') return +(0.1 + 4.2 * ramp).toFixed(2);
+          if (m === 'throughput_mbps') return jitter(940, 0.05);
           if (m === 'bandwidth_mbps') return 1000;
-          if (m === 'cpu_pct') return jitter(30, 0.2);
+          if (m === 'cpu_pct') return jitter(35, 0.2);
           if (m === 'memory_pct') return jitter(45, 0.15);
         }
         if (downstream.includes(d)) {
-          if (m === 'latency_ms') return jitter(20 + 150 * ramp, 0.2);
-          if (m === 'jitter_ms') return jitter(5 + 40 * ramp, 0.2);
-          if (m === 'packet_loss_pct') return +(0.1 + 3 * ramp).toFixed(2);
-          if (m === 'link_utilization_pct') return jitter(30, 0.2);
+          if (m === 'latency_ms') return jitter(30 + 190 * ramp, 0.15);
+          if (m === 'jitter_ms') return jitter(6 + 45 * ramp, 0.2);
+          if (m === 'packet_loss_pct') return +(0.1 + 3.2 * ramp).toFixed(2);
+          if (m === 'link_utilization_pct') return jitter(32, 0.2);
           if (m === 'queue_drops') return 0;
-          if (m === 'cpu_pct') return jitter(20, 0.2);
+          if (m === 'cpu_pct') return jitter(22, 0.2);
           if (m === 'memory_pct') return jitter(35, 0.15);
         }
         // healthy devices
-        const healthy = { latency_ms: jitter(10, 0.2), jitter_ms: jitter(2, 0.3), packet_loss_pct: 0, link_utilization_pct: jitter(25, 0.2), cpu_pct: jitter(20, 0.2), memory_pct: jitter(40, 0.15), queue_drops: 0, interface_errors: 0, throughput_mbps: jitter(500, 0.1), bandwidth_mbps: 1000 };
+        const healthy = {
+          latency_ms: jitter(10, 0.2),
+          jitter_ms: jitter(2, 0.3),
+          packet_loss_pct: 0,
+          link_utilization_pct: jitter(25, 0.2),
+          cpu_pct: jitter(20, 0.2),
+          memory_pct: jitter(40, 0.15),
+          queue_drops: 0,
+          interface_errors: 0,
+          throughput_mbps: jitter(500, 0.1),
+          bandwidth_mbps: 1000
+        };
         return healthy[m] !== undefined ? healthy[m] : undefined;
       });
-      return { schema: SCHEMA_ID, devices: devices.map(id => ({ device_id: id, parent: topology[id] || null, type: id.startsWith('srv') ? 'server' : 'router' === id.split('-')[0] ? 'router' : 'switch', name: id })), samples };
+      return {
+        schema: SCHEMA_ID,
+        incident_id: 'INC-8832',
+        devices: devices.map(id => ({
+          device_id: id,
+          parent: topology[id] || null,
+          type: id.includes('SRV') ? 'server' : id.includes('RTR') ? 'router' : 'switch',
+          name: id
+        })),
+        samples
+      };
     }
   },
   {
     key: 'weak_wifi',
     name: 'Weak Wi-Fi Signal',
-    description: 'Access point showing poor signal strength — retransmissions, high loss, elevated latency for wireless clients.',
+    description: 'Hostel Brahmaputra Access Point (HOSTEL_BRAHMAPUTRA_AP_04) degraded RF signal (-82 dBm), 18% retransmissions and client packet loss.',
     generate() {
-      const devices = ['core-sw-01', 'dist-sw-01', 'ap-office-01', 'ap-office-02', 'laptop-01', 'laptop-02', 'phone-01'];
-      const topology = { 'dist-sw-01': 'core-sw-01', 'ap-office-01': 'dist-sw-01', 'ap-office-02': 'dist-sw-01', 'laptop-01': 'ap-office-01', 'laptop-02': 'ap-office-01', 'phone-01': 'ap-office-01' };
-      const weakAp = 'ap-office-01';
-      const wirelessClients = ['laptop-01', 'laptop-02', 'phone-01'];
+      const devices = ['IITBBS_CORE_RTR_01', 'HOSTEL_DIST_SW_01', 'HOSTEL_BRAHMAPUTRA_AP_04', 'HOSTEL_BRAHMAPUTRA_AP_05', 'STUDENT_LAPTOP_01', 'STUDENT_LAPTOP_02', 'STUDENT_PHONE_01'];
+      const topology = {
+        'HOSTEL_DIST_SW_01': 'IITBBS_CORE_RTR_01',
+        'HOSTEL_BRAHMAPUTRA_AP_04': 'HOSTEL_DIST_SW_01',
+        'HOSTEL_BRAHMAPUTRA_AP_05': 'HOSTEL_DIST_SW_01',
+        'STUDENT_LAPTOP_01': 'HOSTEL_BRAHMAPUTRA_AP_04',
+        'STUDENT_LAPTOP_02': 'HOSTEL_BRAHMAPUTRA_AP_04',
+        'STUDENT_PHONE_01': 'HOSTEL_BRAHMAPUTRA_AP_04'
+      };
+      const weakAp = 'HOSTEL_BRAHMAPUTRA_AP_04';
+      const wirelessClients = ['STUDENT_LAPTOP_01', 'STUDENT_LAPTOP_02', 'STUDENT_PHONE_01'];
       const metrics = ['latency_ms', 'jitter_ms', 'packet_loss_pct', 'signal_dbm', 'retransmission_pct', 'cpu_pct', 'memory_pct', 'link_utilization_pct'];
       const samples = makeSamples(devices, metrics, 20, (d, m) => {
         if (d === weakAp || wirelessClients.includes(d)) {
-          if (m === 'signal_dbm') return jitter(-82, 0.05);
-          if (m === 'retransmission_pct') return jitter(18, 0.2);
-          if (m === 'latency_ms') return jitter(180, 0.2);
-          if (m === 'jitter_ms') return jitter(45, 0.25);
-          if (m === 'packet_loss_pct') return jitter(3.5, 0.3);
-          if (m === 'cpu_pct') return jitter(15, 0.2);
-          if (m === 'memory_pct') return jitter(30, 0.15);
-          if (m === 'link_utilization_pct') return jitter(20, 0.2);
+          if (m === 'signal_dbm') return jitter(-82, 0.04);
+          if (m === 'retransmission_pct') return jitter(19, 0.15);
+          if (m === 'latency_ms') return jitter(185, 0.15);
+          if (m === 'jitter_ms') return jitter(48, 0.2);
+          if (m === 'packet_loss_pct') return jitter(3.8, 0.25);
+          if (m === 'cpu_pct') return jitter(18, 0.2);
+          if (m === 'memory_pct') return jitter(32, 0.15);
+          if (m === 'link_utilization_pct') return jitter(22, 0.2);
         }
-        const healthy = { latency_ms: jitter(8, 0.2), jitter_ms: jitter(2, 0.2), packet_loss_pct: 0, cpu_pct: jitter(20, 0.2), memory_pct: jitter(40, 0.15), link_utilization_pct: jitter(25, 0.2) };
+        const healthy = {
+          latency_ms: jitter(8, 0.2),
+          jitter_ms: jitter(2, 0.2),
+          packet_loss_pct: 0,
+          cpu_pct: jitter(20, 0.2),
+          memory_pct: jitter(40, 0.15),
+          link_utilization_pct: jitter(25, 0.2)
+        };
         return healthy[m] !== undefined ? healthy[m] : undefined;
       });
-      return { schema: SCHEMA_ID, devices: devices.map(id => ({ device_id: id, parent: topology[id] || null, type: id.startsWith('ap') ? 'access_point' : id.startsWith('laptop') || id.startsWith('phone') ? 'endpoint' : 'switch', name: id })), samples };
+      return {
+        schema: SCHEMA_ID,
+        devices: devices.map(id => ({
+          device_id: id,
+          parent: topology[id] || null,
+          type: id.includes('AP') ? 'access_point' : id.includes('STUDENT') ? 'endpoint' : id.includes('RTR') ? 'router' : 'switch',
+          name: id
+        })),
+        samples
+      };
     }
   },
   {
     key: 'interface_fault',
     name: 'Interface Fault',
-    description: 'A switch interface is flapping — rising error counts, link status changes, packet loss spikes.',
+    description: 'Department switch (DEPT_CSE_SW_01) failing SFP interface — rising CRC errors, link flaps, and packet loss spikes.',
     generate() {
-      const devices = ['core-sw-01', 'agg-sw-01', 'acc-sw-01', 'acc-sw-02', 'srv-01', 'srv-02'];
-      const topology = { 'agg-sw-01': 'core-sw-01', 'acc-sw-01': 'agg-sw-01', 'acc-sw-02': 'agg-sw-01', 'srv-01': 'acc-sw-01', 'srv-02': 'acc-sw-01' };
-      const faultyDev = 'acc-sw-01';
+      const devices = ['CAMPUS_CORE_SW_01', 'DEPT_AGG_SW_01', 'DEPT_CSE_SW_01', 'DEPT_ECE_SW_01', 'LAB_WORKSTATION_01', 'LAB_WORKSTATION_02'];
+      const topology = {
+        'DEPT_AGG_SW_01': 'CAMPUS_CORE_SW_01',
+        'DEPT_CSE_SW_01': 'DEPT_AGG_SW_01',
+        'DEPT_ECE_SW_01': 'DEPT_AGG_SW_01',
+        'LAB_WORKSTATION_01': 'DEPT_CSE_SW_01',
+        'LAB_WORKSTATION_02': 'DEPT_CSE_SW_01'
+      };
+      const faultyDev = 'DEPT_CSE_SW_01';
       const metrics = ['latency_ms', 'jitter_ms', 'packet_loss_pct', 'interface_errors', 'link_status', 'cpu_pct', 'memory_pct', 'link_utilization_pct'];
       const samples = makeSamples(devices, metrics, 25, (d, m, i) => {
         if (d === faultyDev) {
-          if (m === 'interface_errors') return Math.round(jitter(50 + i * 8, 0.2));
+          if (m === 'interface_errors') return Math.round(jitter(60 + i * 9, 0.15));
           if (m === 'link_status') return i % 4 === 0 ? 0 : 1; // flapping
-          if (m === 'packet_loss_pct') return jitter(6 + i * 0.3, 0.2);
-          if (m === 'latency_ms') return jitter(50 + i * 10, 0.15);
-          if (m === 'jitter_ms') return jitter(15 + i * 3, 0.2);
+          if (m === 'packet_loss_pct') return jitter(6 + i * 0.35, 0.2);
+          if (m === 'latency_ms') return jitter(50 + i * 9, 0.15);
+          if (m === 'jitter_ms') return jitter(16 + i * 3, 0.2);
           if (m === 'cpu_pct') return jitter(30, 0.2);
           if (m === 'memory_pct') return jitter(45, 0.15);
-          if (m === 'link_utilization_pct') return jitter(40, 0.2);
+          if (m === 'link_utilization_pct') return jitter(38, 0.2);
         }
-        if (d === 'srv-01' || d === 'srv-02') {
+        if (d === 'LAB_WORKSTATION_01' || d === 'LAB_WORKSTATION_02') {
           if (m === 'packet_loss_pct') return jitter(3 + i * 0.15, 0.3);
           if (m === 'latency_ms') return jitter(30 + i * 5, 0.2);
         }
-        const healthy = { latency_ms: jitter(10, 0.2), jitter_ms: jitter(3, 0.2), packet_loss_pct: 0, interface_errors: 0, link_status: 1, cpu_pct: jitter(20, 0.2), memory_pct: jitter(40, 0.15), link_utilization_pct: jitter(30, 0.2) };
+        const healthy = {
+          latency_ms: jitter(10, 0.2),
+          jitter_ms: jitter(3, 0.2),
+          packet_loss_pct: 0,
+          interface_errors: 0,
+          link_status: 1,
+          cpu_pct: jitter(20, 0.2),
+          memory_pct: jitter(40, 0.15),
+          link_utilization_pct: jitter(30, 0.2)
+        };
         return healthy[m] !== undefined ? healthy[m] : undefined;
       });
-      return { schema: SCHEMA_ID, devices: devices.map(id => ({ device_id: id, parent: topology[id] || null, type: id.startsWith('srv') ? 'server' : 'switch', name: id })), samples };
+      return {
+        schema: SCHEMA_ID,
+        devices: devices.map(id => ({
+          device_id: id,
+          parent: topology[id] || null,
+          type: id.includes('WORKSTATION') ? 'server' : 'switch',
+          name: id
+        })),
+        samples
+      };
     }
   },
   {
     key: 'dns_failure',
     name: 'DNS Failure',
-    description: 'DNS resolver is timing out — elevated DNS resolution times, failure responses, downstream impact on application servers.',
+    description: 'Central campus DNS resolver (CAMPUS_DNS_SRV_01) timeout — 4500ms query latency and 65% failure rate while general link ping is nominal.',
     generate() {
-      const devices = ['core-rtr-01', 'dns-srv-01', 'dns-srv-02', 'app-srv-01', 'app-srv-02', 'db-srv-01'];
-      const topology = { 'dns-srv-01': 'core-rtr-01', 'dns-srv-02': 'core-rtr-01', 'app-srv-01': 'core-rtr-01', 'app-srv-02': 'core-rtr-01', 'db-srv-01': 'core-rtr-01' };
-      const failDns = 'dns-srv-01';
+      const devices = ['CAMPUS_CORE_RTR_01', 'CAMPUS_DNS_SRV_01', 'CAMPUS_DNS_SRV_02', 'DEPT_APP_SRV_01', 'DEPT_APP_SRV_02', 'CAMPUS_DB_SRV_01'];
+      const topology = {
+        'CAMPUS_DNS_SRV_01': 'CAMPUS_CORE_RTR_01',
+        'CAMPUS_DNS_SRV_02': 'CAMPUS_CORE_RTR_01',
+        'DEPT_APP_SRV_01': 'CAMPUS_CORE_RTR_01',
+        'DEPT_APP_SRV_02': 'CAMPUS_CORE_RTR_01',
+        'CAMPUS_DB_SRV_01': 'CAMPUS_CORE_RTR_01'
+      };
+      const failDns = 'CAMPUS_DNS_SRV_01';
       const metrics = ['latency_ms', 'packet_loss_pct', 'dns_resolution_ms', 'dns_failure_pct', 'cpu_pct', 'memory_pct'];
       const samples = makeSamples(devices, metrics, 20, (d, m, i) => {
         if (d === failDns) {
-          if (m === 'dns_resolution_ms') return jitter(4500 + i * 100, 0.1);
-          if (m === 'dns_failure_pct') return jitter(65, 0.15);
-          if (m === 'cpu_pct') return jitter(90, 0.05);
-          if (m === 'memory_pct') return jitter(85, 0.05);
-          if (m === 'latency_ms') return jitter(20, 0.2);
+          if (m === 'dns_resolution_ms') return jitter(4500 + i * 80, 0.1);
+          if (m === 'dns_failure_pct') return jitter(65, 0.12);
+          if (m === 'cpu_pct') return jitter(91, 0.04);
+          if (m === 'memory_pct') return jitter(86, 0.04);
+          if (m === 'latency_ms') return jitter(12, 0.2); // network path healthy
           if (m === 'packet_loss_pct') return 0;
         }
-        if (d === 'dns-srv-02') {
+        if (d === 'CAMPUS_DNS_SRV_02') {
           if (m === 'dns_resolution_ms') return jitter(15, 0.3);
           if (m === 'dns_failure_pct') return 0;
-          if (m === 'cpu_pct') return jitter(60, 0.1);
-          if (m === 'memory_pct') return jitter(55, 0.1);
+          if (m === 'cpu_pct') return jitter(55, 0.1);
+          if (m === 'memory_pct') return jitter(50, 0.1);
         }
-        if (d === 'app-srv-01' || d === 'app-srv-02') {
-          if (m === 'dns_resolution_ms') return jitter(3000 + i * 50, 0.15);
-          if (m === 'dns_failure_pct') return jitter(40, 0.2);
+        if (d === 'DEPT_APP_SRV_01' || d === 'DEPT_APP_SRV_02') {
+          if (m === 'dns_resolution_ms') return jitter(3200 + i * 40, 0.15);
+          if (m === 'dns_failure_pct') return jitter(42, 0.2);
         }
-        const healthy = { latency_ms: jitter(8, 0.2), packet_loss_pct: 0, cpu_pct: jitter(25, 0.2), memory_pct: jitter(40, 0.15) };
+        const healthy = {
+          latency_ms: jitter(8, 0.2),
+          packet_loss_pct: 0,
+          cpu_pct: jitter(25, 0.2),
+          memory_pct: jitter(40, 0.15)
+        };
         return healthy[m] !== undefined ? healthy[m] : undefined;
       });
-      return { schema: SCHEMA_ID, devices: devices.map(id => ({ device_id: id, parent: topology[id] || null, type: id.includes('dns') ? 'dns_server' : id.includes('rtr') ? 'router' : 'server', name: id })), samples };
+      return {
+        schema: SCHEMA_ID,
+        devices: devices.map(id => ({
+          device_id: id,
+          parent: topology[id] || null,
+          type: id.includes('DNS') ? 'dns_server' : id.includes('RTR') ? 'router' : 'server',
+          name: id
+        })),
+        samples
+      };
     }
   },
   {
     key: 'dhcp_failure',
     name: 'DHCP Failure',
-    description: 'DHCP server pool exhausted — clients failing to obtain addresses, connection timeouts.',
+    description: 'Central campus DHCP server (CAMPUS_DHCP_SRV_01) scope exhausted — 75% lease rejection rate and client IP allocation timeouts.',
     generate() {
-      const devices = ['core-sw-01', 'dhcp-srv-01', 'acc-sw-01', 'client-01', 'client-02', 'client-03'];
-      const topology = { 'dhcp-srv-01': 'core-sw-01', 'acc-sw-01': 'core-sw-01', 'client-01': 'acc-sw-01', 'client-02': 'acc-sw-01', 'client-03': 'acc-sw-01' };
+      const devices = ['CAMPUS_CORE_SW_01', 'CAMPUS_DHCP_SRV_01', 'HOSTEL_ACC_SW_01', 'HOSTEL_CLIENT_01', 'HOSTEL_CLIENT_02', 'HOSTEL_CLIENT_03'];
+      const topology = {
+        'CAMPUS_DHCP_SRV_01': 'CAMPUS_CORE_SW_01',
+        'HOSTEL_ACC_SW_01': 'CAMPUS_CORE_SW_01',
+        'HOSTEL_CLIENT_01': 'HOSTEL_ACC_SW_01',
+        'HOSTEL_CLIENT_02': 'HOSTEL_ACC_SW_01',
+        'HOSTEL_CLIENT_03': 'HOSTEL_ACC_SW_01'
+      };
       const metrics = ['latency_ms', 'packet_loss_pct', 'dhcp_failure_pct', 'dhcp_lease_time_ms', 'cpu_pct', 'memory_pct'];
       const samples = makeSamples(devices, metrics, 20, (d, m, i) => {
-        if (d === 'dhcp-srv-01') {
+        if (d === 'CAMPUS_DHCP_SRV_01') {
           if (m === 'dhcp_failure_pct') return jitter(75, 0.1);
           if (m === 'dhcp_lease_time_ms') return jitter(30000, 0.1);
-          if (m === 'cpu_pct') return jitter(85, 0.05);
+          if (m === 'cpu_pct') return jitter(86, 0.05);
           if (m === 'memory_pct') return jitter(92, 0.03);
         }
-        if (d.startsWith('client-')) {
-          if (m === 'dhcp_failure_pct') return jitter(60, 0.15);
-          if (m === 'dhcp_lease_time_ms') return jitter(25000, 0.15);
-          if (m === 'latency_ms') return jitter(200, 0.3);
-          if (m === 'packet_loss_pct') return jitter(5, 0.3);
+        if (d.startsWith('HOSTEL_CLIENT_')) {
+          if (m === 'dhcp_failure_pct') return jitter(62, 0.15);
+          if (m === 'dhcp_lease_time_ms') return jitter(26000, 0.15);
+          if (m === 'latency_ms') return jitter(190, 0.25);
+          if (m === 'packet_loss_pct') return jitter(4.8, 0.25);
         }
-        const healthy = { latency_ms: jitter(10, 0.2), packet_loss_pct: 0, cpu_pct: jitter(20, 0.2), memory_pct: jitter(40, 0.15) };
+        const healthy = {
+          latency_ms: jitter(10, 0.2),
+          packet_loss_pct: 0,
+          cpu_pct: jitter(20, 0.2),
+          memory_pct: jitter(40, 0.15)
+        };
         return healthy[m] !== undefined ? healthy[m] : undefined;
       });
-      return { schema: SCHEMA_ID, devices: devices.map(id => ({ device_id: id, parent: topology[id] || null, type: id.includes('dhcp') ? 'dhcp_server' : id.startsWith('client') ? 'endpoint' : 'switch', name: id })), samples };
+      return {
+        schema: SCHEMA_ID,
+        devices: devices.map(id => ({
+          device_id: id,
+          parent: topology[id] || null,
+          type: id.includes('DHCP') ? 'dhcp_server' : id.includes('CLIENT') ? 'endpoint' : 'switch',
+          name: id
+        })),
+        samples
+      };
     }
   },
   {
     key: 'interop_failure',
     name: 'Interoperability Test',
-    description: 'Telemetry with wrong field names, different units (seconds instead of ms), missing schema version — tests the normaliser\'s error handling.',
+    description: 'Telemetry with incompatible schema version, non-standard units (seconds instead of ms), and missing keys — exercises validation boundaries.',
     generate() {
-      // deliberately use wrong / alternative field names and different units
+      // Deliberately uses incompatible major schema version to test error reporting (Section 4 & 5)
       const data = {
-        version: '2.0', // wrong major version? Actually use no 'schema' key
+        version: '2.0',
         device_list: [
-          { id: 'router-A', upstream: null, kind: 'router' },
-          { id: 'switch-B', upstream: 'router-A', kind: 'switch' },
-          { id: 'host-C', upstream: 'switch-B', kind: 'server' }
+          { id: 'IITBBS_BORDER_RTR_01', upstream: null, kind: 'router' },
+          { id: 'DEPT_DIST_SW_01', upstream: 'IITBBS_BORDER_RTR_01', kind: 'switch' },
+          { id: 'HOSTEL_ACCESS_NODE_01', upstream: 'DEPT_DIST_SW_01', kind: 'server' }
         ],
         records: []
       };
       for (let i = 0; i < 15; i++) {
         data.records.push(
-          { device: 'router-A', time: ts(15 - i), rtt_s: jitter(0.015, 0.2), jitter_us: jitter(3000, 0.2), loss_ratio: jitter(0.001, 0.3), utilization_ratio: jitter(0.25, 0.2), cpu_percent: jitter(20, 0.2) },
-          { device: 'switch-B', time: ts(15 - i), delay_ms: jitter(12, 0.2), pkt_loss: jitter(0.1, 0.3), util_pct: jitter(30, 0.2), cpu_percent: jitter(22, 0.2), mem_percent: jitter(45, 0.15) },
-          { device: 'host-C', time: ts(15 - i), latency_avg_ms: jitter(15, 0.2), throughput_kbps: jitter(500000, 0.1), capacity_mbps: 1000 }
+          { device: 'IITBBS_BORDER_RTR_01', time: ts(15 - i), rtt_s: jitter(0.015, 0.2), jitter_us: jitter(3000, 0.2), loss_ratio: jitter(0.001, 0.3), utilization_ratio: jitter(0.25, 0.2), cpu_percent: jitter(20, 0.2) },
+          { device: 'DEPT_DIST_SW_01', time: ts(15 - i), delay_ms: jitter(12, 0.2), pkt_loss: jitter(0.1, 0.3), util_pct: jitter(30, 0.2), cpu_percent: jitter(22, 0.2), mem_percent: jitter(45, 0.15) },
+          { device: 'HOSTEL_ACCESS_NODE_01', time: ts(15 - i), latency_avg_ms: jitter(15, 0.2), throughput_kbps: jitter(500000, 0.1), capacity_mbps: 1000 }
         );
       }
-      return data; // intentionally no 'schema' key, wrong field names — the normaliser should handle it
+      return data;
     }
   },
   {
     key: 'device_overload',
     name: 'Device Overload',
-    description: 'Core switch CPU and memory critically high — performance degradation cascading to all downstream devices.',
+    description: 'Campus Core Switch (IITBBS_CORE_SW_01) resource starvation — 96% CPU, 94% memory, 220 queue drops cascading network-wide.',
     generate() {
-      const devices = ['core-sw-01', 'dist-sw-01', 'dist-sw-02', 'srv-web-01', 'srv-web-02', 'srv-db-01'];
-      const topology = { 'dist-sw-01': 'core-sw-01', 'dist-sw-02': 'core-sw-01', 'srv-web-01': 'dist-sw-01', 'srv-web-02': 'dist-sw-01', 'srv-db-01': 'dist-sw-02' };
+      const devices = ['IITBBS_CORE_SW_01', 'HOSTEL_DIST_SW_01', 'DEPT_DIST_SW_01', 'CAMPUS_PORTAL_SRV', 'STUDENT_REG_SRV'];
+      const topology = {
+        'HOSTEL_DIST_SW_01': 'IITBBS_CORE_SW_01',
+        'DEPT_DIST_SW_01': 'IITBBS_CORE_SW_01',
+        'CAMPUS_PORTAL_SRV': 'HOSTEL_DIST_SW_01',
+        'STUDENT_REG_SRV': 'DEPT_DIST_SW_01'
+      };
       const metrics = ['latency_ms', 'jitter_ms', 'packet_loss_pct', 'cpu_pct', 'memory_pct', 'queue_drops', 'link_utilization_pct'];
       const samples = makeSamples(devices, metrics, 20, (d, m, i) => {
-        if (d === 'core-sw-01') {
-          if (m === 'cpu_pct') return jitter(96, 0.03);
-          if (m === 'memory_pct') return jitter(94, 0.03);
-          if (m === 'queue_drops') return Math.round(jitter(200 + i * 15, 0.15));
-          if (m === 'latency_ms') return jitter(300 + i * 10, 0.1);
-          if (m === 'jitter_ms') return jitter(80, 0.15);
-          if (m === 'packet_loss_pct') return jitter(7, 0.2);
-          if (m === 'link_utilization_pct') return jitter(50, 0.15);
+        if (d === 'IITBBS_CORE_SW_01') {
+          if (m === 'cpu_pct') return jitter(96, 0.02);
+          if (m === 'memory_pct') return jitter(94, 0.02);
+          if (m === 'queue_drops') return Math.round(jitter(220 + i * 12, 0.15));
+          if (m === 'latency_ms') return jitter(310 + i * 10, 0.1);
+          if (m === 'jitter_ms') return jitter(82, 0.15);
+          if (m === 'packet_loss_pct') return jitter(7.2, 0.2);
+          if (m === 'link_utilization_pct') return jitter(52, 0.15);
         }
         // downstream sees elevated latency and loss
-        if (m === 'latency_ms') return jitter(100 + i * 5, 0.2);
-        if (m === 'jitter_ms') return jitter(30, 0.2);
-        if (m === 'packet_loss_pct') return jitter(3, 0.3);
+        if (m === 'latency_ms') return jitter(110 + i * 5, 0.2);
+        if (m === 'jitter_ms') return jitter(32, 0.2);
+        if (m === 'packet_loss_pct') return jitter(3.2, 0.25);
         if (m === 'cpu_pct') return jitter(25, 0.2);
         if (m === 'memory_pct') return jitter(40, 0.15);
         if (m === 'queue_drops') return 0;
         if (m === 'link_utilization_pct') return jitter(30, 0.2);
       });
-      return { schema: SCHEMA_ID, devices: devices.map(id => ({ device_id: id, parent: topology[id] || null, type: id.startsWith('srv') ? 'server' : 'switch', name: id })), samples };
+      return {
+        schema: SCHEMA_ID,
+        devices: devices.map(id => ({
+          device_id: id,
+          parent: topology[id] || null,
+          type: id.includes('SRV') ? 'server' : 'switch',
+          name: id
+        })),
+        samples
+      };
     }
   }
 ];
@@ -265,4 +417,3 @@ function generate(key) {
 }
 
 module.exports = { SCENARIOS, generate };
-

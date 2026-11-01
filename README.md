@@ -102,7 +102,7 @@ NetCoop AI addresses 100% of the requirements defined in the **Agentic AI Hackat
 
 NetCoop AI deploys six cooperative autonomous agents with distinct diagnostic responsibilities:
 
-### 1. Telemetry & Performance Agent (`telemetry_agent`)
+### 1. Telemetry & Performance Agent (`performance_agent`)
 - **Domain:** End-to-end transport performance and wireless physical layer health.
 - **Metrics Evaluated:** `latency_ms`, `jitter_ms`, `packet_loss_pct`, `throughput_mbps`, `bandwidth_mbps`, `link_utilization_pct`, `signal_dbm`, `retransmission_pct`.
 - **Triggers:** Flags packet loss exceeding 1%, RTT latency spikes past 100ms, and Wi-Fi RSSI degrading below -70 dBm.
@@ -117,11 +117,11 @@ NetCoop AI deploys six cooperative autonomous agents with distinct diagnostic re
 - **Metrics Evaluated:** Graph connectivity, upstream parent dependencies, `dns_latency_ms`, `dns_failure_pct`, `dhcp_latency_ms`, `dhcp_failure_pct`.
 - **Triggers:** Differentiates between localized node failures and cascaded upstream link outages.
 
-### 4. Fault Correlation Agent (`fault_correlation_agent`)
+### 4. Fault Correlation Agent (`correlation_agent`)
 - **Domain:** Multi-agent evidence synthesis, resolution of competing hypotheses, and root-cause localization.
 - **Techniques:** Dispatches `challenge` messages to agents to verify whether anomalies are sustained or transient; computes coverage-penalized Bayesian cause ranking.
 
-### 5. Recommendation & Reporting Agent (`recommendation_agent`)
+### 5. Recommendation & Reporting Agent (`reporting_agent`)
 - **Domain:** Report generation, safety gating, and operational mitigation planning.
 - **Responsibilities:** Enforces the insufficient-evidence boundary, formats diagnostic summaries, and prescribes immediate actions.
 
@@ -144,13 +144,13 @@ All agents exchange structured messages conforming to the **NetCoop Agent Messag
   "run_id": "R-1730424560000-1",
   "seq": 4,
   "timestamp": "2026-11-01T04:22:15.341Z",
-  "from": "telemetry_agent",
-  "to": "fault_correlation_agent",
+  "from": "performance_agent",
+  "to": "correlation_agent",
   "type": "finding",
   "in_reply_to": "M-0001",
-  "summary": "telemetry_agent flagged 3 indicators on ap-academic-01",
+  "summary": "performance_agent flagged 3 indicators on HOSTEL_BRAHMAPUTRA_AP_04",
   "payload": {
-    "device_id": "ap-academic-01",
+    "device_id": "HOSTEL_BRAHMAPUTRA_AP_04",
     "items": [
       {
         "metric": "signal_dbm",
@@ -170,9 +170,9 @@ All agents exchange structured messages conforming to the **NetCoop Agent Messag
 | Type | Purpose | Sender $\rightarrow$ Receiver |
 | :--- | :--- | :--- |
 | `task` | Dispatches diagnostic work packages and provides reference finding IDs. | `orchestrator` $\rightarrow$ Agents |
-| `finding` | Reports anomalous metrics, sustained trends, and device states. | Agents $\rightarrow$ `fault_correlation_agent` |
-| `challenge` | Inquires whether a specific metric anomaly was persistent or an isolated spike. | `fault_correlation_agent` $\rightarrow$ Agents |
-| `challenge_response` | Returns time-windowed median, peak, baseline, and degree of persistence. | Agents $\rightarrow$ `fault_correlation_agent` |
+| `finding` | Reports anomalous metrics, sustained trends, and device states. | Agents $\rightarrow$ `correlation_agent` |
+| `challenge` | Inquires whether a specific metric anomaly was persistent or an isolated spike. | `correlation_agent` $\rightarrow$ Agents |
+| `challenge_response` | Returns time-windowed median, peak, baseline, and degree of persistence. | Agents $\rightarrow$ `correlation_agent` |
 | `result` | Delivers finalized multi-agent diagnosis report or Groq LLM synthesis. | Agents $\rightarrow$ `orchestrator` |
 | `error` | Signals unparseable inputs, schema violations, or normalization failures. | Agents / Schema $\rightarrow$ `orchestrator` |
 
@@ -182,14 +182,14 @@ All agents exchange structured messages conforming to the **NetCoop Agent Messag
 
 | Metric Key | Canonical Unit | Expected Range | Warning Threshold | Critical Threshold | Responsible Agent |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| `latency_ms` | ms | 0 – 60,000 | 100 ms | 250 ms | `telemetry_agent` |
-| `jitter_ms` | ms | 0 – 60,000 | 30 ms | 80 ms | `telemetry_agent` |
-| `packet_loss_pct` | % | 0 – 100 | 1.0 % | 5.0 % | `telemetry_agent` |
-| `throughput_mbps` | Mbps | 0 – 10,000,000 | — | — | `telemetry_agent` |
-| `bandwidth_mbps` | Mbps | 0 – 10,000,000 | — | — | `telemetry_agent` |
-| `link_utilization_pct` | % | 0 – 100 | 80.0 % | 92.0 % | `telemetry_agent` |
-| `signal_dbm` | dBm | -120 – 0 | -70 dBm | -80 dBm | `telemetry_agent` |
-| `retransmission_pct` | % | 0 – 100 | 10.0 % | 25.0 % | `telemetry_agent` |
+| `latency_ms` | ms | 0 – 60,000 | 100 ms | 250 ms | `performance_agent` |
+| `jitter_ms` | ms | 0 – 60,000 | 30 ms | 80 ms | `performance_agent` |
+| `packet_loss_pct` | % | 0 – 100 | 1.0 % | 5.0 % | `performance_agent` |
+| `throughput_mbps` | Mbps | 0 – 10,000,000 | — | — | `performance_agent` |
+| `bandwidth_mbps` | Mbps | 0 – 10,000,000 | — | — | `performance_agent` |
+| `link_utilization_pct` | % | 0 – 100 | 80.0 % | 92.0 % | `performance_agent` |
+| `signal_dbm` | dBm | -120 – 0 | -70 dBm | -80 dBm | `performance_agent` |
+| `retransmission_pct` | % | 0 – 100 | 10.0 % | 25.0 % | `performance_agent` |
 | `cpu_pct` | % | 0 – 100 | 80.0 % | 92.0 % | `infrastructure_agent` |
 | `memory_pct` | % | 0 – 100 | 85.0 % | 95.0 % | `infrastructure_agent` |
 | `queue_drops` | drops/int | 0 – $10^{12}$ | 50 drops | 150 drops | `infrastructure_agent` |
@@ -268,7 +268,7 @@ The application simulates an 8-node tier-3 campus network architecture:
                               │
                ┌──────────────┴──────────────┐
                ▼                             ▼
-       [ ap-academic-01 ]            [ sw-hostel-01 ]
+       [ HOSTEL_BRAHMAPUTRA_AP_04 ]            [ sw-hostel-01 ]
       (Aruba AP-555 Wi-Fi)        (Juniper EX4300 Switch)
          │           │                       │
      [laptop-01] [laptop-02]            [desktop-lab-01]
@@ -284,7 +284,7 @@ NetCoop AI includes 8 reproducible test scenarios available via the UI and API:
 | :--- | :--- | :--- | :---: |
 | `normal` | Clean telemetry within operational bounds. | None | `no_fault_detected` (90%) |
 | `link_congestion` | Saturated uplink utilization (95%) on `dist-sw-01`. | `dist-sw-01`, downstream APs | `diagnosed` (87%) |
-| `weak_wifi` | RSSI degradation (-82 dBm) and high retries on AP. | `laptop-02`, `ap-academic-01` | `diagnosed` (86%) |
+| `weak_wifi` | RSSI degradation (-82 dBm) and high retries on AP. | `laptop-02`, `HOSTEL_BRAHMAPUTRA_AP_04` | `diagnosed` (86%) |
 | `interface_fault` | CRC error spikes and flapping on access switch. | `sw-hostel-01` | `diagnosed` (65%) |
 | `dns_failure` | Resolution timeouts (>950ms) on `srv-dns-01`. | Campus-wide clients | `diagnosed` (95%) |
 | `dhcp_failure` | Lease offer timeouts and scope pool starvation. | `srv-dhcp-01`, `laptop-01` | `diagnosed` (60%) |
@@ -428,7 +428,7 @@ npm test
 [4/5] Running Multi-Agent Diagnosis on all 8 Scenarios...
   • normal               -> no_fault_detected  [90%] | No fault detected: all reported metrics are normal
   • link_congestion      -> diagnosed          [87%] | Likely link congestion on dist-sw-01
-  • weak_wifi            -> diagnosed          [86%] | Likely weak Wi-Fi signal at ap-academic-01
+  • weak_wifi            -> diagnosed          [86%] | Likely weak Wi-Fi signal at HOSTEL_BRAHMAPUTRA_AP_04
   • interface_fault      -> diagnosed          [65%] | Likely physical or interface fault on sw-hostel-01
   • dns_failure          -> diagnosed          [95%] | Likely DNS resolution failure or slowness
   • dhcp_failure         -> diagnosed          [60%] | Possible DHCP failure or slowness seen at srv-dhcp-01
