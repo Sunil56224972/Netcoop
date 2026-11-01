@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NetCoop AI — 4-Minute Demo Walkthrough</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --surface: #0f172a;
+      --card: #1e293b;
+      --border: rgba(56, 189, 248, 0.2);
+      --accent: #38bdf8;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 16px 64px;
+    }
+    .container {
+      width: 100%;
+      max-width: 1100px;
+    }
+    header {
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .title-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .badge {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 5px 12px;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    .sub {
+      color: var(--text-muted);
+      font-size: 13.5px;
+      margin-top: 4px;
+    }
+    .player-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(56, 189, 248, 0.15);
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+    video {
+      width: 100%;
+      height: auto;
+      display: block;
+      background: #000;
+      outline: none;
+    }
+    .chapters {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+    }
+    .chapters h2 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+    }
+    .ch-item {
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .ch-item:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      background: rgba(56, 189, 248, 0.08);
+    }
+    .ch-time {
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .ch-title {
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+    .ch-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="title-group">
+        <span class="badge">Deliverable #4</span>
+        <div>
+          <h1>NetCoop AI — Multi-Agent Network Diagnosis Demo</h1>
+          <p class="sub">4-Minute End-to-End Walkthrough • IIT Bhubaneswar Campus Infrastructure • Playwright Verified</p>
+        </div>
+      </div>
+      <div>
+        <a href="NetCoop_AI_4min_Demo_Testing_Walkthrough.webm" download style="color:var(--accent);font-size:13px;text-decoration:none;border:1px solid var(--border);padding:8px 14px;border-radius:8px;background:var(--card);">
+          ⬇ Download WebM (50.6 MB)
+        </a>
+      </div>
+    </header>
+
+    <div class="player-card">
+      <video id="demo-player" controls preload="metadata" poster="../public/images/netcoop-emblem.png">
+        <source src="NetCoop_AI_4min_Demo_Testing_Walkthrough.webm" type="video/webm">
+        Your browser does not support HTML5 WebM video. Open this file in Google Chrome, Microsoft Edge, or VLC.
+      </video>
+    </div>
+
+    <div class="chapters">
+      <h2>Video Chapters &amp; Problem Statement Compliance</h2>
+      <div class="timeline">
+        <div class="ch-item" onclick="seek(0)">
+          <span class="ch-time">0:00 - 0:35</span>
+          <span class="ch-title">Part 1: System Boot &amp; Agent Mesh</span>
+          <span class="ch-desc">Initialization of 6 functional agents (Telemetry, Infrastructure, Connectivity, Correlation, Reporting, Groq LLM).</span>
+        </div>
+        <div class="ch-item" onclick="seek(35)">
+          <span class="ch-time">0:35 - 1:10</span>
+          <span class="ch-title">Part 2: Campus Topology Inspection</span>
+          <span class="ch-desc">Inspection of IIT Bhubaneswar core routers, hostel distribution switches, and Wi-Fi access points.</span>
+        </div>
+        <div class="ch-item" onclick="seek(70)">
+          <span class="ch-time">1:10 - 1:45</span>
+          <span class="ch-title">Part 3: JSON-RPC v1.0.0 Protocol</span>
+          <span class="ch-desc">Inspection of interoperability message schema, agent contracts, and 16-metric threshold arbitration matrix.</span>
+        </div>
+        <div class="ch-item" onclick="seek(105)">
+          <span class="ch-time">1:45 - 2:20</span>
+          <span class="ch-title">Part 4: Scenario 1 — Nominal Baseline</span>
+          <span class="ch-desc">Running baseline telemetry diagnosis; verifying zero false alarms with "NO FAULT DETECTED" verdict.</span>
+        </div>
+        <div class="ch-item" onclick="seek(140)">
+          <span class="ch-time">2:20 - 3:00</span>
+          <span class="ch-title">Part 5: Scenario 2 — Link Congestion</span>
+          <span class="ch-desc">Problem Statement scenario (HOSTEL_CORE_SW_01), Section 6 JSON report, confidence ranking, and HITL operator gate.</span>
+        </div>
+        <div class="ch-item" onclick="seek(180)">
+          <span class="ch-time">3:00 - 3:35</span>
+          <span class="ch-title">Part 6: Agent Message Bus Inspection</span>
+          <span class="ch-desc">Deep-inspection of JSON-RPC Tasks, Findings, Dispute Challenges, and Corroboration envelopes.</span>
+        </div>
+        <div class="ch-item" onclick="seek(215)">
+          <span class="ch-time">3:35 - 4:06</span>
+          <span class="ch-title">Part 7: Live Real Host Probing</span>
+          <span class="ch-desc">Real non-synthetic telemetry capture from host CPU, RAM, active Wi-Fi interface, and DNS latency.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const player = document.getElementById('demo-player');
+    function seek(sec) {
+      player.currentTime = sec;
+      player.play();
+    }
+  </script>
+</body>
+</html>

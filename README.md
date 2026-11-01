@@ -404,6 +404,25 @@ npm run dev
 
 ---
 
+## 🎥 4-Minute Demo Video Walkthrough (Deliverable #4)
+
+In direct fulfillment of Round 2 Problem Statement **Deliverable #4** (*"A three-to-five-minute recording demonstrating an end-to-end diagnosis, inter-agent communication, and the final report"*), a full automated, high-definition (1440x900) video walkthrough has been recorded via Playwright:
+
+* **Video File (WebM 1440x900, 25fps, 4m 06s):** [`demo_video/NetCoop_AI_4min_Demo_Testing_Walkthrough.webm`](demo_video/NetCoop_AI_4min_Demo_Testing_Walkthrough.webm)
+* **Interactive Player Page:** Double-click [`demo_video/view_demo.html`](demo_video/view_demo.html) to open the walkthrough in Google Chrome or Microsoft Edge with interactive chapter navigation.
+* **Automated Recording Script:** Run `node scripts/record-demo.js` to re-record the entire 4-minute demo at any time.
+
+### Video Chapters:
+1. **0:00 – 0:35 (Part 1):** System Boot sequence, live cooperative agent kernel initialization, and 6 specialized diagnostic agent cards.
+2. **0:35 – 1:10 (Part 2):** Campus Topology visualizer inspecting IIT Bhubaneswar core routers, distribution switches, Wi-Fi APs, and server farm.
+3. **1:10 – 1:45 (Part 3):** JSON-RPC v1.0.0 Interoperability Protocol specification, agent contracts, and 16-metric arbitration threshold matrix.
+4. **1:45 – 2:20 (Part 4):** Scenario 1 (Normal Operation Baseline) diagnosis demonstrating clean telemetry evaluation and "NO FAULT DETECTED" verdict.
+5. **2:20 – 3:00 (Part 5):** Scenario 2 (Hostel Core Switch Link Congestion) demonstrating multi-hypothesis arbitration, confidence ranking, Human-in-the-Loop (HITL) operator review gate, and Section 6 JSON report.
+6. **3:00 – 3:35 (Part 6):** Agent Message Bus deep inspection inspecting raw JSON-RPC async Task, Finding, Dispute Challenge, and Corroboration envelopes.
+7. **3:35 – 4:06 (Part 7):** Live Real Host Network Prober measuring non-synthetic host CPU, RAM, active network adapters, and DNS latency.
+
+---
+
 ## 🧪 Automated Verification Suite
 
 NetCoop AI includes a comprehensive standalone test suite verifying protocol compliance, normalization, and all 8 scenarios:

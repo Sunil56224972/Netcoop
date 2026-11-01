@@ -105,8 +105,15 @@
       <!-- Navigation Tabs -->
       <nav class="tabs" role="tablist">
         <button class="tab is-on" data-tab="boot" role="tab" aria-selected="true">
-          <img src="images/netcoop-emblem.png" alt="NetCoop" class="tab-boot-logo" />
-          <span>System Boot</span>
+          <span class="tab-boot-badge">
+            <img src="images/netcoop-emblem.png" alt="NetCoop" class="tab-boot-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block';" />
+            <svg class="tab-boot-power-fallback" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+              <line x1="12" y1="2" x2="12" y2="12"></line>
+            </svg>
+            <span class="tab-boot-dot"></span>
+          </span>
+          <span class="tab-boot-text">System Boot</span>
         </button>
         <button class="tab" data-tab="studio" role="tab" aria-selected="false">
           <i data-icon="terminal"></i> Diagnosis Studio
