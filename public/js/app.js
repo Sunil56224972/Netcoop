@@ -804,11 +804,11 @@ function runBootSequence(options = {}) {
   if (percentText) percentText.textContent = '0%';
 
   const steps = [
-    { p: 25, t: 'Booting multi-agent telemetry mesh…', delay: 180 },
-    { p: 50, t: 'Connecting IIT Bhubaneswar node telemetry…', delay: 480 },
-    { p: 75, t: 'Synchronizing JSON-RPC v1.0.0 bus…', delay: 820 },
-    { p: 90, t: 'Groq LPU neural inference ready…', delay: 1150 },
-    { p: 100, t: 'NetCoop AI initialized and operational.', delay: 1480 }
+    { p: 20, t: '[01/05] Calibrating 16 network telemetry metric arbitrators…', delay: 200 },
+    { p: 48, t: '[02/05] Binding IIT Bhubaneswar topology mesh (Hostel, Core & AP nodes)…', delay: 520 },
+    { p: 74, t: '[03/05] Synchronizing JSON-RPC v1.0.0 multi-agent message bus…', delay: 860 },
+    { p: 92, t: '[04/05] Initializing Groq LPU gpt-oss-120b inference engine…', delay: 1200 },
+    { p: 100, t: '[05/05] NetCoop AI Kernel online • Autonomous arbitration active.', delay: 1540 }
   ];
 
   steps.forEach(({ p, t, delay }) => {

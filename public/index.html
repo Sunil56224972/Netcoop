@@ -27,29 +27,89 @@
   </script>
 </head>
 <body>
-  <!-- NetCoop AI Booting Screen Overlay -->
+  <!-- NetCoop AI Booting Screen Overlay (Handcrafted Senior Designer Edition) -->
   <div id="netcoop-boot-screen" class="boot-screen" aria-label="NetCoop AI System Booting">
+    <div class="boot-grid-backdrop"></div>
     <div class="boot-card">
-      <div class="boot-glow"></div>
+      <!-- Technical Corner Registration Crosshairs -->
+      <span class="boot-corner boot-corner--tl" aria-hidden="true">+</span>
+      <span class="boot-corner boot-corner--tr" aria-hidden="true">+</span>
+      <span class="boot-corner boot-corner--bl" aria-hidden="true">+</span>
+      <span class="boot-corner boot-corner--br" aria-hidden="true">+</span>
+
+      <!-- Instrument Header Bar -->
+      <div class="boot-card__header">
+        <span class="boot-hdr-item"><span class="boot-hdr-dot"></span>SYS.KERNEL // V1.0.0</span>
+        <span class="boot-hdr-divider"></span>
+        <span class="boot-hdr-item">IIT-BBS-CAMPUS-01</span>
+      </div>
+
+      <!-- Optical Reticle & Emblem -->
       <div class="boot-logo-wrap">
-        <div class="boot-emblem-ring"></div>
-        <img src="images/netcoop-emblem.png" alt="NetCoop AI Logo" class="boot-logo" />
+        <div class="boot-reticle-outer"></div>
+        <div class="boot-reticle-sweep"></div>
+        <div class="boot-reticle-ticks">
+          <span class="tick tick-n"></span>
+          <span class="tick tick-e"></span>
+          <span class="tick tick-s"></span>
+          <span class="tick tick-w"></span>
+        </div>
+        <div class="boot-lens-glow"></div>
+        <img src="images/netcoop-emblem.png" alt="NetCoop AI Emblem" class="boot-logo" />
       </div>
+
+      <!-- Identity & Typographic Lockup -->
       <div class="boot-brand">
+        <div class="boot-overline">AUTONOMOUS MULTI-AGENT DIAGNOSTICS</div>
         <h1 class="boot-title">NETCOOP AI</h1>
-        <p class="boot-subtitle">Multi-Agent Network Intelligence System</p>
-        <span class="boot-facility">IIT Bhubaneswar Campus Infrastructure • Node Alpha</span>
+        <p class="boot-subtitle">Cooperative Network Fault Localization &amp; Arbitration Mesh</p>
+        <div class="boot-facility">
+          <span class="boot-facility__tag">IIT BHUBANESWAR</span>
+          <span class="boot-facility__sep">/</span>
+          <span class="boot-facility__cluster">CAMPUS CLUSTER &alpha;-01</span>
+        </div>
       </div>
+
+      <!-- High-Precision Telemetry Gauge -->
       <div class="boot-status-box">
         <div class="boot-status-row">
-          <span class="boot-pulse-dot"></span>
-          <span id="boot-status-text" class="boot-status-text">Booting multi-agent telemetry mesh…</span>
+          <div class="boot-status-lead">
+            <span class="boot-pulse-dot"></span>
+            <span id="boot-status-text" class="boot-status-text">Synchronizing multi-agent telemetry mesh&hellip;</span>
+          </div>
           <span id="boot-percent" class="boot-percent">0%</span>
         </div>
         <div class="boot-progress-track">
-          <div id="boot-progress-bar" class="boot-progress-bar"></div>
+          <div id="boot-progress-bar" class="boot-progress-bar">
+            <span class="boot-progress-spark"></span>
+          </div>
+          <div class="boot-track-ticks" aria-hidden="true">
+            <span style="left:0%"></span>
+            <span style="left:25%"></span>
+            <span style="left:50%"></span>
+            <span style="left:75%"></span>
+            <span style="left:100%"></span>
+          </div>
         </div>
       </div>
+
+      <!-- 3-Cell Engineering Specification Matrix -->
+      <div class="boot-spec-matrix">
+        <div class="boot-spec-cell">
+          <span class="boot-spec-label">BUS PROTOCOL</span>
+          <span class="boot-spec-val">JSON-RPC 1.0</span>
+        </div>
+        <div class="boot-spec-cell">
+          <span class="boot-spec-label">REASONING CORE</span>
+          <span class="boot-spec-val">GROQ LPU &bull; 120B</span>
+        </div>
+        <div class="boot-spec-cell">
+          <span class="boot-spec-label">ARCHITECTURE</span>
+          <span class="boot-spec-val">6 AGENTS ACTIVE</span>
+        </div>
+      </div>
+    </div>
+  </div>
       <div class="boot-meta">
         <span>JSON-RPC v1.0.0</span>
         <span>•</span>
@@ -131,20 +191,33 @@
 
       <!-- Tab 0: System Boot Tab (Booting Tab with Animated Logo) -->
       <div id="tab-boot" class="tab-pane stack reveal">
-        <section class="boot-tab-hero">
-          <div class="boot-glow"></div>
-          <div class="boot-tab-logo-container">
-            <div class="boot-tab-emblem-ring"></div>
+                <section class="boot-tab-hero">
+          <span class="boot-corner boot-corner--tl" aria-hidden="true">+</span>
+          <span class="boot-corner boot-corner--tr" aria-hidden="true">+</span>
+          <span class="boot-corner boot-corner--bl" aria-hidden="true">+</span>
+          <span class="boot-corner boot-corner--br" aria-hidden="true">+</span>
+
+          <div class="boot-logo-wrap" style="margin-bottom:18px">
+            <div class="boot-reticle-outer"></div>
+            <div class="boot-reticle-sweep"></div>
+            <div class="boot-reticle-ticks">
+              <span class="tick tick-n"></span>
+              <span class="tick tick-e"></span>
+              <span class="tick tick-s"></span>
+              <span class="tick tick-w"></span>
+            </div>
+            <div class="boot-lens-glow"></div>
             <img src="images/netcoop-emblem.png" alt="NetCoop AI Logo" class="boot-tab-logo" id="boot-tab-interactive-logo" title="NetCoop AI — Click to reboot diagnostic agents" />
           </div>
 
-          <h2 class="boot-tab-title">NETCOOP AI</h2>
+          <div class="boot-overline" style="margin-bottom:2px">IIT BHUBANESWAR CAMPUS INFRASTRUCTURE</div>
+          <h2 class="boot-tab-title">NETCOOP AI KERNEL</h2>
           <p class="boot-tab-sub">
             Multi-Agent Cooperative Network Fault Diagnosis &amp; Root Cause Localization System for IIT Bhubaneswar Campus Infrastructure.
           </p>
 
           <div class="boot-tab-badges">
-            <span class="pill pill--CONTAINED"><span class="status-dot" style="background:#4bab7d"></span> System Operational</span>
+            <span class="pill pill--CONTAINED"><span class="status-dot" style="background:#10b981"></span> Telemetry Active</span>
             <span class="pill pill--admin">JSON-RPC v1.0.0 Bus</span>
             <span class="pill pill--viewer">Groq LPUs (gpt-oss-120b)</span>
             <span class="pill pill--viewer">6 Cooperative Agents</span>
@@ -160,16 +233,27 @@
           <!-- Live Booting Progress Bar -->
           <div class="boot-status-box" style="max-width:820px">
             <div class="boot-status-row">
-              <span class="boot-pulse-dot"></span>
-              <span id="tab-boot-status-text" class="boot-status-text">All agents booted and ready for telemetry diagnosis</span>
+              <div class="boot-status-lead">
+                <span class="boot-pulse-dot"></span>
+                <span id="tab-boot-status-text" class="boot-status-text">All agents booted and ready for telemetry diagnosis</span>
+              </div>
               <span id="tab-boot-percent" class="boot-percent">100%</span>
             </div>
             <div class="boot-progress-track">
-              <div id="tab-boot-progress-bar" class="boot-progress-bar" style="width:100%"></div>
+              <div id="tab-boot-progress-bar" class="boot-progress-bar" style="width:100%">
+                <span class="boot-progress-spark"></span>
+              </div>
+              <div class="boot-track-ticks" aria-hidden="true">
+                <span style="left:0%"></span>
+                <span style="left:25%"></span>
+                <span style="left:50%"></span>
+                <span style="left:75%"></span>
+                <span style="left:100%"></span>
+              </div>
             </div>
           </div>
 
-          <!-- High-Tech Agent Boot Log Console -->
+                    <!-- High-Tech Agent Boot Log Console -->
           <div class="boot-tab-console">
             <div class="boot-tab-console__head">
               <div class="boot-console-dots">
