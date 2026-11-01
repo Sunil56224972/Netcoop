@@ -23,13 +23,6 @@ const mediaDir = path.join(scratchDir, 'ppt', 'media');
 fs.copyFileSync('public/images/netcoop-emblem.png', path.join(mediaDir, 'image16.png'));
 fs.copyFileSync('public/images/netcoop-logo.png', path.join(mediaDir, 'image17.png'));
 
-// Ensure slide1.xml.rels links image16.png as rIdNetLogo
-let rels1 = fs.readFileSync(path.join(relsDir, 'slide1.xml.rels'), 'utf8');
-if (!rels1.includes('image16.png')) {
-  rels1 = rels1.replace('</Relationships>', '<Relationship Id="rIdNetLogo" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/image16.png"/></Relationships>');
-  fs.writeFileSync(path.join(relsDir, 'slide1.xml.rels'), rels1, 'utf8');
-}
-
 // Global brand replacement
 const slideFiles = fs.readdirSync(slidesDir).filter(f => f.startsWith('slide') && f.endsWith('.xml') && !f.includes('.rels'));
 slideFiles.forEach(f => {
@@ -37,8 +30,7 @@ slideFiles.forEach(f => {
   xml = xml.replace(/<a:t>Hallucination<\/a:t>/g, '<a:t>NetCoop</a:t>');
   xml = xml.replace(/<a:t>Hunters<\/a:t>/g, '<a:t>AI</a:t>');
   xml = xml.replace(/<a:t>Hallucination Hunter<\/a:t>/g, '<a:t>NetCoop AI</a:t>');
-  xml = xml.replace(/Hallucination Hunter — Tejas India Hackathon 2026/g, 'NetCoop AI — Multi-Agent Network Fault Diagnosis | Agentic AI Grand Finale');
-  xml = xml.replace(/Tejas India Hackathon 2026/g, 'Agentic AI Grand Finale 2026');
+  xml = xml.replace(/Hallucination Hunter — Tejas India Hackathon 2026/g, 'NetCoop AI — Tejas India Hackathon 2026');
   fs.writeFileSync(path.join(slidesDir, f), xml, 'utf8');
 });
 
@@ -51,250 +43,14 @@ function modifySlide(num, fn) {
 }
 
 // ===========================================================================
-// SLIDE 1: Executive Title Slide
+// SLIDE 1: Title Page (Exact Hackathon Submission Registration Format)
 // ===========================================================================
 console.log('Building Slide 1...');
-const slide1Xml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
-  <p:cSld name="Slide 1">
-    <p:bg><p:bgPr><a:solidFill><a:srgbClr val="F8FAFC"/></a:solidFill><a:effectLst/></p:bgPr></p:bg>
-    <p:spTree>
-      <p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>
-      <p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>
-      
-      <!-- Top Header Bar -->
-      <p:sp>
-        <p:nvSpPr><p:cNvPr id="2" name="Top Header"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>
-        <p:spPr>
-          <a:xfrm><a:off x="0" y="0"/><a:ext cx="12188952" cy="621792"/></a:xfrm>
-          <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>
-          <a:solidFill><a:srgbClr val="FFFFFF"/></a:solidFill>
-          <a:ln w="15240"><a:solidFill><a:srgbClr val="CBD5E1"/></a:solidFill></a:ln>
-        </p:spPr>
-      </p:sp>
-      
-      <!-- Top Brand Badge -->
-      <p:sp>
-        <p:nvSpPr><p:cNvPr id="3" name="Brand Badge"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>
-        <p:spPr>
-          <a:xfrm><a:off x="146304" y="82296"/><a:ext cx="877824" cy="457200"/></a:xfrm>
-          <a:prstGeom prst="ellipse"><a:avLst/></a:prstGeom>
-          <a:solidFill><a:srgbClr val="0070C0"/></a:solidFill>
-          <a:ln w="15240"><a:solidFill><a:srgbClr val="005A9E"/></a:solidFill></a:ln>
-        </p:spPr>
-        <p:txBody>
-          <a:bodyPr anchor="ctr" t="0" b="0"/>
-          <a:lstStyle/>
-          <a:p><a:pPr algn="ctr"/><a:r><a:rPr lang="en-US" sz="800" b="1"><a:solidFill><a:srgbClr val="FFFFFF"/></a:solidFill></a:rPr><a:t>NETCOOP</a:t></a:r></a:p>
-          <a:p><a:pPr algn="ctr"/><a:r><a:rPr lang="en-US" sz="800" b="1"><a:solidFill><a:srgbClr val="FFFFFF"/></a:solidFill></a:rPr><a:t>AI</a:t></a:r></a:p>
-        </p:txBody>
-      </p:sp>
-      
-      <!-- Top Title Text -->
-      <p:sp>
-        <p:nvSpPr><p:cNvPr id="4" name="Header Title"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>
-        <p:spPr>
-          <a:xfrm><a:off x="1188720" y="54864"/><a:ext cx="10500000" cy="512064"/></a:xfrm>
-          <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>
-          <a:noFill/><a:ln/>
-        </p:spPr>
-        <p:txBody>
-          <a:bodyPr anchor="ctr"/>
-          <a:lstStyle/>
-          <a:p><a:pPr algn="l"/><a:r><a:rPr lang="en-US" sz="2000" b="1"><a:solidFill><a:srgbClr val="1F4E79"/></a:solidFill></a:rPr><a:t>TITLE PAGE // AGENTIC AI GRAND FINALE 2026</a:t></a:r></a:p>
-        </p:txBody>
-      </p:sp>
-      
-      <!-- LEFT HERO CARD -->
-      <p:sp>
-        <p:nvSpPr><p:cNvPr id="10" name="Left Hero Card"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>
-        <p:spPr>
-          <a:xfrm><a:off x="457200" y="780000"/><a:ext cx="5500000" cy="5650000"/></a:xfrm>
-          <a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val 8000"/></a:avLst></a:prstGeom>
-          <a:solidFill><a:srgbClr val="FFFFFF"/></a:solidFill>
-          <a:ln w="25400"><a:solidFill><a:srgbClr val="0070C0"/></a:solidFill></a:ln>
-        </p:spPr>
-      </p:sp>
-      
-      <!-- NetCoop Emblem Picture -->
-      <p:pic>
-        <p:nvPicPr>
-          <p:cNvPr id="11" name="NetCoop Emblem" descr="NetCoop Multi-Agent Emblem"/>
-          <p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr>
-          <p:nvPr/>
-        </p:nvPicPr>
-        <p:blipFill>
-          <a:blip r:embed="rIdNetLogo"/>
-          <a:stretch><a:fillRect/></a:stretch>
-        </p:blipFill>
-        <p:spPr>
-          <a:xfrm><a:off x="700000" y="950000"/><a:ext cx="1200000" cy="1200000"/></a:xfrm>
-          <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>
-        </p:spPr>
-      </p:pic>
-      
-      <!-- Left Title Text next to Emblem -->
-      <p:sp>
-        <p:nvSpPr><p:cNvPr id="12" name="Hero Title Text"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>
-        <p:spPr>
-          <a:xfrm><a:off x="2050000" y="950000"/><a:ext cx="3700000" cy="1300000"/></a:xfrm>
-          <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>
-          <a:noFill/><a:ln/>
-        </p:spPr>
-        <p:txBody>
-          <a:bodyPr anchor="t" t="0" b="0"/>
-          <a:lstStyle/>
-          <a:p><a:r><a:rPr lang="en-US" sz="2600" b="1"><a:solidFill><a:srgbClr val="0070C0"/></a:solidFill></a:rPr><a:t>NetCoop AI</a:t></a:r></a:p>
-          <a:p><a:r><a:rPr lang="en-US" sz="1250" b="1"><a:solidFill><a:srgbClr val="1F4E79"/></a:solidFill></a:rPr><a:t>Autonomous Multi-Agent NOC</a:t></a:r></a:p>
-          <a:p><a:r><a:rPr lang="en-US" sz="1000"><a:solidFill><a:srgbClr val="64748B"/></a:solidFill></a:rPr><a:t>Telemetry Arbitration &amp; Runbook Engine</a:t></a:r></a:p>
-        </p:txBody>
-      </p:sp>
-      
-      <!-- Campus Pill Badge -->
-      <p:sp>
-        <p:nvSpPr><p:cNvPr id="13" name="Campus Pill"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>
-        <p:spPr>
-          <a:xfrm><a:off x="700000" y="2350000"/><a:ext cx="5000000" cy="420000"/></a:xfrm>
-          <a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val 20000"/></a:avLst></a:prstGeom>
-          <a:solidFill><a:srgbClr val="EBF8FF"/></a:solidFill>
-          <a:ln w="19050"><a:solidFill><a:srgbClr val="3182CE"/></a:solidFill></a:ln>
-        </p:spPr>
-        <p:txBody>
-          <a:bodyPr anchor="ctr" t="36000" b="36000"/>
-          <a:lstStyle/>
-          <a:p><a:pPr algn="ctr"/><a:r><a:rPr lang="en-US" sz="1150" b="1"><a:solidFill><a:srgbClr val="0070C0"/></a:solidFill></a:rPr><a:t>🏛 IIT BHUBANESWAR CAMPUS INFRASTRUCTURE</a:t></a:r></a:p>
-        </p:txBody>
-      </p:sp>
-      
-      <!-- Left Hero Features List -->
-      <p:sp>
-        <p:nvSpPr><p:cNvPr id="14" name="Hero Feature List"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>
-        <p:spPr>
-          <a:xfrm><a:off x="700000" y="2900000"/><a:ext cx="5000000" cy="3350000"/></a:xfrm>
-          <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>
-          <a:noFill/><a:ln/>
-        </p:spPr>
-        <p:txBody>
-          <a:bodyPr anchor="t" t="0" b="0"/>
-          <a:lstStyle/>
-          <a:p><a:r><a:rPr lang="en-US" sz="1150" b="1"><a:solidFill><a:srgbClr val="1F4E79"/></a:solidFill></a:rPr><a:t>• Cooperative Agent Event Bus:</a:t></a:r></a:p>
-          <a:p><a:r><a:rPr lang="en-US" sz="1000"><a:solidFill><a:srgbClr val="334155"/></a:solidFill></a:rPr><a:t>   Standard JSON-RPC v1.0.0 protocol with cross-agent disputes.</a:t></a:r></a:p>
-          <a:p><a:endParaRPr lang="en-US" sz="300"/></a:p>
-          <a:p><a:r><a:rPr lang="en-US" sz="1150" b="1"><a:solidFill><a:srgbClr val="1F4E79"/></a:solidFill></a:rPr><a:t>• Mathematical Root Cause Arbitration:</a:t></a:r></a:p>
-          <a:p><a:r><a:rPr lang="en-US" sz="1000"><a:solidFill><a:srgbClr val="334155"/></a:solidFill></a:rPr><a:t>   16 normalized telemetry metrics evaluated against calibrated baselines.</a:t></a:r></a:p>
-          <a:p><a:endParaRPr lang="en-US" sz="300"/></a:p>
-          <a:p><a:r><a:rPr lang="en-US" sz="1150" b="1"><a:solidFill><a:srgbClr val="1F4E79"/></a:solidFill></a:rPr><a:t>• Groq Neural Remediation Synthesis:</a:t></a:r></a:p>
-          <a:p><a:r><a:rPr lang="en-US" sz="1000"><a:solidFill><a:srgbClr val="334155"/></a:solidFill></a:rPr><a:t>   Synthesizes copy-pasteable Cisco &amp; Aruba CLI runbooks in &lt;200ms.</a:t></a:r></a:p>
-          <a:p><a:endParaRPr lang="en-US" sz="300"/></a:p>
-          <a:p><a:r><a:rPr lang="en-US" sz="1150" b="1"><a:solidFill><a:srgbClr val="1F4E79"/></a:solidFill></a:rPr><a:t>• Strict Section 6 Output Compliance:</a:t></a:r></a:p>
-          <a:p><a:r><a:rPr lang="en-US" sz="1000"><a:solidFill><a:srgbClr val="334155"/></a:solidFill></a:rPr><a:t>   Typed JSON envelope with blast radius, limitations &amp; HITL gate.</a:t></a:r></a:p>
-        </p:txBody>
-      </p:sp>
-      
-      <!-- RIGHT METADATA CARD -->
-      <p:sp>
-        <p:nvSpPr><p:cNvPr id="20" name="Right Metadata Card"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>
-        <p:spPr>
-          <a:xfrm><a:off x="6200000" y="780000"/><a:ext cx="5500000" cy="5650000"/></a:xfrm>
-          <a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val 8000"/></a:avLst></a:prstGeom>
-          <a:solidFill><a:srgbClr val="FFFFFF"/></a:solidFill>
-          <a:ln w="25400"><a:solidFill><a:srgbClr val="0070C0"/></a:solidFill></a:ln>
-        </p:spPr>
-      </p:sp>
-      
-      <!-- Right Card Title Banner -->
-      <p:sp>
-        <p:nvSpPr><p:cNvPr id="21" name="Metadata Header Banner"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>
-        <p:spPr>
-          <a:xfrm><a:off x="6450000" y="950000"/><a:ext cx="5000000" cy="420000"/></a:xfrm>
-          <a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val 8000"/></a:avLst></a:prstGeom>
-          <a:solidFill><a:srgbClr val="1F4E79"/></a:solidFill>
-        </p:spPr>
-        <p:txBody>
-          <a:bodyPr anchor="ctr" t="36000" b="36000"/>
-          <a:lstStyle/>
-          <a:p><a:pPr algn="ctr"/><a:r><a:rPr lang="en-US" sz="1200" b="1"><a:solidFill><a:srgbClr val="FFFFFF"/></a:solidFill></a:rPr><a:t>SUBMISSION METADATA &amp; TEAM REGISTRATION</a:t></a:r></a:p>
-        </p:txBody>
-      </p:sp>
-      
-      <!-- Right Card Metadata Text -->
-      <p:sp>
-        <p:nvSpPr><p:cNvPr id="22" name="Metadata Details Text"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>
-        <p:spPr>
-          <a:xfrm><a:off x="6450000" y="1450000"/><a:ext cx="5000000" cy="4850000"/></a:xfrm>
-          <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>
-          <a:noFill/><a:ln/>
-        </p:spPr>
-        <p:txBody>
-          <a:bodyPr anchor="t" t="0" b="0"/>
-          <a:lstStyle/>
-          <a:p><a:r><a:rPr lang="en-US" sz="1150" b="1"><a:solidFill><a:srgbClr val="0070C0"/></a:solidFill></a:rPr><a:t>• Problem Statement Title:</a:t></a:r></a:p>
-          <a:p><a:r><a:rPr lang="en-US" sz="1050"><a:solidFill><a:srgbClr val="1E293B"/></a:solidFill></a:rPr><a:t>   Autonomous Multi-Agent Network Fault Diagnosis System</a:t></a:r></a:p>
-          <a:p><a:endParaRPr lang="en-US" sz="300"/></a:p>
-          
-          <a:p><a:r><a:rPr lang="en-US" sz="1150" b="1"><a:solidFill><a:srgbClr val="0070C0"/></a:solidFill></a:rPr><a:t>• Theme &amp; Category:</a:t></a:r></a:p>
-          <a:p><a:r><a:rPr lang="en-US" sz="1050"><a:solidFill><a:srgbClr val="1E293B"/></a:solidFill></a:rPr><a:t>   Agentic AI / Campus Infrastructure Intelligence (Open Innovation)</a:t></a:r></a:p>
-          <a:p><a:endParaRPr lang="en-US" sz="300"/></a:p>
-          
-          <a:p><a:r><a:rPr lang="en-US" sz="1150" b="1"><a:solidFill><a:srgbClr val="0070C0"/></a:solidFill></a:rPr><a:t>• Registered Team Name:</a:t></a:r></a:p>
-          <a:p><a:r><a:rPr lang="en-US" sz="1100" b="1"><a:solidFill><a:srgbClr val="0070C0"/></a:solidFill></a:rPr><a:t>   Void-Dev</a:t></a:r></a:p>
-          <a:p><a:endParaRPr lang="en-US" sz="300"/></a:p>
-          
-          <a:p><a:r><a:rPr lang="en-US" sz="1150" b="1"><a:solidFill><a:srgbClr val="0070C0"/></a:solidFill></a:rPr><a:t>• Team Leader:</a:t></a:r></a:p>
-          <a:p><a:r><a:rPr lang="en-US" sz="1050" b="1"><a:solidFill><a:srgbClr val="1E293B"/></a:solidFill></a:rPr><a:t>   Sunil Yogi </a:t></a:r><a:r><a:rPr lang="en-US" sz="1000"><a:solidFill><a:srgbClr val="64748B"/></a:solidFill></a:rPr><a:t>— Lead Agent Architect &amp; Full-Stack Developer</a:t></a:r></a:p>
-          <a:p><a:endParaRPr lang="en-US" sz="300"/></a:p>
-          
-          <a:p><a:r><a:rPr lang="en-US" sz="1150" b="1"><a:solidFill><a:srgbClr val="0070C0"/></a:solidFill></a:rPr><a:t>• Team Members:</a:t></a:r></a:p>
-          <a:p><a:r><a:rPr lang="en-US" sz="1050"><a:solidFill><a:srgbClr val="1E293B"/></a:solidFill></a:rPr><a:t>   Prashank — UI/UX Designer</a:t></a:r></a:p>
-          <a:p><a:r><a:rPr lang="en-US" sz="1050"><a:solidFill><a:srgbClr val="1E293B"/></a:solidFill></a:rPr><a:t>   Tekchand — Backend &amp; Network QA Engineer</a:t></a:r></a:p>
-          <a:p><a:endParaRPr lang="en-US" sz="300"/></a:p>
-          
-          <a:p><a:r><a:rPr lang="en-US" sz="1150" b="1"><a:solidFill><a:srgbClr val="0070C0"/></a:solidFill></a:rPr><a:t>• Technology Stack Core:</a:t></a:r></a:p>
-          <a:p><a:r><a:rPr lang="en-US" sz="1000"><a:solidFill><a:srgbClr val="1E293B"/></a:solidFill></a:rPr><a:t>   Node.js 18+ · Express · Groq LPUs (gpt-oss-120b) · Native OS Prober</a:t></a:r></a:p>
-        </p:txBody>
-      </p:sp>
-      
-      <!-- Bottom Footer Bar -->
-      <p:sp>
-        <p:nvSpPr><p:cNvPr id="30" name="Footer Bar"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>
-        <p:spPr>
-          <a:xfrm><a:off x="0" y="6601968"/><a:ext cx="12188952" cy="256032"/></a:xfrm>
-          <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>
-          <a:solidFill><a:srgbClr val="1F4E79"/></a:solidFill>
-          <a:ln/>
-        </p:spPr>
-      </p:sp>
-      <p:sp>
-        <p:nvSpPr><p:cNvPr id="31" name="Footer Text"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>
-        <p:spPr>
-          <a:xfrm><a:off x="274320" y="6601968"/><a:ext cx="10515600" cy="256032"/></a:xfrm>
-          <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>
-          <a:noFill/><a:ln/>
-        </p:spPr>
-        <p:txBody>
-          <a:bodyPr anchor="ctr"/>
-          <a:lstStyle/>
-          <a:p><a:r><a:rPr lang="en-US" sz="900" b="1"><a:solidFill><a:srgbClr val="FFFFFF"/></a:solidFill></a:rPr><a:t>NetCoop AI — Multi-Agent Network Fault Diagnosis | Agentic AI Grand Finale</a:t></a:r></a:p>
-        </p:txBody>
-      </p:sp>
-      <p:sp>
-        <p:nvSpPr><p:cNvPr id="32" name="Footer Page"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>
-        <p:spPr>
-          <a:xfrm><a:off x="11750040" y="6601968"/><a:ext cx="320040" cy="256032"/></a:xfrm>
-          <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>
-          <a:noFill/><a:ln/>
-        </p:spPr>
-        <p:txBody>
-          <a:bodyPr anchor="ctr"/>
-          <a:lstStyle/>
-          <a:p><a:pPr algn="ctr"/><a:r><a:rPr lang="en-US" sz="900" b="1"><a:solidFill><a:srgbClr val="FFFFFF"/></a:solidFill></a:rPr><a:t>1</a:t></a:r></a:p>
-        </p:txBody>
-      </p:sp>
-    </p:spTree>
-  </p:cSld>
-  <p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr>
-</p:sld>`;
-fs.writeFileSync(path.join(slidesDir, 'slide1.xml'), slide1Xml, 'utf8');
+modifySlide(1, xml => {
+  // Remove Rectangle 20 (stray Vibeathon box) so slide is completely clean and matches exact template
+  xml = xml.replace(/<p:sp><p:nvSpPr><p:cNvPr id="21" name="Rectangle 20"[\s\S]*?<\/p:sp>/, '');
+  return xml;
+});
 
 // ===========================================================================
 // SLIDE 2: Problem Statement
@@ -860,6 +616,13 @@ try {
 } catch (e) {
   console.log('Note: NetCoop_AI_Presentation_Final.pptx was locked by PowerPoint.');
 }
+
+// Also write to NetCoop_AI_Presentation_Updated.pptx (always fresh)
+try {
+  const updatedPptx = path.resolve('NetCoop_AI_Presentation_Updated.pptx');
+  fs.copyFileSync(tempPptx, updatedPptx);
+  console.log(`✅ Success! Created ${updatedPptx}`);
+} catch (e) {}
 
 if (fs.existsSync(tempPptx)) {
   try { fs.unlinkSync(tempPptx); } catch (e) {}
