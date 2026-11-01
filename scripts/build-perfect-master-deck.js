@@ -490,8 +490,8 @@ modifySlide(5, xml => {
   xml = xml.replace('Save &amp; Search', 'Section 6 &amp; HITL Gate');
   xml = xml.replace('All results stored in Supabase DB', 'Standardized JSON report &amp; operator gate');
 
-  // Expand left column title boxes
-  xml = xml.replace(/<a:ext cx="457200" cy="457200"\/>/g, '<a:ext cx="2600000" cy="350000"/>');
+  // Expand left column title boxes without distorting square 0.50"x0.50" icons
+  // (Do NOT replace cx="457200" cy="457200" which belongs to the 10 square tech icons)
   // Expand Text 26 (JSON-RPC Protocol) height
   xml = xml.replace(/<a:off x="3703320" y="2450592"\/><a:ext cx="2103120" cy="219456"\/>/g,
     '<a:off x="3703320" y="2450592"/><a:ext cx="2800000" cy="360000"/>');
@@ -768,15 +768,10 @@ modifySlide(10, xml => {
   xml = xml.replace('Public rankings of AI models by hallucination rate — helping users pick the most trustworthy model',
     'Standardized SDK connectors for Arista EOS, Juniper JunOS, and Fortinet firewalls expanding NetCoop AI beyond Cisco and Aruba.');
 
-  // Expand title box dimensions
-  xml = xml.replace(/<a:ext cx="384048" cy="384048"\/>/g, '<a:ext cx="3300000" cy="450000"/>');
-  // Expand Text 8 and Text 11 height
-  xml = xml.replace(/<a:off x="850392" y="1188720"\/><a:ext cx="2971800" cy="292608"\/>/g,
-    '<a:off x="850392" y="1188720"/><a:ext cx="3300000" cy="420000"/>');
-  xml = xml.replace(/<a:off x="4800600" y="1188720"\/><a:ext cx="2971800" cy="292608"\/>/g,
-    '<a:off x="4800600" y="1188720"/><a:ext cx="3300000" cy="420000"/>');
+  // Expand all 6 title text boxes on Slide 10 without touching the 6 square icons (cx="384048" cy="384048")
+  xml = xml.replace(/<a:ext cx="2971800" cy="292608"\/>/g, '<a:ext cx="3150000" cy="380000"/>');
 
-  xml = xml.replace(/sz="1300"/g, 'sz="1100"');
+  xml = xml.replace(/sz="1300"/g, 'sz="1000"');
   xml = xml.replace(/sz="1200"/g, 'sz="950"');
   return xml;
 });
@@ -813,7 +808,9 @@ modifySlide(11, xml => {
   xml = xml.replace('Anonymous User Isolation via RLS', 'Non-Synthetic Live Telemetry Prober');
   xml = xml.replace('No login required. Each browser generates a UUID stored in localStorage. Supabase Row Level Security policies enforce strict isolation — users can only read &amp; write their own rows.',
     'Integrated native hardware probe captures authentic OS CPU load, physical RAM usage, active network adapters, and live DNS latency — ensuring complete authenticity without canned responses.');
-  xml = xml.replace(/<a:ext cx="329184" cy="329184"\/>/g, '<a:ext cx="4800000" cy="380000"/>');
+  // Keep the 4 decision card icons square at cx="329184" cy="329184" (0.36" x 0.36")
+  // Only expand the title text boxes (Text 42, 48, 54, 60: cx="4462272" cy="274320")
+  xml = xml.replace(/<a:ext cx="4462272" cy="274320"\/>/g, '<a:ext cx="4600000" cy="320000"/>');
   xml = xml.replace(/sz="1400"/g, 'sz="1150"');
   xml = xml.replace(/sz="1200"/g, 'sz="980"');
   return xml;
@@ -823,30 +820,47 @@ modifySlide(11, xml => {
 // Packaging Decks
 // ===========================================================================
 console.log('Packaging Master Decks...');
-if (fs.existsSync(masterPptx)) fs.unlinkSync(masterPptx);
-if (fs.existsSync(perfectPptx)) fs.unlinkSync(perfectPptx);
-
-const packPs = `Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::CreateFromDirectory('${scratchDir.replace(/\\/g, '\\\\')}', '${masterPptx.replace(/\\/g, '\\\\')}')`;
-execSync(`powershell -NoProfile -Command "${packPs}"`);
-fs.copyFileSync(masterPptx, perfectPptx);
-
-console.log(`✅ Success! Created ${masterPptx} (${fs.statSync(masterPptx).size} bytes)`);
-console.log(`✅ Success! Created ${perfectPptx} (${fs.statSync(perfectPptx).size} bytes)`);
-
-// Update root NetCoop_AI_Presentation.pptx
-try {
-  if (fs.existsSync(rootPptx)) fs.unlinkSync(rootPptx);
-  fs.copyFileSync(masterPptx, rootPptx);
-  console.log(`✅ Also updated ${rootPptx}`);
-} catch (e) {
-  console.log(`Note: ${rootPptx} was locked.`);
+const tempPptx = path.resolve('temp_built_deck.pptx');
+if (fs.existsSync(tempPptx)) {
+  try { fs.unlinkSync(tempPptx); } catch (e) {}
 }
 
-// Try to update NetCoop_AI_Presentation_Final.pptx
+const packPs = `Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::CreateFromDirectory('${scratchDir.replace(/\\/g, '\\\\')}', '${tempPptx.replace(/\\/g, '\\\\')}')`;
+execSync(`powershell -NoProfile -Command "${packPs}"`);
+
+// Always deliver to NetCoop_AI_Presentation_Perfect.pptx
 try {
-  if (fs.existsSync(finalPptx)) fs.unlinkSync(finalPptx);
-  fs.copyFileSync(masterPptx, finalPptx);
+  if (fs.existsSync(perfectPptx)) fs.unlinkSync(perfectPptx);
+  fs.copyFileSync(tempPptx, perfectPptx);
+  console.log(`✅ Success! Created ${perfectPptx} (${fs.statSync(perfectPptx).size} bytes)`);
+} catch (e) {
+  console.error(`Error copying to ${perfectPptx}:`, e.message);
+}
+
+// Try copy to Master
+try {
+  fs.copyFileSync(tempPptx, masterPptx);
+  console.log(`✅ Success! Created ${masterPptx} (${fs.statSync(masterPptx).size} bytes)`);
+} catch (e) {
+  console.log('Note: NetCoop_AI_Presentation_Master.pptx could not be overwritten (in use)');
+}
+
+// Try copy to root
+try {
+  fs.copyFileSync(tempPptx, rootPptx);
+  console.log(`✅ Also updated ${rootPptx}`);
+} catch (e) {
+  console.log(`Note: ${rootPptx} was locked by PowerPoint.`);
+}
+
+// Try copy to Final
+try {
+  fs.copyFileSync(tempPptx, finalPptx);
   console.log(`✅ Also updated ${finalPptx}`);
 } catch (e) {
-  console.log(`Note: ${finalPptx} was locked by PowerPoint. Created ${perfectPptx} for immediate viewing.`);
+  console.log('Note: NetCoop_AI_Presentation_Final.pptx was locked by PowerPoint.');
+}
+
+if (fs.existsSync(tempPptx)) {
+  try { fs.unlinkSync(tempPptx); } catch (e) {}
 }
