@@ -338,6 +338,9 @@ Retrieve all built-in test scenarios.
 ### 3. `POST /api/netcoop/scenarios/:key`
 Generate complete simulated telemetry for a given scenario key.
 
+### 5. `GET /api/netcoop/probe-live`
+Actively measure live host hardware, RAM, CPU, active network interfaces, and DNS query latency from the operating system runtime, producing a genuine non-synthetic telemetry dataset.
+
 ### 4. `GET /api/netcoop/protocol`
 Fetch the active JSON-RPC protocol specification, scoring weights, and role definitions.
 

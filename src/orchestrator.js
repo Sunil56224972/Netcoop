@@ -8,6 +8,7 @@ const { normalizeInput, REPORT_SCHEMA } = require('./schema');
 const { MessageBus, createAgents, PROTOCOL, SCORING, ROLES } = require('./agents');
 const { synthesizeWithGroq } = require('./groq');
 const scenarios = require('./scenarios');
+const { probeLiveTelemetry } = require('./probe');
 
 let _runSeq = 0;
 
@@ -240,4 +241,4 @@ function listScenarios() {
   return scenarios.SCENARIOS.map(s => ({ key: s.key, name: s.name, description: s.description }));
 }
 
-module.exports = { diagnose, generateScenario, listScenarios, PROTOCOL, SCORING, ROLES };
+module.exports = { diagnose, generateScenario, listScenarios, probeLiveTelemetry, PROTOCOL, SCORING, ROLES };

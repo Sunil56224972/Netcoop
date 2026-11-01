@@ -882,6 +882,81 @@ function runTabBootSequence() {
 window.netcoopReboot = () => runBootSequence({ isReboot: true });
 
 // ─── Initialize Application ───────────────────────────────────────────────
+
+// ─── Live Network Probing & External File Upload ───────────────────────────
+async function probeLiveSystem() {
+  const statusEl = $('#nc-status');
+  const btn = $('#nc-probe-live-btn');
+  if (btn) btn.classList.add('is-busy');
+  statusEl.textContent = 'Probing live host CPU, RAM, active network interfaces & DNS…';
+
+  try {
+    const res = await fetch('/api/netcoop/probe-live');
+    const data = await res.json();
+    if (!data.ok || !data.telemetry) throw new Error(data.error || 'Failed to capture live metrics');
+
+    $('#nc-raw').value = JSON.stringify(data.telemetry, null, 2);
+    statusEl.textContent = `Captured ${data.telemetry.samples.length} real telemetry measurements from host (${data.telemetry.source})`;
+    toast('Live Host Probed', `Captured real measurements: ${data.telemetry.source}`, 'ok');
+  } catch (err) {
+    statusEl.textContent = '';
+    toast('Live Probe Failed', err.message, 'error');
+  } finally {
+    if (btn) btn.classList.remove('is-busy');
+  }
+}
+
+function initExternalHandlers() {
+  // 1. Probe Live buttons
+  const probeBtn1 = $('#nc-probe-live-btn');
+  if (probeBtn1) probeBtn1.onclick = () => probeLiveSystem();
+  const probeBtn2 = $('#nc-probe-live-top');
+  if (probeBtn2) probeBtn2.onclick = () => probeLiveSystem();
+
+  // 2. File Upload
+  const uploadBtn = $('#nc-upload-btn');
+  const fileInput = $('#nc-file-input');
+  if (uploadBtn && fileInput) {
+    uploadBtn.onclick = () => fileInput.click();
+    fileInput.onchange = (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        $('#nc-raw').value = evt.target.result;
+        $('#nc-status').textContent = `Loaded external file: ${file.name} (${Math.round(file.size / 1024)} KB)`;
+        toast('File Loaded', `Loaded ${file.name}`, 'ok');
+      };
+      reader.readAsText(file);
+    };
+  }
+
+  // 3. Drag and Drop on textarea
+  const textarea = $('#nc-raw');
+  if (textarea) {
+    textarea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      textarea.style.borderColor = 'var(--accent)';
+    });
+    textarea.addEventListener('dragleave', () => {
+      textarea.style.borderColor = '';
+    });
+    textarea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      textarea.style.borderColor = '';
+      const file = e.dataTransfer.files && e.dataTransfer.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        textarea.value = evt.target.result;
+        $('#nc-status').textContent = `Dropped external file: ${file.name}`;
+        toast('File Dropped', `Loaded ${file.name}`, 'ok');
+      };
+      reader.readAsText(file);
+    });
+  }
+}
+
 function boot() {
   runBootSequence();
   hydrateIcons();
@@ -889,6 +964,7 @@ function boot() {
   initTheme();
   initTabs();
   loadScenarios();
+  initExternalHandlers();
 
   // Reboot triggers
   const rebootBtn = $('#boot-reboot-btn');

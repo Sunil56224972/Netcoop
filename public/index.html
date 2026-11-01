@@ -240,11 +240,17 @@
           <section class="panel">
             <div class="panel__head">
               <h2 class="panel__title">Telemetry input</h2>
+              <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+                <button class="panel__link" id="nc-probe-live-top" title="Measure live hardware & network"><i data-icon="activity"></i> Probe Live Host</button>
+                <button class="panel__link" id="nc-upload-btn" title="Load external file"><i data-icon="file"></i> Upload File</button>
+                <input type="file" id="nc-file-input" accept=".json,.csv,.ndjson,.txt" style="display:none" />
+              </div>
             </div>
             <div class="panel__body">
-              <textarea id="nc-raw" class="textarea" rows="14" spellcheck="false" placeholder="Paste JSON, NDJSON or CSV telemetry here…"></textarea>
+              <textarea id="nc-raw" class="textarea" rows="14" spellcheck="false" placeholder="Paste external JSON, NDJSON or CSV telemetry here, or drag & drop a file…"></textarea>
               <div class="row wrap" style="display:flex;align-items:center;margin-top:10px;gap:8px">
                 <button class="btn btn--primary" id="nc-run"><i data-icon="play"></i> Run diagnosis</button>
+                <button class="btn" id="nc-probe-live-btn"><i data-icon="activity"></i> Probe Live Network</button>
                 <button class="btn" id="nc-clear"><i data-icon="x"></i> Clear</button>
                 <span class="small mono" style="color:var(--ink-3);margin-left:auto" id="nc-status"></span>
               </div>
