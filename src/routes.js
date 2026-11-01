@@ -1,7 +1,7 @@
 'use strict';
 
 // NetCoop AI: Express router for the multi-agent network fault diagnosis API.
-// All routes are self-contained — they do NOT access any Aegis store tables,
+// All routes are self-contained — they do NOT access any external services.
 // investigation engine, or existing API endpoints.
 
 const express = require('express');

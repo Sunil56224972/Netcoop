@@ -262,7 +262,7 @@ async function runDiagnosis() {
   }
 }
 
-// ─── Paint Results (Authentic Handcrafted Aegis Structure) ───────────────
+// ─── Paint Results (Authentic Handcrafted Diagnostic View) ───────────────
 function paintResults() {
   const { result } = appState;
   if (!result) return;
