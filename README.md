@@ -423,6 +423,26 @@ In direct fulfillment of Round 2 Problem Statement **Deliverable #4** (*"A three
 
 ---
 
+## 📊 Hackathon Submission Presentation (PPTX)
+
+In addition to the working application and demo video, an official 11-slide presentation deck is provided in native PowerPoint format (`.pptx`):
+
+* **Presentation File:** [`NetCoop_AI_Presentation.pptx`](NetCoop_AI_Presentation.pptx)
+* **Slides Outline & Coverage:**
+  1. **Title Page:** Project Name, Problem Statement, Theme, Category, Team Void-Dev & Members.
+  2. **Problem Statement:** Real-world campus network anomalies at scale, silent cascading drops, and lack of multi-agent consensus.
+  3. **Idea & Approach Details:** Cooperative agent bus, dispute arbitration, Groq neural acceleration, and step-by-step pipeline.
+  4. **Technical Approach:** Complete multi-layer system architecture (Ingestion, JSON-RPC 1.0 Bus, Groq LPUs, Section 6 Output).
+  5. **Technology Stack & Process Flow:** Vanilla ES6+ SPA, Node.js 18+ LTS, Groq LPU inference (`openai/gpt-oss-120b`), native OS telemetry prober.
+  6. **Workflow Diagram:** End-to-end diagnostic flowchart from telemetry ingestion to automated Cisco/Aruba CLI runbooks.
+  7. **Use Case Diagram:** Interaction between Network Operators, NOC Engineers, Campus Admins, and Diagnostic Agents.
+  8. **Feasibility & Viability:** Concrete engineering solutions for telemetry noise, LLM hallucinations, and multi-vendor hardware.
+  9. **Impact & Benefits:** Measurable quantitative benefits (73% MTTR reduction, 4.2x faster localization) across academic and hostel networks.
+  10. **Future Scope & Scalability:** 6-pillar expansion roadmap (NetConf/Ansible closed-loop execution, eBPF gNMI streaming, multi-campus mesh).
+  11. **Implementation Approach & Architectural Rigor:** Strict Section 6 schema compliance, mathematical telemetry scoring, and HITL gate.
+
+---
+
 ## 🧪 Automated Verification Suite
 
 NetCoop AI includes a comprehensive standalone test suite verifying protocol compliance, normalization, and all 8 scenarios:
