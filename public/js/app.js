@@ -791,92 +791,67 @@ export function switchTab(target) {
   if (tab) tab.click();
 }
 
-// ─── Boot Sequence Orchestrator ───────────────────────────────────────────
+// ─── Boot Sequence Orchestrator (Terminal POST Style) ─────────────────────
 function runBootSequence(options = {}) {
   const bootScreen = $('#netcoop-boot-screen');
   const statusText = $('#boot-status-text');
   const percentText = $('#boot-percent');
   const progressBar = $('#boot-progress-bar');
+  const postLog = $('#boot-post-log');
   if (!bootScreen) return;
 
   bootScreen.classList.remove('is-loaded');
   if (progressBar) progressBar.style.width = '0%';
   if (percentText) percentText.textContent = '0%';
+  if (statusText) statusText.textContent = 'INITIALIZING SYSTEM';
+  if (postLog) postLog.innerHTML = '';
 
-  const steps = [
-    { p: 20, t: '[01/05] Calibrating 16 network telemetry metric arbitrators…', delay: 200 },
-    { p: 48, t: '[02/05] Binding IIT Bhubaneswar topology mesh (Hostel, Core & AP nodes)…', delay: 520 },
-    { p: 74, t: '[03/05] Synchronizing JSON-RPC v1.0.0 multi-agent message bus…', delay: 860 },
-    { p: 92, t: '[04/05] Initializing Groq LPU gpt-oss-120b inference engine…', delay: 1200 },
-    { p: 100, t: '[05/05] NetCoop AI Kernel online • Autonomous arbitration active.', delay: 1540 }
+  const postLines = [
+    { p: 8,   prefix: '>>',  msg: 'NetCoop AI Kernel v1.0.0 — POST sequence initiated',           status: 'INIT',   cls: 'sync',  delay: 100 },
+    { p: 16,  prefix: '>>',  msg: 'Loading campus topology: IIT Bhubaneswar (32 nodes, 6 zones)', status: 'OK',     cls: 'ok',    delay: 320 },
+    { p: 28,  prefix: '>>',  msg: 'JSON-RPC v1.0.0 message bus binding to localhost:7331',         status: 'OK',     cls: 'ok',    delay: 520 },
+    { p: 40,  prefix: '>>',  msg: 'performance_agent \u2192 latency, jitter, loss, utilization',    status: 'ONLINE', cls: 'ok',    delay: 720 },
+    { p: 52,  prefix: '>>',  msg: 'infrastructure_agent \u2192 CPU, RAM, queue drops, errors',      status: 'ONLINE', cls: 'ok',    delay: 920 },
+    { p: 62,  prefix: '>>',  msg: 'connectivity_agent \u2192 topology graph & downstream scope',    status: 'ONLINE', cls: 'ok',    delay: 1100 },
+    { p: 72,  prefix: '>>',  msg: 'correlation_agent \u2192 multi-hypothesis fault ranking',        status: 'ONLINE', cls: 'ok',    delay: 1280 },
+    { p: 82,  prefix: '>>',  msg: 'reporting_agent \u2192 Section 6 JSON report schema active',     status: 'ONLINE', cls: 'ok',    delay: 1450 },
+    { p: 90,  prefix: '>>',  msg: 'groq_llm_agent \u2192 Groq LPU gpt-oss-120b inference bridge',  status: 'ONLINE', cls: 'ok',    delay: 1620 },
+    { p: 96,  prefix: '>>',  msg: 'Cooperative arbitration mesh synchronized (6/6 agents)',         status: 'SYNC',   cls: 'sync',  delay: 1800 },
+    { p: 100, prefix: '>>',  msg: 'System ready \u2014 standing by for telemetry input',             status: 'READY',  cls: 'ready', delay: 2000 }
   ];
 
-  steps.forEach(({ p, t, delay }) => {
+  postLines.forEach(({ p, prefix, msg, status, cls, delay }) => {
     setTimeout(() => {
       if (progressBar) progressBar.style.width = `${p}%`;
       if (percentText) percentText.textContent = `${p}%`;
-      if (statusText) statusText.textContent = t;
-    }, delay);
-  });
+      if (statusText) statusText.textContent = msg.length > 42 ? msg.substring(0, 42) + '\u2026' : msg;
 
-  setTimeout(() => {
-    bootScreen.classList.add('is-loaded');
-    if (options.isReboot) {
-      toast('System rebooted', 'NetCoop AI initialized successfully', 'ok');
-    }
-  }, 1900);
-}
-
-// ─── Tab-Level Interactive Boot Diagnostics ───────────────────────────────
-function runTabBootSequence() {
-  const statusText = $('#tab-boot-status-text');
-  const percentText = $('#tab-boot-percent');
-  const progressBar = $('#tab-boot-progress-bar');
-  const logContainer = $('#tab-boot-log');
-  const logo = $('#boot-tab-interactive-logo');
-
-  if (logo) {
-    logo.style.transform = 'scale(1.08)';
-    setTimeout(() => { logo.style.transform = ''; }, 600);
-  }
-
-  if (progressBar) progressBar.style.width = '0%';
-  if (percentText) percentText.textContent = '0%';
-  if (statusText) statusText.textContent = 'Rebooting multi-agent telemetry subsystem…';
-
-  const logSteps = [
-    { p: 15, tag: 'INIT', tagCls: 'boot-log-tag--sync', t: 'Core Multi-Agent Kernel restarted (JSON-RPC v1.0.0 bus ready)', delay: 150 },
-    { p: 32, tag: 'BOOT', tagCls: 'boot-log-tag--ok', t: 'Telemetry & Performance Agent (performance_agent) initialized -> latency, loss, jitter, utilization', delay: 350 },
-    { p: 50, tag: 'BOOT', tagCls: 'boot-log-tag--ok', t: 'Infrastructure Health Agent (infrastructure_agent) initialized -> CPU, RAM, queue drops, errors', delay: 600 },
-    { p: 68, tag: 'BOOT', tagCls: 'boot-log-tag--ok', t: 'Connectivity Analysis Agent (connectivity_agent) initialized -> topology graph & downstream scope', delay: 850 },
-    { p: 82, tag: 'SYNC', tagCls: 'boot-log-tag--sync', t: 'Fault Correlation Agent (correlation_agent) online -> multi-hypothesis ranking & challenge bus', delay: 1100 },
-    { p: 92, tag: 'BOOT', tagCls: 'boot-log-tag--ok', t: 'Recommendation & Reporting Agent (reporting_agent) online -> Section 6 JSON report schema active', delay: 1350 },
-    { p: 98, tag: 'READY', tagCls: 'boot-log-tag--ok', t: 'Groq LLM Reasoning Agent (groq_llm_agent) ready -> gpt-oss-120b inference bridge online', delay: 1500 },
-    { p: 100, tag: 'READY', tagCls: 'boot-log-tag--ok', t: 'ALL 6 AGENTS OPERATIONAL: Standing by for telemetry input & fault diagnosis', delay: 1650 }
-  ];
-
-  if (logContainer) logContainer.innerHTML = '';
-
-  logSteps.forEach(({ p, tag, tagCls, t, delay }) => {
-    setTimeout(() => {
-      if (progressBar) progressBar.style.width = `${p}%`;
-      if (percentText) percentText.textContent = `${p}%`;
-      if (statusText) statusText.textContent = t;
-      if (logContainer) {
+      if (postLog) {
         const line = document.createElement('div');
-        line.className = 'boot-log-line';
-        const d = new Date();
-        const timeStr = `[${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}:${String(Math.floor(d.getMilliseconds() / 10)).padStart(2, '0')}]`;
-        line.innerHTML = `<span class="boot-log-time">${timeStr}</span> <span class="boot-log-tag ${tagCls}">${tag}</span> ${esc(t)}`;
-        logContainer.appendChild(line);
-        logContainer.scrollTop = logContainer.scrollHeight;
+        line.className = 'boot-post-line';
+        line.innerHTML = `<span class="post-prefix">${esc(prefix)}</span><span class="post-msg">${esc(msg)}</span><span class="post-status ${cls}">[${esc(status)}]</span>`;
+        postLog.appendChild(line);
+        // Keep cursor at end
+        const oldCursor = postLog.querySelector('.boot-cursor');
+        if (oldCursor) oldCursor.remove();
+        const cursor = document.createElement('span');
+        cursor.className = 'boot-cursor';
+        line.appendChild(cursor);
       }
     }, delay);
   });
 
   setTimeout(() => {
-    toast('Boot Complete', 'All 6 diagnostic agents operational', 'ok');
-  }, 1750);
+    // Remove cursor before hiding
+    if (postLog) {
+      const c = postLog.querySelector('.boot-cursor');
+      if (c) c.remove();
+    }
+    bootScreen.classList.add('is-loaded');
+    if (options.isReboot) {
+      toast('System rebooted', 'NetCoop AI initialized successfully', 'ok');
+    }
+  }, 2400);
 }
 
 window.netcoopReboot = () => runBootSequence({ isReboot: true });

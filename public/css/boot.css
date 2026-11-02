@@ -1,6 +1,6 @@
 /* ==========================================================================
-   NetCoop AI — Handcrafted Senior Designer System
-   Aesthetic: Precision Industrial Telemetry / Aerospace Cybernetic Instrument
+   NetCoop AI — Professional Terminal Boot System
+   Aesthetic: Real NOC/NMS System POST • Cisco IOS-style Terminal Boot
    ========================================================================== */
 
 /* ─── Boot Overlay Screen ─────────────────────────────────────────────────── */
@@ -12,434 +12,348 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background-color: #f8fafc;
-  background-image: 
-    radial-gradient(circle at 50% 40%, rgba(2, 132, 199, 0.08) 0%, transparent 60%),
-    linear-gradient(rgba(15, 23, 42, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
-  background-size: 100% 100%, 32px 32px, 32px 32px;
-  background-position: 0 0, -1px -1px, -1px -1px;
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  background-color: #0a0e17;
+  background-image: none;
   opacity: 1;
   visibility: visible;
-  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-              visibility 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+              visibility 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Scanline overlay for CRT feel */
+.boot-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.08) 2px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Subtle vignette */
+.boot-screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.4) 100%);
+  pointer-events: none;
+  z-index: 1;
 }
 
 [data-theme="dark"] .boot-screen {
-  background-color: #080b11;
-  background-image: 
-    radial-gradient(circle at 50% 40%, rgba(56, 189, 248, 0.12) 0%, rgba(14, 165, 233, 0.04) 40%, transparent 70%),
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 100% 100%, 32px 32px, 32px 32px;
+  background-color: #060910;
 }
 
 .boot-screen.is-loaded {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: scale(1.025);
 }
 
-/* ─── Chassis Card Box ────────────────────────────────────────────────────── */
+/* ─── Terminal Boot Container ─────────────────────────────────────────────── */
 .boot-card {
   position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  max-width: 470px;
+  max-width: 640px;
   width: 100%;
-  padding: 26px 32px 24px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(15, 23, 42, 0.10);
-  box-shadow: 
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset,
-    0 1px 3px rgba(15, 23, 42, 0.05),
-    0 12px 32px -8px rgba(15, 23, 42, 0.10),
-    0 32px 64px -16px rgba(15, 23, 42, 0.12);
-  backdrop-filter: blur(32px) saturate(190%);
-  -webkit-backdrop-filter: blur(32px) saturate(190%);
-  animation: boot-card-rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+  padding: 0;
+  border-radius: 8px;
+  background: #0d1117;
+  border: 1px solid #1b2332;
+  box-shadow:
+    0 0 0 1px rgba(0, 200, 255, 0.04),
+    0 20px 60px -12px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+  animation: boot-terminal-appear 0.3s ease-out both;
 }
 
-[data-theme="dark"] .boot-card {
-  background: rgba(13, 18, 28, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  box-shadow: 
-    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
-    0 1px 3px rgba(0, 0, 0, 0.5),
-    0 24px 64px -12px rgba(0, 0, 0, 0.8),
-    0 0 40px rgba(56, 189, 248, 0.08);
-}
-
-@keyframes boot-card-rise {
+@keyframes boot-terminal-appear {
   from {
     opacity: 0;
-    transform: translateY(14px) scale(0.97);
+    transform: scale(0.98);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: scale(1);
   }
 }
 
-/* ─── Technical Corner Registration Marks ─────────────────────────────────── */
-.boot-corner {
-  position: absolute;
-  font-family: var(--font-mono, monospace);
-  font-size: 13px;
-  font-weight: 300;
-  line-height: 1;
-  color: rgba(15, 23, 42, 0.28);
-  pointer-events: none;
-  user-select: none;
-}
-[data-theme="dark"] .boot-corner {
-  color: rgba(255, 255, 255, 0.22);
-}
-.boot-corner--tl { top: 8px; left: 10px; }
-.boot-corner--tr { top: 8px; right: 10px; }
-.boot-corner--bl { bottom: 8px; left: 10px; }
-.boot-corner--br { bottom: 8px; right: 10px; }
-
-/* ─── Instrument Header Bar ───────────────────────────────────────────────── */
+/* ─── Terminal Title Bar ──────────────────────────────────────────────────── */
 .boot-card__header {
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding-bottom: 12px;
-  margin-bottom: 18px;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
-  font-family: var(--font-mono, monospace);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  color: var(--ink-3);
-  text-transform: uppercase;
+  padding: 10px 16px;
+  background: #161b26;
+  border-bottom: 1px solid #1b2332;
+  gap: 10px;
 }
-[data-theme="dark"] .boot-card__header {
-  border-bottom-color: rgba(255, 255, 255, 0.07);
+
+.boot-card__header .boot-hdr-dots {
+  display: flex;
+  gap: 6px;
 }
-.boot-hdr-dot {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
+
+.boot-card__header .boot-hdr-dot-r,
+.boot-card__header .boot-hdr-dot-y,
+.boot-card__header .boot-hdr-dot-g {
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background: #10b981;
-  margin-right: 6px;
-  box-shadow: 0 0 6px rgba(16, 185, 129, 0.8);
-  animation: tab-boot-dot-pulse 2s infinite;
+}
+.boot-hdr-dot-r { background: #ff5f57; }
+.boot-hdr-dot-y { background: #ffbd2e; }
+.boot-hdr-dot-g { background: #28c840; }
+
+.boot-card__header .boot-hdr-title {
+  flex: 1;
+  text-align: center;
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 11px;
+  font-weight: 500;
+  color: #5a6578;
+  letter-spacing: 0.04em;
 }
 
-/* ─── Optical Reticle & Emblem Framing ────────────────────────────────────── */
-.boot-logo-wrap {
-  position: relative;
-  width: 124px;
-  height: 124px;
-  margin-bottom: 18px;
-  display: grid;
-  place-items: center;
+/* Hide old header items */
+.boot-card__header .boot-hdr-item,
+.boot-card__header .boot-hdr-divider,
+.boot-card__header .boot-hdr-dot {
+  display: none;
 }
 
-.boot-reticle-outer {
-  position: absolute;
-  inset: -8px;
-  border-radius: 50%;
-  pointer-events: none;
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
-}
-[data-theme="dark"] .boot-reticle-outer {
-  border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+/* ─── Terminal Body ───────────────────────────────────────────────────────── */
+.boot-terminal-body {
+  padding: 20px 22px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
-.boot-reticle-sweep {
-  position: absolute;
-  inset: -12px;
-  border-radius: 50%;
-  pointer-events: none;
-  border: 1.5px solid transparent;
-  border-top-color: #0284c7;
-  border-right-color: rgba(2, 132, 199, 0.35);
-  animation: boot-reticle-spin 7s linear infinite;
-}
-[data-theme="dark"] .boot-reticle-sweep {
-  border-top-color: #38bdf8;
-  border-right-color: rgba(56, 189, 248, 0.35);
+/* ─── System Header Block ─────────────────────────────────────────────────── */
+.boot-sys-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #1b2332;
 }
 
-@keyframes boot-reticle-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.boot-reticle-ticks {
-  position: absolute;
-  inset: -13px;
-  pointer-events: none;
-}
-.boot-reticle-ticks .tick {
-  position: absolute;
-  background: var(--ink-3);
-  opacity: 0.4;
-}
-.tick-n { top: 0; left: 50%; width: 1px; height: 5px; transform: translateX(-50%); }
-.tick-s { bottom: 0; left: 50%; width: 1px; height: 5px; transform: translateX(-50%); }
-.tick-w { left: 0; top: 50%; width: 5px; height: 1px; transform: translateY(-50%); }
-.tick-e { right: 0; top: 50%; width: 5px; height: 1px; transform: translateY(-50%); }
-
-.boot-lens-glow {
-  position: absolute;
-  inset: 12px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(2, 132, 199, 0.18) 0%, rgba(234, 88, 12, 0.08) 55%, transparent 75%);
-  filter: blur(14px);
-  pointer-events: none;
+.boot-logo-frame {
+  width: 56px;
+  height: 56px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #0f1823 0%, #131b28 100%);
+  border: 1px solid #1e293b;
 }
 
 .boot-logo {
-  width: 104px;
-  height: 104px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
-  z-index: 2;
-  filter: drop-shadow(0 6px 14px rgba(15, 23, 42, 0.12));
-  animation: boot-logo-breathe 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
-  will-change: transform;
+  filter: brightness(1.1);
+  animation: none;
 }
 
-@keyframes boot-logo-breathe {
-  0% { transform: scale(1) translateY(0); }
-  100% { transform: scale(1.025) translateY(-2px); }
-}
-
-/* ─── Typography & Brand Lockup ───────────────────────────────────────────── */
-.boot-brand {
-  margin-bottom: 18px;
-}
-
-.boot-overline {
-  font-family: var(--font-mono, monospace);
-  font-size: 9px;
-  font-weight: 650;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 4px;
-}
-
-.boot-title {
-  font-size: 24px;
-  font-weight: 800;
-  letter-spacing: -0.025em;
-  color: var(--ink);
-  margin: 0 0 4px;
-  line-height: 1.15;
-}
-
-.boot-subtitle {
-  font-size: 13px;
-  font-weight: 450;
-  color: var(--ink-2);
-  margin: 0 0 12px;
-  line-height: 1.4;
-}
-
-/* Machined Hardware Badge */
-.boot-facility {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 6px;
-  background: rgba(15, 23, 42, 0.04);
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  font-family: var(--font-mono, monospace);
-  font-size: 11px;
-  color: var(--ink-2);
-}
-[data-theme="dark"] .boot-facility {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.08);
-  color: var(--ink-2);
-}
-.boot-facility__tag {
-  font-weight: 700;
-  color: var(--ink);
-}
-.boot-facility__sep {
-  opacity: 0.35;
-}
-.boot-facility__cluster {
-  color: var(--accent);
-  font-weight: 500;
-}
-
-/* ─── Precision Telemetry Gauge (NO RAINBOW) ──────────────────────────────── */
-.boot-status-box {
-  width: 100%;
-  margin: 16px 0 20px;
-}
-
-.boot-status-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-family: var(--font-mono, monospace);
-  font-size: 11px;
-  color: var(--ink-2);
-  margin-bottom: 8px;
-}
-
-.boot-status-lead {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
+.boot-sys-info {
   flex: 1;
+  min-width: 0;
 }
 
-.boot-pulse-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #0284c7;
+.boot-sys-info .boot-sys-name {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 16px;
+  font-weight: 700;
+  color: #e2e8f0;
+  letter-spacing: -0.01em;
+  margin: 0 0 2px;
+}
+
+.boot-sys-info .boot-sys-ver {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 11px;
+  color: #4a5568;
+  margin: 0;
+}
+
+/* ─── POST Log Lines ──────────────────────────────────────────────────────── */
+.boot-post-log {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 16px;
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 12px;
+  line-height: 1.75;
+  min-height: 140px;
+}
+
+.boot-post-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  opacity: 0;
+  animation: boot-line-appear 0.15s ease-out forwards;
+}
+
+@keyframes boot-line-appear {
+  from { opacity: 0; transform: translateX(-4px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.boot-post-line .post-prefix {
+  color: #2d9cdb;
   flex: none;
-  box-shadow: 0 0 8px rgba(2, 132, 199, 0.8);
-  animation: boot-dot-blink 1.4s ease-in-out infinite alternate;
-}
-[data-theme="dark"] .boot-pulse-dot {
-  background: #38bdf8;
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.9);
+  user-select: none;
 }
 
-@keyframes boot-dot-blink {
-  0% { opacity: 0.4; transform: scale(0.9); }
-  100% { opacity: 1; transform: scale(1.1); }
+.boot-post-line .post-msg {
+  color: #94a3b8;
+  flex: 1;
+  min-width: 0;
 }
 
-.boot-status-text {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-align: left;
+.boot-post-line .post-status {
+  flex: none;
+  font-weight: 600;
+  font-size: 11px;
 }
 
-.boot-percent {
+.post-status.ok { color: #10b981; }
+.post-status.sync { color: #2d9cdb; }
+.post-status.warn { color: #f59e0b; }
+.post-status.ready { color: #10b981; }
+
+/* Cursor blink at the end of the last line */
+.boot-cursor {
+  display: inline-block;
+  width: 7px;
+  height: 14px;
+  background: #2d9cdb;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: cursor-blink 1s step-end infinite;
+}
+
+@keyframes cursor-blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* ─── Progress Bar ────────────────────────────────────────────────────────── */
+.boot-progress-section {
+  margin-bottom: 14px;
+}
+
+.boot-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 10px;
+  font-weight: 600;
+  color: #4a5568;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+
+.boot-progress-label .boot-percent {
+  color: #2d9cdb;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: var(--accent);
-  margin-left: 12px;
-  flex: none;
 }
 
-/* Recessed Precision Track */
 .boot-progress-track {
   position: relative;
   width: 100%;
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(15, 23, 42, 0.06);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.12);
-  overflow: visible;
-}
-[data-theme="dark"] .boot-progress-track {
-  background: rgba(255, 255, 255, 0.06);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+  height: 3px;
+  border-radius: 2px;
+  background: #1b2332;
+  overflow: hidden;
 }
 
-/* Electric Luminous Beam (Single-System Palette) */
 .boot-progress-bar {
-  position: relative;
   width: 0%;
   height: 100%;
-  border-radius: 3px;
-  background: linear-gradient(90deg, #0284c7 0%, #0ea5e9 60%, #38bdf8 100%);
-  box-shadow: 0 0 10px rgba(14, 165, 233, 0.5);
-  transition: width 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 2px;
+  background: #2d9cdb;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Radiant leading-edge spark */
-.boot-progress-spark {
-  position: absolute;
-  top: 50%;
-  right: -3px;
-  transform: translateY(-50%);
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #ffffff;
-  box-shadow: 0 0 6px #ffffff, 0 0 12px #38bdf8;
-  pointer-events: none;
-}
-
-/* Segmented Calibration Ticks */
-.boot-track-ticks {
-  position: absolute;
-  top: 9px;
-  left: 0;
-  right: 0;
-  height: 4px;
-  pointer-events: none;
-}
-.boot-track-ticks span {
-  position: absolute;
-  width: 1px;
-  height: 3px;
-  background: var(--ink-3);
-  opacity: 0.35;
-  transform: translateX(-50%);
-}
-
-/* ─── 3-Cell Engineering Specification Matrix ─────────────────────────────── */
+/* ─── System Status Footer ────────────────────────────────────────────────── */
 .boot-spec-matrix {
   width: 100%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: rgba(15, 23, 42, 0.08);
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 8px;
-  overflow: hidden;
-}
-[data-theme="dark"] .boot-spec-matrix {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.08);
+  gap: 0;
+  border-top: 1px solid #1b2332;
+  background: #0f1520;
 }
 
 .boot-spec-cell {
-  background: rgba(255, 255, 255, 0.7);
-  padding: 8px 10px;
+  padding: 10px 14px;
   display: flex;
   flex-direction: column;
   gap: 2px;
   text-align: center;
+  border-right: 1px solid #1b2332;
 }
-[data-theme="dark"] .boot-spec-cell {
-  background: rgba(15, 23, 42, 0.7);
+
+.boot-spec-cell:last-child {
+  border-right: none;
 }
 
 .boot-spec-label {
-  font-family: var(--font-mono, monospace);
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
   font-size: 8px;
-  font-weight: 650;
+  font-weight: 600;
   letter-spacing: 0.1em;
-  color: var(--ink-3);
+  color: #3d4a5c;
   text-transform: uppercase;
 }
 
 .boot-spec-val {
-  font-family: var(--font-mono, monospace);
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
   font-size: 11px;
-  font-weight: 650;
-  color: var(--ink);
+  font-weight: 600;
+  color: #94a3b8;
   letter-spacing: -0.01em;
+}
+
+/* ─── Hide old elements that are no longer used ───────────────────────────── */
+.boot-corner,
+.boot-logo-wrap,
+.boot-reticle-outer,
+.boot-reticle-sweep,
+.boot-reticle-ticks,
+.boot-lens-glow,
+.boot-brand,
+.boot-overline,
+.boot-title,
+.boot-subtitle,
+.boot-facility,
+.boot-status-box,
+.boot-status-row,
+.boot-pulse-dot,
+.boot-status-lead,
+.boot-grid-backdrop,
+.boot-meta,
+.boot-progress-spark,
+.boot-track-ticks {
+  display: none !important;
 }
 
 /* ─── Brand Logos Across Views ────────────────────────────────────────────── */
@@ -517,12 +431,16 @@
   animation: boot-glow-pulse 2s ease-in-out infinite alternate;
 }
 
+@keyframes boot-glow-pulse {
+  0% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
 .diagnosis-logo-img {
   width: 52px;
   height: 52px;
   object-fit: contain;
   z-index: 2;
-  animation: boot-logo-breathe 2s ease-in-out infinite alternate;
 }
 
 .diagnosis-status-title {
@@ -567,7 +485,7 @@
   background: #10b981;
 }
 
-/* ─── System Boot Tab Hero (Handcrafted Chassis) ──────────────────────────── */
+/* ─── System Boot Tab Hero ────────────────────────────────────────────────── */
 .boot-tab-hero {
   position: relative;
   overflow: hidden;
@@ -588,8 +506,6 @@
   object-fit: contain;
   z-index: 2;
   filter: drop-shadow(0 8px 24px rgba(2, 132, 199, 0.25));
-  animation: boot-logo-breathe 2.8s ease-in-out infinite alternate;
-  will-change: transform, filter;
   cursor: pointer;
   transition: transform 0.25s var(--ease-out);
 }
@@ -729,7 +645,7 @@
   color: var(--ink-3);
 }
 
-/* ─── Structured Tab-Bar Boot Emblem & Badge ──────────────────────────────── */
+/* ─── Tab Boot Badge ──────────────────────────────────────────────────────── */
 .tab-boot-badge {
   position: relative;
   display: inline-flex;
@@ -799,44 +715,20 @@
 }
 
 @keyframes tab-boot-dot-pulse {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.55;
-    transform: scale(0.85);
-  }
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(0.85); }
 }
 
 @keyframes tab-boot-logo-breathe {
-  0% {
-    transform: scale(1);
-    filter: drop-shadow(0 1px 2px rgba(2, 132, 199, 0.4));
-  }
-  50% {
-    transform: scale(1.12);
-    filter: drop-shadow(0 2px 6px rgba(2, 132, 199, 0.55));
-  }
-  100% {
-    transform: scale(1.05);
-    filter: drop-shadow(0 2px 4px rgba(2, 132, 199, 0.45));
-  }
+  0% { transform: scale(1); filter: drop-shadow(0 1px 2px rgba(2, 132, 199, 0.4)); }
+  50% { transform: scale(1.12); filter: drop-shadow(0 2px 6px rgba(2, 132, 199, 0.55)); }
+  100% { transform: scale(1.05); filter: drop-shadow(0 2px 4px rgba(2, 132, 199, 0.45)); }
 }
 
 @keyframes tab-boot-power-breathe {
-  0% {
-    transform: scale(1);
-    opacity: 0.85;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1.04);
-    opacity: 0.9;
-  }
+  0% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1.04); opacity: 0.9; }
 }
 
 .tab:hover .tab-boot-badge {
@@ -850,4 +742,25 @@
   letter-spacing: -0.01em;
   display: inline-block;
   line-height: 1;
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .boot-card {
+    max-width: 100%;
+    border-radius: 0;
+  }
+  .boot-terminal-body {
+    padding: 14px 14px 12px;
+  }
+  .boot-spec-matrix {
+    grid-template-columns: 1fr;
+  }
+  .boot-spec-cell {
+    border-right: none;
+    border-bottom: 1px solid #1b2332;
+  }
+  .boot-spec-cell:last-child {
+    border-bottom: none;
+  }
 }
