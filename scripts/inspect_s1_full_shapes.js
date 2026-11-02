@@ -12,3 +12,4 @@ sps.forEach((s, idx) => {
   console.log(`[${idx}] name="${name}" @ (${off?off[1]:'?'}, ${off?off[2]:'?'}) size=(${ext?ext[1]:'?'}, ${ext?ext[2]:'?'})`);
   if (t) console.log(`     text: "${t}"`);
 });
+

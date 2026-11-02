@@ -23,3 +23,4 @@ sps.forEach((s, idx) => {
   console.log(`[${idx}] "${name}" @ (${x}", ${y}") size ${w}" x ${h}"`);
   if (t) console.log(`      -> "${t}"`);
 });
+

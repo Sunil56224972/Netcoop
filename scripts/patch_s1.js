@@ -29,3 +29,4 @@ modifySlide(1, xml => {
 const newContent = content.substring(0, startIndex) + replacement + content.substring(endIndex + endMarker.length);
 fs.writeFileSync(filePath, newContent, 'utf8');
 console.log("Successfully updated Slide 1 in scripts/build-perfect-master-deck.js!");
+

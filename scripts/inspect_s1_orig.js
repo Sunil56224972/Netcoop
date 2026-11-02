@@ -9,3 +9,4 @@ const xml = fs.readFileSync(`${origDir}/ppt/slides/slide1.xml`, 'utf8');
 const texts = [...xml.matchAll(/<a:t>([^<]+)<\/a:t>/g)].map(m => m[1]);
 console.log('Original slide 1 texts:');
 console.log(texts.join('\n'));
+

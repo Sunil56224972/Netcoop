@@ -12,3 +12,4 @@ sps.forEach((s, idx) => {
   const text = [...s.matchAll(/<a:t>([^<]+)<\/a:t>/g)].map(m => m[1]).join(' ');
   console.log(`Shape ${idx} [${name}] @ (${off ? off[1] : '?'}, ${off ? off[2] : '?'}) ext=(${ext ? ext[1] : '?'}, ${ext ? ext[2] : '?'}) text: "${text.trim()}"`);
 });
+
