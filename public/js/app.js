@@ -791,13 +791,12 @@ export function switchTab(target) {
   if (tab) tab.click();
 }
 
-// ─── Boot Sequence Orchestrator (Inline-Styled POST) ─────────────────────
+// ─── Boot Sequence Orchestrator ───────────────────────────────────────────────────
 function runBootSequence(options = {}) {
-  const bootScreen = $('#netcoop-boot-screen');
-  const statusText = $('#boot-status-text');
-  const percentText = $('#boot-percent');
-  const progressBar = $('#boot-progress-bar');
-  const postLog = $('#boot-post-log');
+  var bootScreen = $('#netcoop-boot-screen');
+  var statusText = $('#boot-status-text');
+  var percentText = $('#boot-percent');
+  var progressBar = $('#boot-progress-bar');
   if (!bootScreen) return;
 
   bootScreen.style.opacity = '1';
@@ -805,61 +804,39 @@ function runBootSequence(options = {}) {
   bootScreen.classList.remove('is-loaded');
   if (progressBar) progressBar.style.width = '0%';
   if (percentText) percentText.textContent = '0%';
-  if (statusText) statusText.textContent = 'INITIALIZING';
-  if (postLog) postLog.innerHTML = '';
+  if (statusText) statusText.textContent = 'Initializing system\u2026';
 
-  const lines = [
-    { p: 8,   msg: 'NetCoop AI Kernel v1.0.0 \u2014 POST sequence initiated',             st: 'INIT',   color: '#3b82f6', delay: 150 },
-    { p: 16,  msg: 'Loading campus topology: IIT-BBS (32 nodes, 6 zones)',               st: 'OK',     color: '#22c55e', delay: 380 },
-    { p: 26,  msg: 'JSON-RPC v1.0.0 message bus \u2192 localhost:7331',                    st: 'OK',     color: '#22c55e', delay: 580 },
-    { p: 38,  msg: 'performance_agent \u2192 latency, jitter, loss, utilization',           st: 'ONLINE', color: '#22c55e', delay: 780 },
-    { p: 48,  msg: 'infrastructure_agent \u2192 CPU, RAM, queue drops, errors',             st: 'ONLINE', color: '#22c55e', delay: 980 },
-    { p: 58,  msg: 'connectivity_agent \u2192 topology graph, downstream scope',            st: 'ONLINE', color: '#22c55e', delay: 1180 },
-    { p: 68,  msg: 'correlation_agent \u2192 multi-hypothesis fault ranking',               st: 'ONLINE', color: '#22c55e', delay: 1380 },
-    { p: 78,  msg: 'reporting_agent \u2192 Section 6 JSON report schema',                   st: 'ONLINE', color: '#22c55e', delay: 1560 },
-    { p: 88,  msg: 'groq_llm_agent \u2192 Groq LPU gpt-oss-120b inference',                st: 'ONLINE', color: '#22c55e', delay: 1740 },
-    { p: 96,  msg: 'Cooperative arbitration mesh synced (6/6 agents)',                    st: 'SYNC',   color: '#3b82f6', delay: 1920 },
-    { p: 100, msg: 'System ready \u2014 standing by for telemetry input',                   st: 'READY',  color: '#22c55e', delay: 2100 }
+  var steps = [
+    { p: 10,  t: 'Loading campus topology\u2026',          delay: 200 },
+    { p: 22,  t: 'Binding JSON-RPC message bus\u2026',     delay: 450 },
+    { p: 35,  t: 'Starting performance agent\u2026',       delay: 700 },
+    { p: 45,  t: 'Starting infrastructure agent\u2026',    delay: 920 },
+    { p: 55,  t: 'Starting connectivity agent\u2026',      delay: 1120 },
+    { p: 65,  t: 'Starting correlation agent\u2026',       delay: 1320 },
+    { p: 75,  t: 'Starting reporting agent\u2026',         delay: 1500 },
+    { p: 85,  t: 'Connecting Groq LPU inference\u2026',    delay: 1680 },
+    { p: 95,  t: 'Synchronizing agent mesh (6/6)\u2026',   delay: 1860 },
+    { p: 100, t: 'System ready',                          delay: 2050 }
   ];
 
-  lines.forEach(({ p, msg, st, color, delay }) => {
-    setTimeout(() => {
-      if (progressBar) progressBar.style.width = p + '%';
-      if (percentText) percentText.textContent = p + '%';
-      if (statusText) statusText.textContent = st === 'READY' ? 'SYSTEM READY' : msg.substring(0, 40);
-
-      if (postLog) {
-        const line = document.createElement('div');
-        line.style.cssText = 'display:flex;align-items:baseline;gap:8px;font-family:IBM Plex Mono,monospace;font-size:11.5px;line-height:1.8;';
-        
-        const prefix = document.createElement('span');
-        prefix.textContent = '>>';
-        prefix.style.cssText = 'color:#3b82f6;flex:none;font-weight:600;';
-        
-        const msgEl = document.createElement('span');
-        msgEl.textContent = msg;
-        msgEl.style.cssText = 'color:#94a3b8;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
-        
-        const badge = document.createElement('span');
-        badge.textContent = '[' + st + ']';
-        badge.style.cssText = 'flex:none;font-weight:700;font-size:10.5px;color:' + color + ';';
-        
-        line.appendChild(prefix);
-        line.appendChild(msgEl);
-        line.appendChild(badge);
-        postLog.appendChild(line);
-      }
-    }, delay);
+  steps.forEach(function(step) {
+    setTimeout(function() {
+      if (progressBar) progressBar.style.width = step.p + '%';
+      if (percentText) percentText.textContent = step.p + '%';
+      if (statusText) statusText.textContent = step.t;
+    }, step.delay);
   });
 
-  setTimeout(() => {
+  setTimeout(function() {
     bootScreen.style.opacity = '0';
-    bootScreen.style.visibility = 'hidden';
-    bootScreen.classList.add('is-loaded');
+    setTimeout(function() {
+      bootScreen.style.visibility = 'hidden';
+      bootScreen.classList.add('is-loaded');
+    }, 800);
     if (options.isReboot) {
       toast('System rebooted', 'NetCoop AI initialized successfully', 'ok');
     }
-  }, 2600);
+  }, 2500);
 }
 
 window.netcoopReboot = () => runBootSequence({ isReboot: true });

@@ -91,3 +91,4 @@ function runBootSequence(options = {}) {\r
 const newCode = code.substring(0, startIdx) + newBootFn + code.substring(endIdx);
 fs.writeFileSync(appPath, newCode, 'utf-8');
 console.log('Boot JS replaced with inline-styled version');
+

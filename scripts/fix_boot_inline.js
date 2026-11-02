@@ -82,3 +82,4 @@ const newBootHTML = `  <!-- NetCoop AI Professional Boot Screen -->
 const newHtml = html.substring(0, startIdx) + newBootHTML + html.substring(endIdx);
 fs.writeFileSync(htmlPath, newHtml, 'utf-8');
 console.log('Boot HTML replaced with inline-styled version');
+
