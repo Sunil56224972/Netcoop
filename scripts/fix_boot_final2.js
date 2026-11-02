@@ -121,3 +121,4 @@ if (content.includes(oldFn)) {
   const snippet = 'var st = document.getElementById("boot-status-text");';
   console.log('Snippet found:', content.includes(snippet));
 }
+

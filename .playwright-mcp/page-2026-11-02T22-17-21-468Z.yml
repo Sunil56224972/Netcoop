@@ -1,0 +1,131 @@
+- generic [active] [ref=f3e1]:
+  - generic [ref=f3e3]:
+    - generic [ref=f3e4]: netcoop-ai — system boot
+    - generic [ref=f3e10]:
+      - generic [ref=f3e11]:
+        - img "NetCoop AI" [ref=f3e13]
+        - generic [ref=f3e14]:
+          - generic [ref=f3e15]: NetCoop AI
+          - generic [ref=f3e16]: Multi-Agent Network Diagnostics v2.0IIT Bhubaneswar · Groq LPU Inference
+      - generic [ref=f3e19]:
+        - generic [ref=f3e20]: SYSTEM INITIALIZATION
+        - generic [ref=f3e21]: 0%
+    - generic [ref=f3e23]:
+      - generic [ref=f3e24]:
+        - generic [ref=f3e25]: Agents
+        - generic [ref=f3e26]: 6 Active
+      - generic [ref=f3e27]:
+        - generic [ref=f3e28]: Model
+        - generic [ref=f3e29]: Groq 120B
+      - generic [ref=f3e30]:
+        - generic [ref=f3e31]: Protocol
+        - generic [ref=f3e32]: JSON-RPC
+  - generic [ref=f3e33]:
+    - banner [ref=f3e34]:
+      - button "NetCoop Logo IIT Bhubaneswar / NetCoop AI" [ref=f3e35] [cursor=pointer]:
+        - img "NetCoop Logo" [ref=f3e36]
+        - generic [ref=f3e37]:
+          - generic [ref=f3e38]: IIT Bhubaneswar
+          - generic [ref=f3e39]: /
+          - generic [ref=f3e40]: NetCoop AI
+      - generic "Click to inspect system telemetry boot status" [ref=f3e41] [cursor=pointer]: AI idle
+      - generic [ref=f3e42]: 03:47:21 UTC
+      - button "Search" [ref=f3e43] [cursor=pointer]:
+        - generic [ref=f3e48]: /
+      - button "Toggle theme" [ref=f3e49] [cursor=pointer]
+    - main [ref=f3e52]:
+      - generic [ref=f3e53]:
+        - img "NetCoop AI Logo" [ref=f3e54]
+        - generic [ref=f3e55]:
+          - heading "NetCoop AI" [level=1] [ref=f3e56]
+          - paragraph [ref=f3e57]: Multi-agent cooperative network fault diagnosis & root cause localization.
+      - tablist [ref=f3e58]:
+        - tab "NetCoop System Boot" [selected] [ref=f3e59] [cursor=pointer]:
+          - img "NetCoop" [ref=f3e61]
+          - generic [ref=f3e64]: System Boot
+        - tab "Diagnosis Studio" [ref=f3e65] [cursor=pointer]
+        - tab "Agent Message Bus" [ref=f3e68] [cursor=pointer]
+        - tab "Interoperability Protocol" [ref=f3e73] [cursor=pointer]
+        - tab "Campus Topology & Agents" [ref=f3e77] [cursor=pointer]
+      - generic [ref=f3e84]:
+        - img "NetCoop AI Logo" [ref=f3e86] [cursor=pointer]
+        - heading "NETCOOP AI KERNEL" [level=2] [ref=f3e87]
+        - paragraph [ref=f3e88]: Multi-Agent Cooperative Network Fault Diagnosis & Root Cause Localization System for IIT Bhubaneswar Campus Infrastructure.
+        - generic [ref=f3e89]:
+          - generic [ref=f3e90]: Telemetry Active
+          - generic [ref=f3e91]: JSON-RPC v1.0.0 Bus
+          - generic [ref=f3e92]: Groq LPUs (gpt-oss-120b)
+          - generic [ref=f3e93]: 6 Cooperative Agents
+          - generic [ref=f3e94]: 8 Topology Nodes
+        - generic [ref=f3e95]:
+          - button "Reboot Agents & Re-run Booting" [ref=f3e96] [cursor=pointer]
+          - button "Open Diagnosis Studio" [ref=f3e100] [cursor=pointer]
+          - button "Inspect Campus Nodes" [ref=f3e103] [cursor=pointer]
+        - generic [ref=f3e109]:
+          - generic [ref=f3e110]:
+            - generic [ref=f3e115]: netcoop-agent-mesh-boot.log
+            - generic [ref=f3e116]: LIVE FEED
+          - generic [ref=f3e117]:
+            - generic [ref=f3e118]:
+              - generic [ref=f3e119]: "[00:00:01]"
+              - generic [ref=f3e120]: INIT
+              - text: Core Multi-Agent Kernel loaded (Node.js v18+, Express v4.21, JSON-RPC v1.0.0 bus ready)
+            - generic [ref=f3e121]:
+              - generic [ref=f3e122]: "[00:00:02]"
+              - generic [ref=f3e123]: BOOT
+              - text: Telemetry & Performance Agent (performance_agent) online → latency, jitter, loss, utilization
+            - generic [ref=f3e124]:
+              - generic [ref=f3e125]: "[00:00:03]"
+              - generic [ref=f3e126]: BOOT
+              - text: Infrastructure Health Agent (infrastructure_agent) online → CPU, RAM, queue drops, interface errors
+            - generic [ref=f3e127]:
+              - generic [ref=f3e128]: "[00:00:04]"
+              - generic [ref=f3e129]: BOOT
+              - text: Connectivity Analysis Agent (connectivity_agent) online → campus topology graph & blast radius
+            - generic [ref=f3e130]:
+              - generic [ref=f3e131]: "[00:00:05]"
+              - generic [ref=f3e132]: BOOT
+              - text: Fault Correlation Agent (correlation_agent) online → multi-hypothesis ranking & challenge bus
+            - generic [ref=f3e133]:
+              - generic [ref=f3e134]: "[00:00:06]"
+              - generic [ref=f3e135]: BOOT
+              - text: Recommendation & Reporting Agent (reporting_agent) online → Section 6 schema & guardrails active
+            - generic [ref=f3e136]:
+              - generic [ref=f3e137]: "[00:00:07]"
+              - generic [ref=f3e138]: READY
+              - text: Groq LLM Reasoning Agent (groq_llm_agent) online → ultra-fast gpt-oss-120b inference connected
+            - generic [ref=f3e139]:
+              - generic [ref=f3e140]: "[00:00:08]"
+              - generic [ref=f3e141]: READY
+              - text: "IIT Bhubaneswar Campus Telemetry Mesh: ONLINE • Standing by for telemetry input"
+        - generic [ref=f3e142]:
+          - generic [ref=f3e143]:
+            - generic [ref=f3e144]:
+              - generic [ref=f3e145]: Performance Agent
+              - generic [ref=f3e148]: Active
+            - generic [ref=f3e149]: performance_agent • Latency, Loss, Jitter, Utilization
+          - generic [ref=f3e150]:
+            - generic [ref=f3e151]:
+              - generic [ref=f3e152]: Infrastructure Agent
+              - generic [ref=f3e157]: Active
+            - generic [ref=f3e158]: infrastructure_agent • CPU, RAM, Queue Drops, Errors
+          - generic [ref=f3e159]:
+            - generic [ref=f3e160]:
+              - generic [ref=f3e161]: Connectivity Agent
+              - generic [ref=f3e167]: Active
+            - generic [ref=f3e168]: connectivity_agent • Campus Topology & Blast Radius
+          - generic [ref=f3e169]:
+            - generic [ref=f3e170]:
+              - generic [ref=f3e171]: Fault Correlation
+              - generic [ref=f3e176]: Active
+            - generic [ref=f3e177]: correlation_agent • Hypothesis Ranking & Challenges
+          - generic [ref=f3e178]:
+            - generic [ref=f3e179]:
+              - generic [ref=f3e180]: Reporting Agent
+              - generic [ref=f3e184]: Active
+            - generic [ref=f3e185]: reporting_agent • Section 6 JSON Report & Guardrails
+          - generic [ref=f3e186]:
+            - generic [ref=f3e187]:
+              - generic [ref=f3e188]: Groq LLM Agent
+              - generic [ref=f3e191]: Groq LPU
+            - generic [ref=f3e192]: groq_llm_agent • gpt-oss-120b CLI Runbook Synthesis

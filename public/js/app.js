@@ -791,65 +791,46 @@ export function switchTab(target) {
   if (tab) tab.click();
 }
 
-// ─── Boot Sequence Orchestrator ───────────────────────────────────────────────────
+// ─── Boot Sequence Orchestrator ──────────────────────────────────────────────
 function runBootSequence(options) {
   if (!options) options = {};
-  var bs = document.getElementById("netcoop-boot-screen");
-  var logEl = document.getElementById("boot-post-log");
-  var pc = document.getElementById("boot-percent");
-  var pb = document.getElementById("boot-progress-bar");
-  if (!bs) return;
+  var el = document.getElementById('netcoop-boot-screen');
+  var bar = document.getElementById('boot-progress-bar');
+  var txt = document.getElementById('boot-status-text');
+  if (!el) return;
 
-  // Show boot screen
-  bs.classList.remove('is-loaded');
-  bs.style.display = "";
-  if (pb) pb.style.width = "0%";
-  if (pc) pc.textContent = "0%";
-  if (logEl) logEl.innerHTML = "";
+  el.classList.remove('out');
+  el.style.display = '';
+  if (bar) bar.style.width = '0%';
+  if (txt) txt.textContent = 'Preparing workspace\u2026';
 
-  var steps = [
-    [10,  "Loading campus topology...",          "OK",    "ok"],
-    [22,  "Binding JSON-RPC bus...",              "OK",    "ok"],
-    [34,  "Starting performance agent...",        "SYNC",  "sync"],
-    [44,  "Starting infrastructure agent...",     "SYNC",  "sync"],
-    [54,  "Starting connectivity agent...",       "SYNC",  "sync"],
-    [64,  "Starting correlation agent...",        "SYNC",  "sync"],
-    [74,  "Starting reporting agent...",          "SYNC",  "sync"],
-    [84,  "Connecting Groq LPU inference...",     "OK",    "ok"],
-    [94,  "Synchronizing agent mesh...",          "OK",    "ok"],
-    [100, "All systems operational",              "READY", "ready"]
+  var msgs = [
+    [15,  'Loading network topology\u2026'],
+    [30,  'Connecting diagnostic agents\u2026'],
+    [50,  'Binding Groq LPU inference\u2026'],
+    [70,  'Synchronising agent mesh\u2026'],
+    [90,  'Running self-checks\u2026'],
+    [100, 'Ready']
   ];
 
-  var delay = 0;
-  for (var i = 0; i < steps.length; i++) {
-    delay += 200 + Math.floor(Math.random() * 120);
-    (function(pct, msg, statusText, statusClass, d) {
+  var t = 0;
+  for (var i = 0; i < msgs.length; i++) {
+    t += 350 + Math.floor(Math.random() * 100);
+    (function(pct, msg, d) {
       setTimeout(function() {
-        if (pb) pb.style.width = pct + "%";
-        if (pc) pc.textContent = pct + "%";
-        if (logEl) {
-          var line = document.createElement("div");
-          line.className = "boot-post-line";
-          line.innerHTML =
-            '<span class="post-prefix">▸</span>' +
-            '<span class="post-msg">' + msg + '</span>' +
-            '<span class="post-status ' + statusClass + '">[' + statusText + ']</span>';
-          logEl.appendChild(line);
-          logEl.scrollTop = logEl.scrollHeight;
-        }
+        if (bar) bar.style.width = pct + '%';
+        if (txt) txt.textContent = msg;
       }, d);
-    })(steps[i][0], steps[i][1], steps[i][2], steps[i][3], delay);
+    })(msgs[i][0], msgs[i][1], t);
   }
 
   setTimeout(function() {
-    bs.classList.add('is-loaded');
-    setTimeout(function() {
-      bs.style.display = "none";
-    }, 800);
+    el.classList.add('out');
+    setTimeout(function() { el.style.display = 'none'; }, 600);
     if (options.isReboot) {
-      toast("System rebooted", "NetCoop AI initialized successfully", "ok");
+      toast('System rebooted', 'NetCoop AI ready', 'ok');
     }
-  }, delay + 400);
+  }, t + 300);
 }
 
 window.netcoopReboot = () => runBootSequence({ isReboot: true });

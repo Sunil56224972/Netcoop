@@ -27,55 +27,14 @@
   </script>
 </head>
 <body>
-  <!-- NetCoop AI Boot Screen -->
-  <div class="boot-screen" id="netcoop-boot-screen">
-    <div class="boot-card">
-      <div class="boot-card__header">
-        <div class="boot-hdr-dots">
-          <span class="boot-hdr-dot-r"></span>
-          <span class="boot-hdr-dot-y"></span>
-          <span class="boot-hdr-dot-g"></span>
-        </div>
-        <span class="boot-hdr-title">netcoop-ai — system boot</span>
-      </div>
-      <div class="boot-terminal-body">
-        <div class="boot-sys-header">
-          <div class="boot-logo-frame">
-            <img src="images/netcoop-emblem.png" alt="NetCoop AI" class="boot-logo" />
-          </div>
-          <div class="boot-sys-info">
-            <div class="boot-sys-name">NetCoop AI</div>
-            <div class="boot-sys-ver">Multi-Agent Network Diagnostics v2.0<br>IIT Bhubaneswar · Groq LPU Inference</div>
-          </div>
-        </div>
-        <div class="boot-post-log" id="boot-post-log">
-          <!-- JS will populate POST lines here -->
-        </div>
-        <div class="boot-progress-section">
-          <div class="boot-progress-label">
-            <span>SYSTEM INITIALIZATION</span>
-            <span class="boot-percent" id="boot-percent">0%</span>
-          </div>
-          <div class="boot-progress-track">
-            <div class="boot-progress-bar" id="boot-progress-bar"></div>
-          </div>
-        </div>
-      </div>
-      <div class="boot-spec-matrix">
-        <div class="boot-spec-cell">
-          <span class="boot-spec-label">Agents</span>
-          <span class="boot-spec-val">6 Active</span>
-        </div>
-        <div class="boot-spec-cell">
-          <span class="boot-spec-label">Model</span>
-          <span class="boot-spec-val">Groq 120B</span>
-        </div>
-        <div class="boot-spec-cell">
-          <span class="boot-spec-label">Protocol</span>
-          <span class="boot-spec-val">JSON-RPC</span>
-        </div>
-      </div>
+  <!-- Boot -->
+  <div id="netcoop-boot-screen" class="nc-splash">
+    <div class="nc-splash__inner">
+      <img src="images/netcoop-splash.png" alt="NetCoop" class="nc-splash__logo" />
+      <div class="nc-splash__bar"><div class="nc-splash__fill" id="boot-progress-bar"></div></div>
+      <p class="nc-splash__status" id="boot-status-text">Preparing workspace&hellip;</p>
     </div>
+    <footer class="nc-splash__foot">IIT Bhubaneswar &nbsp;&middot;&nbsp; Tejas India Hackathon 2026</footer>
   </div>
 
   <div class="shell" style="min-height:100vh;display:flex;flex-direction:column">
