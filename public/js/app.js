@@ -795,48 +795,61 @@ export function switchTab(target) {
 function runBootSequence(options) {
   if (!options) options = {};
   var bs = document.getElementById("netcoop-boot-screen");
-  var st = document.getElementById("boot-status-text");
+  var logEl = document.getElementById("boot-post-log");
   var pc = document.getElementById("boot-percent");
   var pb = document.getElementById("boot-progress-bar");
   if (!bs) return;
-  bs.style.opacity = "1";
-  bs.style.visibility = "visible";
-  bs.style.display = "flex";
+
+  // Show boot screen
+  bs.classList.remove('is-loaded');
+  bs.style.display = "";
   if (pb) pb.style.width = "0%";
   if (pc) pc.textContent = "0%";
-  if (st) st.textContent = "Initializing system...";
+  if (logEl) logEl.innerHTML = "";
+
   var steps = [
-    [12, "Loading campus topology...", 250],
-    [25, "Binding JSON-RPC bus...", 500],
-    [38, "Starting performance agent...", 750],
-    [50, "Starting infrastructure agent...", 1000],
-    [62, "Starting connectivity agent...", 1200],
-    [74, "Starting correlation agent...", 1400],
-    [84, "Starting reporting agent...", 1600],
-    [92, "Connecting Groq LPU...", 1800],
-    [98, "Synchronizing agent mesh...", 2000],
-    [100, "System ready", 2200]
+    [10,  "Loading campus topology...",          "OK",    "ok"],
+    [22,  "Binding JSON-RPC bus...",              "OK",    "ok"],
+    [34,  "Starting performance agent...",        "SYNC",  "sync"],
+    [44,  "Starting infrastructure agent...",     "SYNC",  "sync"],
+    [54,  "Starting connectivity agent...",       "SYNC",  "sync"],
+    [64,  "Starting correlation agent...",        "SYNC",  "sync"],
+    [74,  "Starting reporting agent...",          "SYNC",  "sync"],
+    [84,  "Connecting Groq LPU inference...",     "OK",    "ok"],
+    [94,  "Synchronizing agent mesh...",          "OK",    "ok"],
+    [100, "All systems operational",              "READY", "ready"]
   ];
+
+  var delay = 0;
   for (var i = 0; i < steps.length; i++) {
-    (function(p, t, d) {
+    delay += 200 + Math.floor(Math.random() * 120);
+    (function(pct, msg, statusText, statusClass, d) {
       setTimeout(function() {
-        if (pb) pb.style.width = p + "%";
-        if (pc) pc.textContent = p + "%";
-        if (st) st.textContent = t;
+        if (pb) pb.style.width = pct + "%";
+        if (pc) pc.textContent = pct + "%";
+        if (logEl) {
+          var line = document.createElement("div");
+          line.className = "boot-post-line";
+          line.innerHTML =
+            '<span class="post-prefix">▸</span>' +
+            '<span class="post-msg">' + msg + '</span>' +
+            '<span class="post-status ' + statusClass + '">[' + statusText + ']</span>';
+          logEl.appendChild(line);
+          logEl.scrollTop = logEl.scrollHeight;
+        }
       }, d);
-    })(steps[i][0], steps[i][1], steps[i][2]);
+    })(steps[i][0], steps[i][1], steps[i][2], steps[i][3], delay);
   }
+
   setTimeout(function() {
-    bs.style.transition = "opacity 0.6s ease";
-    bs.style.opacity = "0";
+    bs.classList.add('is-loaded');
     setTimeout(function() {
       bs.style.display = "none";
-      bs.style.visibility = "hidden";
-    }, 700);
+    }, 800);
     if (options.isReboot) {
       toast("System rebooted", "NetCoop AI initialized successfully", "ok");
     }
-  }, 2600);
+  }, delay + 400);
 }
 
 window.netcoopReboot = () => runBootSequence({ isReboot: true });

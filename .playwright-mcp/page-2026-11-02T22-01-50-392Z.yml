@@ -1,0 +1,122 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - img "NetCoop AI" [ref=e3]
+    - generic [ref=e4]: NETCOOP AI
+    - generic [ref=e5]: AUTONOMOUS MULTI-AGENT NETWORK DIAGNOSTICS
+    - generic [ref=e8]: Initializing system...
+    - generic [ref=e9]: 0%
+    - generic [ref=e10]:
+      - generic [ref=e11]: IIT Bhubaneswar
+      - generic [ref=e12]: •
+      - generic [ref=e13]: Groq LPU 120B
+      - generic [ref=e14]: •
+      - generic [ref=e15]: 6 AI Agents
+  - generic [ref=e16]:
+    - banner [ref=e17]:
+      - button "NetCoop Logo IIT Bhubaneswar / NetCoop AI" [ref=e18] [cursor=pointer]:
+        - img "NetCoop Logo" [ref=e19]
+        - generic [ref=e20]:
+          - generic [ref=e21]: IIT Bhubaneswar
+          - generic [ref=e22]: /
+          - generic [ref=e23]: NetCoop AI
+      - generic "Click to inspect system telemetry boot status" [ref=e24] [cursor=pointer]: AI idle
+      - generic [ref=e25]: "--:--:-- UTC"
+      - button "Search" [ref=e26] [cursor=pointer]:
+        - generic [ref=e28]: /
+      - button "Toggle theme" [ref=e29] [cursor=pointer]
+    - main [ref=e30]:
+      - generic [ref=e31]:
+        - img "NetCoop AI Logo" [ref=e32]
+        - generic [ref=e33]:
+          - heading "NetCoop AI" [level=1] [ref=e34]
+          - paragraph [ref=e35]: Multi-agent cooperative network fault diagnosis & root cause localization.
+      - tablist [ref=e36]:
+        - tab "NetCoop System Boot" [selected] [ref=e37] [cursor=pointer]:
+          - img "NetCoop" [ref=e39]
+          - generic [ref=e42]: System Boot
+        - tab "Diagnosis Studio" [ref=e43] [cursor=pointer]
+        - tab "Agent Message Bus" [ref=e44] [cursor=pointer]
+        - tab "Interoperability Protocol" [ref=e45] [cursor=pointer]
+        - tab "Campus Topology & Agents" [ref=e46] [cursor=pointer]
+      - generic [ref=e48]:
+        - img "NetCoop AI Logo" [ref=e50] [cursor=pointer]
+        - heading "NETCOOP AI KERNEL" [level=2] [ref=e51]
+        - paragraph [ref=e52]: Multi-Agent Cooperative Network Fault Diagnosis & Root Cause Localization System for IIT Bhubaneswar Campus Infrastructure.
+        - generic [ref=e53]:
+          - generic [ref=e54]: Telemetry Active
+          - generic [ref=e55]: JSON-RPC v1.0.0 Bus
+          - generic [ref=e56]: Groq LPUs (gpt-oss-120b)
+          - generic [ref=e57]: 6 Cooperative Agents
+          - generic [ref=e58]: 8 Topology Nodes
+        - generic [ref=e59]:
+          - button "Reboot Agents & Re-run Booting" [ref=e60] [cursor=pointer]
+          - button "Open Diagnosis Studio" [ref=e61] [cursor=pointer]
+          - button "Inspect Campus Nodes" [ref=e62] [cursor=pointer]
+        - generic [ref=e63]:
+          - generic [ref=e64]:
+            - generic [ref=e69]: netcoop-agent-mesh-boot.log
+            - generic [ref=e70]: LIVE FEED
+          - generic [ref=e71]:
+            - generic [ref=e72]:
+              - generic [ref=e73]: "[00:00:01]"
+              - generic [ref=e74]: INIT
+              - text: Core Multi-Agent Kernel loaded (Node.js v18+, Express v4.21, JSON-RPC v1.0.0 bus ready)
+            - generic [ref=e75]:
+              - generic [ref=e76]: "[00:00:02]"
+              - generic [ref=e77]: BOOT
+              - text: Telemetry & Performance Agent (performance_agent) online → latency, jitter, loss, utilization
+            - generic [ref=e78]:
+              - generic [ref=e79]: "[00:00:03]"
+              - generic [ref=e80]: BOOT
+              - text: Infrastructure Health Agent (infrastructure_agent) online → CPU, RAM, queue drops, interface errors
+            - generic [ref=e81]:
+              - generic [ref=e82]: "[00:00:04]"
+              - generic [ref=e83]: BOOT
+              - text: Connectivity Analysis Agent (connectivity_agent) online → campus topology graph & blast radius
+            - generic [ref=e84]:
+              - generic [ref=e85]: "[00:00:05]"
+              - generic [ref=e86]: BOOT
+              - text: Fault Correlation Agent (correlation_agent) online → multi-hypothesis ranking & challenge bus
+            - generic [ref=e87]:
+              - generic [ref=e88]: "[00:00:06]"
+              - generic [ref=e89]: BOOT
+              - text: Recommendation & Reporting Agent (reporting_agent) online → Section 6 schema & guardrails active
+            - generic [ref=e90]:
+              - generic [ref=e91]: "[00:00:07]"
+              - generic [ref=e92]: READY
+              - text: Groq LLM Reasoning Agent (groq_llm_agent) online → ultra-fast gpt-oss-120b inference connected
+            - generic [ref=e93]:
+              - generic [ref=e94]: "[00:00:08]"
+              - generic [ref=e95]: READY
+              - text: "IIT Bhubaneswar Campus Telemetry Mesh: ONLINE • Standing by for telemetry input"
+        - generic [ref=e96]:
+          - generic [ref=e97]:
+            - generic [ref=e98]:
+              - generic [ref=e99]: Performance Agent
+              - generic [ref=e100]: Active
+            - generic [ref=e101]: performance_agent • Latency, Loss, Jitter, Utilization
+          - generic [ref=e102]:
+            - generic [ref=e103]:
+              - generic [ref=e104]: Infrastructure Agent
+              - generic [ref=e105]: Active
+            - generic [ref=e106]: infrastructure_agent • CPU, RAM, Queue Drops, Errors
+          - generic [ref=e107]:
+            - generic [ref=e108]:
+              - generic [ref=e109]: Connectivity Agent
+              - generic [ref=e110]: Active
+            - generic [ref=e111]: connectivity_agent • Campus Topology & Blast Radius
+          - generic [ref=e112]:
+            - generic [ref=e113]:
+              - generic [ref=e114]: Fault Correlation
+              - generic [ref=e115]: Active
+            - generic [ref=e116]: correlation_agent • Hypothesis Ranking & Challenges
+          - generic [ref=e117]:
+            - generic [ref=e118]:
+              - generic [ref=e119]: Reporting Agent
+              - generic [ref=e120]: Active
+            - generic [ref=e121]: reporting_agent • Section 6 JSON Report & Guardrails
+          - generic [ref=e122]:
+            - generic [ref=e123]:
+              - generic [ref=e124]: Groq LLM Agent
+              - generic [ref=e125]: Groq LPU
+            - generic [ref=e126]: groq_llm_agent • gpt-oss-120b CLI Runbook Synthesis
