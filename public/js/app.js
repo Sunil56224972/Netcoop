@@ -792,49 +792,49 @@ export function switchTab(target) {
 }
 
 // ─── Boot Sequence Orchestrator ───────────────────────────────────────────────────
-function runBootSequence(options = {}) {
-  var bootScreen = $('#netcoop-boot-screen');
-  var statusText = $('#boot-status-text');
-  var percentText = $('#boot-percent');
-  var progressBar = $('#boot-progress-bar');
-  if (!bootScreen) return;
-
-  bootScreen.style.opacity = '1';
-  bootScreen.style.visibility = 'visible';
-  bootScreen.classList.remove('is-loaded');
-  if (progressBar) progressBar.style.width = '0%';
-  if (percentText) percentText.textContent = '0%';
-  if (statusText) statusText.textContent = 'Initializing system\u2026';
-
+function runBootSequence(options) {
+  if (!options) options = {};
+  var bs = document.getElementById("netcoop-boot-screen");
+  var st = document.getElementById("boot-status-text");
+  var pc = document.getElementById("boot-percent");
+  var pb = document.getElementById("boot-progress-bar");
+  if (!bs) return;
+  bs.style.opacity = "1";
+  bs.style.visibility = "visible";
+  bs.style.display = "flex";
+  if (pb) pb.style.width = "0%";
+  if (pc) pc.textContent = "0%";
+  if (st) st.textContent = "Initializing system...";
   var steps = [
-    { p: 10,  t: 'Loading campus topology\u2026',          delay: 200 },
-    { p: 22,  t: 'Binding JSON-RPC message bus\u2026',     delay: 450 },
-    { p: 35,  t: 'Starting performance agent\u2026',       delay: 700 },
-    { p: 45,  t: 'Starting infrastructure agent\u2026',    delay: 920 },
-    { p: 55,  t: 'Starting connectivity agent\u2026',      delay: 1120 },
-    { p: 65,  t: 'Starting correlation agent\u2026',       delay: 1320 },
-    { p: 75,  t: 'Starting reporting agent\u2026',         delay: 1500 },
-    { p: 85,  t: 'Connecting Groq LPU inference\u2026',    delay: 1680 },
-    { p: 95,  t: 'Synchronizing agent mesh (6/6)\u2026',   delay: 1860 },
-    { p: 100, t: 'System ready',                          delay: 2050 }
+    [10, "Loading campus topology...", 200],
+    [22, "Binding JSON-RPC message bus...", 450],
+    [35, "Starting performance agent...", 700],
+    [45, "Starting infrastructure agent...", 920],
+    [55, "Starting connectivity agent...", 1120],
+    [65, "Starting correlation agent...", 1320],
+    [75, "Starting reporting agent...", 1500],
+    [85, "Connecting Groq LPU inference...", 1680],
+    [95, "Synchronizing agent mesh (6/6)...", 1860],
+    [100, "System ready", 2050]
   ];
-
-  steps.forEach(function(step) {
-    setTimeout(function() {
-      if (progressBar) progressBar.style.width = step.p + '%';
-      if (percentText) percentText.textContent = step.p + '%';
-      if (statusText) statusText.textContent = step.t;
-    }, step.delay);
-  });
-
+  for (var i = 0; i < steps.length; i++) {
+    (function(p, t, d) {
+      setTimeout(function() {
+        if (pb) pb.style.width = p + "%";
+        if (pc) pc.textContent = p + "%";
+        if (st) st.textContent = t;
+      }, d);
+    })(steps[i][0], steps[i][1], steps[i][2]);
+  }
   setTimeout(function() {
-    bootScreen.style.opacity = '0';
+    bs.style.transition = "opacity 0.8s ease";
+    bs.style.opacity = "0";
     setTimeout(function() {
-      bootScreen.style.visibility = 'hidden';
-      bootScreen.classList.add('is-loaded');
-    }, 800);
+      bs.style.visibility = "hidden";
+      bs.style.display = "none";
+    }, 900);
     if (options.isReboot) {
-      toast('System rebooted', 'NetCoop AI initialized successfully', 'ok');
+      toast("System rebooted", "NetCoop AI initialized successfully", "ok");
     }
   }, 2500);
 }

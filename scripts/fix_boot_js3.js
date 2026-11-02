@@ -68,3 +68,4 @@ function runBootSequence(options = {}) {\r
 const newCode = code.substring(0, startIdx) + newFn + code.substring(endIdx);
 fs.writeFileSync(appPath, newCode, 'utf-8');
 console.log('Boot JS updated');
+

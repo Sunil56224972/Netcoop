@@ -106,3 +106,4 @@ const newHtml = html.substring(0, startIdx) + newBoot + html.substring(endIdx);
 fs.writeFileSync(htmlPath, newHtml, 'utf-8');
 console.log('Boot screen replaced with logo-centered design');
 console.log('File size:', newHtml.length);
+
