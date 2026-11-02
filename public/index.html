@@ -27,60 +27,62 @@
   </script>
 </head>
 <body>
-  <!-- NetCoop AI — Professional Terminal Boot Screen -->
-  <div id="netcoop-boot-screen" class="boot-screen" aria-label="NetCoop AI System Booting">
-    <div class="boot-card">
-      <!-- Terminal Title Bar -->
-      <div class="boot-card__header">
-        <div class="boot-hdr-dots">
-          <span class="boot-hdr-dot-r"></span>
-          <span class="boot-hdr-dot-y"></span>
-          <span class="boot-hdr-dot-g"></span>
+  <!-- NetCoop AI Professional Boot Screen -->
+  <div id="netcoop-boot-screen" style="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:#0b0f1a;opacity:1;visibility:visible;transition:opacity 0.7s ease,visibility 0.7s ease;" class="boot-screen">
+    <div style="display:flex;flex-direction:column;max-width:560px;width:92%;border-radius:12px;background:#111827;border:1px solid #2d3748;box-shadow:0 25px 80px -12px rgba(0,0,0,0.8);overflow:hidden;">
+
+      <!-- Title Bar -->
+      <div style="display:flex;align-items:center;padding:10px 16px;background:#0f172a;border-bottom:1px solid #2d3748;gap:10px;">
+        <div style="display:flex;gap:6px;">
+          <span style="width:10px;height:10px;border-radius:50%;background:#ef4444;display:block;"></span>
+          <span style="width:10px;height:10px;border-radius:50%;background:#eab308;display:block;"></span>
+          <span style="width:10px;height:10px;border-radius:50%;background:#22c55e;display:block;"></span>
         </div>
-        <span class="boot-hdr-title">netcoop-ai@iit-bbs:~</span>
+        <span style="flex:1;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#64748b;">netcoop-ai@iit-bbs:~</span>
       </div>
 
-      <!-- Terminal Body -->
-      <div class="boot-terminal-body">
-        <!-- System Header -->
-        <div class="boot-sys-header">
-          <div class="boot-logo-frame">
-            <img src="images/netcoop-emblem.png" alt="NetCoop AI" class="boot-logo" />
+      <!-- Body -->
+      <div style="padding:24px 24px 20px;">
+
+        <!-- Logo + Name -->
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid #2d3748;">
+          <div style="width:64px;height:64px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:12px;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,0.3);">
+            <img src="images/netcoop-emblem.png" alt="NetCoop AI" style="width:48px;height:48px;object-fit:contain;" />
           </div>
-          <div class="boot-sys-info">
-            <p class="boot-sys-name">NetCoop AI v1.0.0</p>
-            <p class="boot-sys-ver">Autonomous Multi-Agent Network Fault Diagnosis System</p>
+          <div style="flex:1;">
+            <div style="font-family:'IBM Plex Sans',sans-serif;font-size:20px;font-weight:700;color:#f1f5f9;margin:0 0 3px;">NetCoop AI v1.0.0</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#64748b;">Autonomous Multi-Agent Network Fault Diagnosis</div>
           </div>
         </div>
 
-        <!-- POST Log (populated by JS) -->
-        <div id="boot-post-log" class="boot-post-log"></div>
+        <!-- POST Log -->
+        <div id="boot-post-log" style="display:flex;flex-direction:column;gap:1px;margin-bottom:18px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;line-height:1.8;min-height:100px;"></div>
 
-        <!-- Progress Section -->
-        <div class="boot-progress-section">
-          <div class="boot-progress-label">
-            <span id="boot-status-text">INITIALIZING SYSTEM</span>
-            <span id="boot-percent" class="boot-percent">0%</span>
+        <!-- Progress -->
+        <div style="margin-bottom:0;">
+          <div style="display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">
+            <span id="boot-status-text">INITIALIZING</span>
+            <span id="boot-percent" style="color:#3b82f6;font-weight:700;font-size:12px;">0%</span>
           </div>
-          <div class="boot-progress-track">
-            <div id="boot-progress-bar" class="boot-progress-bar"></div>
+          <div style="width:100%;height:4px;border-radius:2px;background:#1e293b;overflow:hidden;">
+            <div id="boot-progress-bar" style="width:0%;height:100%;border-radius:2px;background:linear-gradient(90deg,#3b82f6,#60a5fa);transition:width 0.3s ease;"></div>
           </div>
         </div>
       </div>
 
-      <!-- System Spec Footer -->
-      <div class="boot-spec-matrix">
-        <div class="boot-spec-cell">
-          <span class="boot-spec-label">PROTOCOL</span>
-          <span class="boot-spec-val">JSON-RPC 1.0</span>
+      <!-- Spec Footer -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #2d3748;background:#0c1322;">
+        <div style="padding:10px 14px;text-align:center;border-right:1px solid #2d3748;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:600;letter-spacing:0.12em;color:#475569;text-transform:uppercase;">PROTOCOL</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:#cbd5e1;">JSON-RPC 1.0</div>
         </div>
-        <div class="boot-spec-cell">
-          <span class="boot-spec-label">INFERENCE</span>
-          <span class="boot-spec-val">GROQ LPU 120B</span>
+        <div style="padding:10px 14px;text-align:center;border-right:1px solid #2d3748;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:600;letter-spacing:0.12em;color:#475569;text-transform:uppercase;">INFERENCE</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:#cbd5e1;">GROQ LPU 120B</div>
         </div>
-        <div class="boot-spec-cell">
-          <span class="boot-spec-label">AGENTS</span>
-          <span class="boot-spec-val">6 ONLINE</span>
+        <div style="padding:10px 14px;text-align:center;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:600;letter-spacing:0.12em;color:#475569;text-transform:uppercase;">AGENTS</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:#cbd5e1;">6 ONLINE</div>
         </div>
       </div>
     </div>
