@@ -806,16 +806,16 @@ function runBootSequence(options) {
   if (pc) pc.textContent = "0%";
   if (st) st.textContent = "Initializing system...";
   var steps = [
-    [10, "Loading campus topology...", 200],
-    [22, "Binding JSON-RPC message bus...", 450],
-    [35, "Starting performance agent...", 700],
-    [45, "Starting infrastructure agent...", 920],
-    [55, "Starting connectivity agent...", 1120],
-    [65, "Starting correlation agent...", 1320],
-    [75, "Starting reporting agent...", 1500],
-    [85, "Connecting Groq LPU inference...", 1680],
-    [95, "Synchronizing agent mesh (6/6)...", 1860],
-    [100, "System ready", 2050]
+    [12, "Loading campus topology...", 250],
+    [25, "Binding JSON-RPC bus...", 500],
+    [38, "Starting performance agent...", 750],
+    [50, "Starting infrastructure agent...", 1000],
+    [62, "Starting connectivity agent...", 1200],
+    [74, "Starting correlation agent...", 1400],
+    [84, "Starting reporting agent...", 1600],
+    [92, "Connecting Groq LPU...", 1800],
+    [98, "Synchronizing agent mesh...", 2000],
+    [100, "System ready", 2200]
   ];
   for (var i = 0; i < steps.length; i++) {
     (function(p, t, d) {
@@ -827,16 +827,16 @@ function runBootSequence(options) {
     })(steps[i][0], steps[i][1], steps[i][2]);
   }
   setTimeout(function() {
-    bs.style.transition = "opacity 0.8s ease";
+    bs.style.transition = "opacity 0.6s ease";
     bs.style.opacity = "0";
     setTimeout(function() {
-      bs.style.visibility = "hidden";
       bs.style.display = "none";
-    }, 900);
+      bs.style.visibility = "hidden";
+    }, 700);
     if (options.isReboot) {
       toast("System rebooted", "NetCoop AI initialized successfully", "ok");
     }
-  }, 2500);
+  }, 2600);
 }
 
 window.netcoopReboot = () => runBootSequence({ isReboot: true });

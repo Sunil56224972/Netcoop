@@ -147,3 +147,4 @@ jsDirs.forEach(jsPath => {
 });
 
 console.log('\\nDone! Both directories updated.');
+

@@ -27,40 +27,24 @@
   </script>
 </head>
 <body>
-  <!-- NetCoop AI Boot Screen (Self-Contained) -->
-  <div id="netcoop-boot-screen" style="position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,#070b14 0%,#0f1729 50%,#0b1120 100%);opacity:1;visibility:visible;">
-
-    <!-- BIG Logo on White Frame -->
-    <div style="width:130px;height:130px;display:flex;align-items:center;justify-content:center;border-radius:28px;background:#ffffff;box-shadow:0 0 0 1px rgba(255,255,255,0.15),0 8px 40px rgba(0,0,0,0.5),0 0 80px rgba(59,130,246,0.08);margin-bottom:28px;">
-      <img src="images/netcoop-emblem.png" alt="NetCoop AI" style="width:96px;height:96px;object-fit:contain;" />
-    </div>
-
-    <!-- Brand Name -->
-    <div style="font-family:system-ui,-apple-system,sans-serif;font-size:32px;font-weight:800;color:#f1f5f9;letter-spacing:-0.03em;margin:0 0 6px;text-align:center;">NETCOOP AI</div>
-
-    <!-- Subtitle -->
-    <div style="font-family:monospace;font-size:12px;font-weight:400;color:#64748b;margin:0 0 36px;text-align:center;letter-spacing:0.04em;">AUTONOMOUS MULTI-AGENT NETWORK DIAGNOSTICS</div>
-
-    <!-- Progress Bar -->
-    <div style="width:280px;margin-bottom:16px;">
-      <div style="width:100%;height:3px;border-radius:2px;background:rgba(255,255,255,0.08);overflow:hidden;">
-        <div id="boot-progress-bar" style="width:0%;height:100%;border-radius:2px;background:linear-gradient(90deg,#3b82f6,#60a5fa);transition:width 0.35s ease;"></div>
+  <!-- NetCoop AI Boot Screen -->
+  <div id="netcoop-boot-screen" style="position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f8fafc;color-scheme:light;">
+    <img src="images/netcoop-emblem.png" alt="NetCoop AI" style="width:120px;height:120px;object-fit:contain;margin-bottom:24px;" />
+    <div style="font-family:system-ui,-apple-system,sans-serif;font-size:28px;font-weight:800;color:#0f172a;margin-bottom:4px;text-align:center;">NETCOOP AI</div>
+    <div style="font-family:monospace;font-size:11px;color:#64748b;margin-bottom:32px;letter-spacing:0.04em;text-align:center;">AUTONOMOUS MULTI-AGENT NETWORK DIAGNOSTICS</div>
+    <div style="width:240px;margin-bottom:14px;">
+      <div style="width:100%;height:3px;border-radius:2px;background:#e2e8f0;overflow:hidden;">
+        <div id="boot-progress-bar" style="width:0%;height:100%;background:#3b82f6;transition:width 0.3s ease;border-radius:2px;"></div>
       </div>
     </div>
-
-    <!-- Status Text -->
-    <div id="boot-status-text" style="font-family:monospace;font-size:11px;font-weight:500;color:#475569;margin:0 0 8px;text-align:center;min-height:16px;">Initializing system...</div>
-
-    <!-- Percentage -->
-    <div id="boot-percent" style="font-family:monospace;font-size:11px;font-weight:700;color:#3b82f6;">0%</div>
-
-    <!-- Bottom Spec -->
-    <div style="position:absolute;bottom:28px;left:0;right:0;display:flex;justify-content:center;gap:24px;font-family:monospace;font-size:10px;font-weight:500;color:#334155;letter-spacing:0.06em;">
-      <span>JSON-RPC 1.0</span>
-      <span style="color:#1e293b;">&#8226;</span>
-      <span>GROQ LPU 120B</span>
-      <span style="color:#1e293b;">&#8226;</span>
-      <span>6 AGENTS</span>
+    <div id="boot-status-text" style="font-family:monospace;font-size:11px;color:#94a3b8;text-align:center;">Initializing system...</div>
+    <div id="boot-percent" style="font-family:monospace;font-size:11px;font-weight:700;color:#3b82f6;margin-top:6px;">0%</div>
+    <div style="position:absolute;bottom:24px;display:flex;gap:20px;font-family:monospace;font-size:10px;color:#94a3b8;letter-spacing:0.04em;">
+      <span>IIT Bhubaneswar</span>
+      <span>&#8226;</span>
+      <span>Groq LPU 120B</span>
+      <span>&#8226;</span>
+      <span>6 AI Agents</span>
     </div>
   </div>
 
