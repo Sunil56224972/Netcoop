@@ -196,11 +196,12 @@ async function probeLiveTelemetry(opts = {}) {
       device_id: t.device_id,
       type: t.type,
       name: t.host,
-      ip: `${t.ip}:${t.port} (${t.host})`,
+      ip: t.dns.ok ? `${t.ip}:${t.port} (${t.host})` : `UNRESOLVED (${t.dns.error || 'NXDOMAIN'}) · ${t.host}:${t.port}`,
       port: t.port,
       role: t.role,
       dns_latency_ms: t.dns.latency_ms,
-      dns_ok: t.dns.ok
+      dns_ok: t.dns.ok,
+      dns_error: t.dns.error || null
     }))
   ];
 
@@ -229,7 +230,9 @@ async function probeLiveTelemetry(opts = {}) {
             dns_ms: t.dns.latency_ms
           };
         }
-        const tcp = await measureTcpRtt(t.ip || t.host, t.port, 1100);
+        const timeoutMs = (round > 0 && t._lastTcpFailed) ? 180 : 950;
+        const tcp = await measureTcpRtt(t.ip || t.host, t.port, timeoutMs);
+        t._lastTcpFailed = !tcp.ok;
         return {
           target: t,
           tcp,
@@ -246,21 +249,25 @@ async function probeLiveTelemetry(opts = {}) {
     const freeMem = os.freemem();
     const memPct = Math.round(((totalMem - freeMem) / totalMem) * 1000) / 10;
 
-    // Aggregate host metrics from real round measurements
+    // Aggregate host metrics from real round measurements.
+    // If at least one external TCP target succeeded, the local host gateway's egress interface is healthy (0% loss);
+    // individual target failures belong to those specific remote endpoints.
     const validRtts = probeRound.filter(p => p.tcp.ok).map(p => p.tcp.rtt_ms);
-    const failedCount = probeRound.filter(p => !p.tcp.ok).length;
+    const tcpAttempted = probeRound.filter(p => p.target.dns.ok);
+    const hostLossPct = tcpAttempted.length > 0 && validRtts.length === 0 ? 100 : 0;
     const avgHostLatency = validRtts.length
       ? Math.round((validRtts.reduce((a, b) => a + b, 0) / validRtts.length) * 100) / 100
-      : 0;
+      : 5;
 
     samples.push({
       device_id: hostId,
       timestamp,
+      status: hostLossPct === 100 ? 'down' : 'up',
       cpu_pct: cpuPct,
       mem_pct: memPct,
       memory_pct: memPct,
       latency_ms: avgHostLatency,
-      packet_loss_pct: probeRound.length ? Math.round((failedCount / probeRound.length) * 100) : 0,
+      packet_loss_pct: hostLossPct,
       interface_errors: 0,
       queue_drops: 0
     });
@@ -276,17 +283,42 @@ async function probeLiveTelemetry(opts = {}) {
         ? Math.round(Math.abs(tcp.rtt_ms - prevSample.latency_ms) * 100) / 100
         : 0;
 
-      const sampleEntry = {
-        device_id: target.device_id,
-        timestamp,
-        latency_ms: tcp.ok ? tcp.rtt_ms : 950,
-        jitter_ms: jitterMs,
-        packet_loss_pct: tcp.ok ? 0 : 100,
-        dns_latency_ms: dns_ms,
-        dns_failure_pct: target.dns.ok ? 0 : 100
-      };
-
-      samples.push(sampleEntry);
+      if (!target.dns.ok) {
+        // Real DNS resolution failure (NXDOMAIN / SERVFAIL / timeout):
+        // Keep transport latency normal so correlation_agent isolates DNS failure on this target.
+        samples.push({
+          device_id: target.device_id,
+          timestamp,
+          status: 'up',
+          latency_ms: avgHostLatency,
+          jitter_ms: 0,
+          packet_loss_pct: 0,
+          dns_latency_ms: Math.max(350, dns_ms || 350),
+          dns_failure_pct: 100
+        });
+      } else if (!tcp.ok) {
+        // DNS succeeded, but TCP handshake timed out or was refused -> endpoint / upstream outage.
+        samples.push({
+          device_id: target.device_id,
+          timestamp,
+          status: 'down',
+          packet_loss_pct: 100,
+          dns_latency_ms: dns_ms,
+          dns_failure_pct: 0
+        });
+      } else {
+        // Healthy DNS + TCP handshake
+        samples.push({
+          device_id: target.device_id,
+          timestamp,
+          status: 'up',
+          latency_ms: tcp.rtt_ms,
+          jitter_ms: jitterMs,
+          packet_loss_pct: 0,
+          dns_latency_ms: dns_ms,
+          dns_failure_pct: 0
+        });
+      }
     }
 
     const elapsed = performance.now() - roundStart;
@@ -312,7 +344,8 @@ async function probeLiveTelemetry(opts = {}) {
       used_mem_gb: Math.round(((os.totalmem() - os.freemem()) / (1024 ** 3)) * 10) / 10,
       uptime_hours: Math.round((os.uptime() / 3600) * 10) / 10,
       interfaces: ifaces,
-      active_interfaces: ifaces
+      active_interfaces: ifaces,
+      client_edge: opts.clientEdge || null
     },
     devices,
     topology,

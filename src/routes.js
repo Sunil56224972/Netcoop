@@ -29,10 +29,33 @@ module.exports = function netcoopRoutes(ctx = {}) {
     try {
       const targets = (req.body && req.body.targets) || req.query.targets || null;
       const runDiag = Boolean((req.body && req.body.diagnose) || req.query.diagnose === '1' || req.query.diagnose === 'true');
+      const forwarded = req.headers['x-forwarded-for'];
+      const clientIp = (typeof forwarded === 'string' ? forwarded.split(',')[0].trim() : null)
+        || req.ip
+        || (req.socket && req.socket.remoteAddress)
+        || '127.0.0.1';
+      const city = req.headers['x-vercel-ip-city'] ? decodeURIComponent(String(req.headers['x-vercel-ip-city'])) : null;
+      const country = req.headers['x-vercel-ip-country'] ? String(req.headers['x-vercel-ip-country']) : null;
+      const edgeRegion = req.headers['x-vercel-id'] ? String(req.headers['x-vercel-id']).split('::')[0] : null;
+      const browserMetrics = (req.body && req.body.client_edge && typeof req.body.client_edge === 'object')
+        ? req.body.client_edge
+        : {};
+
+      const clientEdge = {
+        client_ip: String(clientIp).replace(/^::ffff:/, ''),
+        location: [city, country].filter(Boolean).join(', ') || null,
+        edge_region: edgeRegion || null,
+        http_rtt_ms: typeof browserMetrics.http_rtt_ms === 'number' ? browserMetrics.http_rtt_ms : null,
+        http_jitter_ms: typeof browserMetrics.http_jitter_ms === 'number' ? browserMetrics.http_jitter_ms : null,
+        downlink_mbps: typeof browserMetrics.downlink_mbps === 'number' ? browserMetrics.downlink_mbps : null,
+        effective_type: browserMetrics.effective_type || null
+      };
+
       const data = await probeLiveTelemetry({
-        samples: Number(req.query.samples || (req.body && req.body.samples) || 4),
-        intervalMs: Number(req.query.interval || (req.body && req.body.interval) || 100),
-        targets
+        samples: Number(req.query.samples || (req.body && req.body.samples) || 5),
+        intervalMs: Number(req.query.interval || (req.body && req.body.interval) || 50),
+        targets,
+        clientEdge
       });
       if (runDiag) {
         const diagnosis = await diagnose(data);

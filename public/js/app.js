@@ -265,6 +265,8 @@ function summarizeTelemetryDataset(telemetryInput, reportObj = null) {
       role: d.role || d.type || 'Monitored Node',
       ip: d.ip || d.target_host || '-',
       dns_latency_ms: d.dns_latency_ms ?? null,
+      dns_ok: d.dns_ok ?? true,
+      dns_error: d.dns_error || null,
       location: d.location || '',
       samples: [],
       metrics: {}
@@ -308,8 +310,12 @@ function summarizeTelemetryDataset(telemetryInput, reportObj = null) {
   const devices = [...devMap.values()].map((d) => {
     const lastSample = d.samples[d.samples.length - 1] || {};
     const rawStatus = lastSample.status || (lastSample.metrics && lastSample.metrics.status) || 'up';
+    const avgLossVal = avg(d.metrics.packet_loss_pct);
+    const avgDnsFailVal = avg(d.metrics.dns_failure_pct);
+    const dnsFailed = d.dns_ok === false || (avgDnsFailVal != null && avgDnsFailVal >= 50);
+    const tcpDown = rawStatus === 'down' || (!dnsFailed && avgLossVal != null && avgLossVal >= 100);
     const isRoot = rootDeviceId === d.id;
-    const isImpaired = impairedSet.has(d.id) || rawStatus === 'down' || rawStatus === 'degraded';
+    const isImpaired = impairedSet.has(d.id) || rawStatus === 'down' || rawStatus === 'degraded' || dnsFailed || tcpDown;
 
     // Find upstream from links
     const parentLink = links.find((l) => (l.to || l.downstream || l.child) === d.id);
@@ -320,12 +326,15 @@ function summarizeTelemetryDataset(telemetryInput, reportObj = null) {
       upstream,
       sampleCount: d.samples.length,
       rawStatus,
+      dnsFailed,
+      tcpDown,
       isRoot,
       isImpaired,
       avgLatency: avg(d.metrics.latency_ms),
       avgJitter: avg(d.metrics.jitter_ms),
-      avgLoss: avg(d.metrics.packet_loss_pct),
+      avgLoss: avgLossVal,
       avgDns: avg(d.metrics.dns_latency_ms) ?? d.dns_latency_ms ?? null,
+      avgDnsFail: avgDnsFailVal,
       avgCpu: avg(d.metrics.cpu_pct),
       avgMem: avg(d.metrics.mem_pct || d.metrics.memory_pct),
       avgUtil: avg(d.metrics.utilization_pct),
@@ -491,9 +500,13 @@ function paintRuntimeOverview() {
   const dnss = targetDevs.map((d) => d.avgDns).filter((v) => v != null);
   const avgRtt = rtts.length ? rtts.reduce((a, b) => a + b, 0) / rtts.length : (gatewayDev ? gatewayDev.avgLatency : null);
   const avgDns = dnss.length ? dnss.reduce((a, b) => a + b, 0) / dnss.length : (gatewayDev ? gatewayDev.avgDns : null);
+  const ce = hostInfo.client_edge || null;
 
   if (rttEl) rttEl.textContent = avgRtt != null ? `${fmtDec(avgRtt, 1)} ms avg RTT` : 'Measured live';
-  if (dnsEl) dnsEl.textContent = avgDns != null ? `${fmtDec(avgDns, 1)} ms avg DNS lookup` : `${targetDevs.length} live endpoints`;
+  if (dnsEl) {
+    const ceNote = ce && ce.http_rtt_ms != null ? ` · Browser RTT ${fmtDec(ce.http_rtt_ms, 1)} ms` : '';
+    dnsEl.textContent = (avgDns != null ? `${fmtDec(avgDns, 1)} ms avg DNS` : `${targetDevs.length} live endpoints`) + ceNote;
+  }
 
   if (diag && diag.report) {
     const r = diag.report;
@@ -510,6 +523,21 @@ function paintRuntimeOverview() {
 
   const wrap = $('#runtime-live-table-wrap');
   if (!wrap) return;
+
+  const clientRowHtml = (ce && (ce.client_ip || ce.http_rtt_ms != null)) ? `
+    <tr style="--i:0;background:rgba(37,99,235,0.03)">
+      <td class="mono"><b>CLIENT_BROWSER_EDGE</b></td>
+      <td class="small muted">Your Browser Edge Session${ce.effective_type ? ` (${esc(String(ce.effective_type).toUpperCase())})` : ''}</td>
+      <td class="mono small">${esc(ce.client_ip || 'Client')}${ce.location ? ` · ${esc(ce.location)}` : ''}${ce.edge_region ? ` → ${esc(ce.edge_region)}` : ''}</td>
+      <td class="num">-</td>
+      <td class="num">${ce.http_rtt_ms != null ? fmtDec(ce.http_rtt_ms, 1) + ' ms (HTTPS)' : '-'}</td>
+      <td class="num">${ce.http_jitter_ms != null ? fmtDec(ce.http_jitter_ms, 2) + ' ms' : '-'}</td>
+      <td class="num">0.0%</td>
+      <td class="num">${ce.downlink_mbps != null ? fmtDec(ce.downlink_mbps, 1) + ' Mbps' : '-'}</td>
+      <td>${pill('CONTAINED', 'Connected')}</td>
+      <td style="text-align:right"><span class="small muted mono">Browser API</span></td>
+    </tr>
+  ` : '';
 
   wrap.innerHTML = `
     <div class="table-wrap">
@@ -529,22 +557,41 @@ function paintRuntimeOverview() {
           </tr>
         </thead>
         <tbody class="rows-in">
-          ${summary.devices.map((d, i) => `
-            <tr class="is-clickable nc-rt-dev-row" data-dev="${esc(d.id)}" style="--i:${i}">
+          ${clientRowHtml}
+          ${summary.devices.map((d, i) => {
+            const dnsCell = d.dnsFailed
+              ? `<span style="color:var(--high);font-weight:600">FAIL (${d.avgDns != null ? fmtDec(d.avgDns, 0) + ' ms' : 'NXDOMAIN'})</span>`
+              : (d.avgDns != null ? fmtDec(d.avgDns, 2) + ' ms' : '-');
+            const tcpCell = d.tcpDown
+              ? `<span style="color:var(--high);font-weight:600">TIMEOUT / DOWN</span>`
+              : (d.avgLatency != null ? fmtDec(d.avgLatency, 2) + ' ms' : '-');
+            const statusLabel = d.dnsFailed
+              ? 'DNS Fail'
+              : d.tcpDown
+                ? 'TCP Down'
+                : d.isRoot
+                  ? 'Root Cause'
+                  : d.isImpaired
+                    ? 'Degraded'
+                    : 'Online';
+            const statusTone = (d.isRoot || d.dnsFailed || d.tcpDown) ? 'CONFIRMED' : d.isImpaired ? 'INVESTIGATING' : 'CONTAINED';
+            return `
+            <tr class="is-clickable nc-rt-dev-row" data-dev="${esc(d.id)}" style="--i:${i + 1}">
               <td class="mono"><b>${esc(d.id)}</b></td>
               <td class="small muted">${esc(d.role)}</td>
               <td class="mono small">${esc(d.ip || '-')}</td>
-              <td class="num">${d.avgDns != null ? fmtDec(d.avgDns, 2) + ' ms' : '-'}</td>
-              <td class="num">${d.avgLatency != null ? fmtDec(d.avgLatency, 2) + ' ms' : '-'}</td>
+              <td class="num">${dnsCell}</td>
+              <td class="num">${tcpCell}</td>
               <td class="num">${d.avgJitter != null ? fmtDec(d.avgJitter, 2) + ' ms' : '-'}</td>
               <td class="num">${d.avgLoss != null ? fmtDec(d.avgLoss, 1) + '%' : '0.0%'}</td>
               <td class="num">${d.avgCpu != null ? `${fmtDec(d.avgCpu, 1)}% / ${fmtDec(d.avgMem, 1)}%` : '-'}</td>
-              <td>${pill(d.isRoot ? 'CONFIRMED' : d.isImpaired ? 'INVESTIGATING' : 'CONTAINED', d.isRoot ? 'Root Cause' : d.isImpaired ? 'Degraded' : 'Online')}</td>
+              <td>${pill(statusTone, statusLabel)}</td>
               <td style="text-align:right">
                 <button class="btn btn--sm nc-inspect-dev-btn" data-dev="${esc(d.id)}">${icon('search')} Samples</button>
               </td>
             </tr>
-          `).join('')}
+            `;
+          }).join('')}
         </tbody>
       </table>
     </div>
@@ -1860,10 +1907,32 @@ async function probeLiveSystem(opts = {}) {
   if (statusEl) statusEl.textContent = 'Measuring real DNS lookup, TCP socket handshake RTT, jitter & host CPU/RAM…';
 
   try {
+    // Measure real client browser-to-server HTTP round-trip latency & link parameters
+    const pingStart1 = performance.now();
+    await fetch('/api/netcoop/protocol', { method: 'GET', cache: 'no-store' }).catch(() => null);
+    const rtt1 = performance.now() - pingStart1;
+    const pingStart2 = performance.now();
+    await fetch('/api/netcoop/protocol', { method: 'GET', cache: 'no-store' }).catch(() => null);
+    const rtt2 = performance.now() - pingStart2;
+
+    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection || null;
+    const clientEdgePayload = {
+      http_rtt_ms: Math.round(((rtt1 + rtt2) / 2) * 10) / 10,
+      http_jitter_ms: Math.round(Math.abs(rtt2 - rtt1) * 100) / 100,
+      downlink_mbps: conn && typeof conn.downlink === 'number' ? conn.downlink : null,
+      effective_type: conn && conn.effectiveType ? conn.effectiveType : null
+    };
+
     const res = await fetch('/api/netcoop/probe-live', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ targets, diagnose: runDiag, samples: 4, interval: 80 })
+      body: JSON.stringify({
+        targets,
+        diagnose: runDiag,
+        samples: 5,
+        interval: 45,
+        client_edge: clientEdgePayload
+      })
     });
     const data = await res.json();
     if (!data.ok || !data.telemetry) throw new Error(data.error || 'Failed to capture live metrics');
