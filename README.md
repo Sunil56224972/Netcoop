@@ -1,356 +1,251 @@
-# NetCoop AI — Multi-Agent Cooperative Network Fault Diagnosis & Interoperability System
+<div align="center">
+  <img src="public/images/netcoop-logo-light.png" alt="NetCoop AI Logo" width="120" />
+  <h1>NetCoop AI</h1>
+  <p><strong>Cooperative Multi-Agent Network Fault Diagnosis, Live Socket Probing &amp; Root-Cause Localization</strong></p>
 
-[![Node.js Version](https://img.shields.io/badge/Node.js-%3E%3D18.0.0-339933?style=flat-square&logo=node.js)](https://nodejs.org/)
-[![Groq LPU](https://img.shields.io/badge/Inference-Groq%20LPU%20(gpt--oss--120b)-F55036?style=flat-square&logo=speedtest)](https://groq.com/)
-[![Protocol Version](https://img.shields.io/badge/Protocol-JSON--RPC%20v1.0.0-2D5BD1?style=flat-square)](https://github.com/Sunil56224972/Netcoop)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-[![Hackathon](https://img.shields.io/badge/IIT%20Bhubaneswar-Agentic%20AI%20Grand%20Finale-blueviolet?style=flat-square)](#)
+  <p>
+    <a href="https://netcoop.vercel.app/"><img src="https://img.shields.io/badge/Live_Deployment-netcoop.vercel.app-2563EB?style=flat-square&logo=vercel" alt="Live Deployment" /></a>
+    <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-%3E%3D18.0.0-339933?style=flat-square&logo=node.js" alt="Node.js" /></a>
+    <a href="https://groq.com/"><img src="https://img.shields.io/badge/Inference-Groq_LPU_(openai%2Fgpt--oss--120b)-F55036?style=flat-square" alt="Groq LPU" /></a>
+    <a href="https://github.com/Sunil56224972/Netcoop"><img src="https://img.shields.io/badge/Protocol-JSON--RPC_v1.0.0-0F172A?style=flat-square" alt="JSON-RPC v1.0.0" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-F59E0B?style=flat-square" alt="MIT License" /></a>
+  </p>
 
-> **Autonomous multi-agent network fault localization, evidence correlation, and technical remediation engine developed for the IIT Bhubaneswar Campus Network Infrastructure.**
-
----
-
-## 📑 Table of Contents
-
-- [Executive Summary](#-executive-summary)
-- [Problem Statement Alignment](#-problem-statement-alignment)
-- [System Architecture](#-system-architecture)
-- [Specialized Agent Roles](#-specialized-agent-roles)
-- [JSON-RPC v1.0.0 Interoperability Protocol](#-json-rpc-v100-interoperability-protocol)
-- [Mathematical Formulation & Scoring](#-mathematical-formulation--scoring)
-- [Groq LPU AI Synthesis Engine](#-groq-lpu-ai-synthesis-engine)
-- [IIT Bhubaneswar Campus Topology](#-iit-bhubaneswar-campus-topology)
-- [Built-In Test Scenarios](#-built-in-test-scenarios)
-- [Web Application UI/UX](#-web-application-uiux)
-- [REST API Specification](#-rest-api-specification)
-- [Quickstart Guide](#-quickstart-guide)
-- [Automated Verification Suite](#-automated-verification-suite)
-- [License](#-license)
+  <p>
+    <a href="https://netcoop.vercel.app/"><strong>Launch Live Console (netcoop.vercel.app) &rarr;</strong></a>
+  </p>
+</div>
 
 ---
 
-## 🎯 Executive Summary
+## Overview
 
-Modern campus network environments—such as the **IIT Bhubaneswar academic and residential infrastructure**—face heterogeneous, transient network anomalies ranging from wireless radio frequency degradation and link saturation to hardware interface flapping and core resolver timeouts. Traditional rule-based monitors fail because they isolate symptoms without understanding topological dependencies.
+**NetCoop AI** is a cooperative multi-agent network intelligence and fault localization system engineered for enterprise and campus-scale infrastructure (**IIT Bhubaneswar Network Operations**).
 
-**NetCoop AI** implements a **collaborative multi-agent framework** in which five specialized diagnostic agents exchange structured JSON-RPC messages across an in-memory message bus, cross-examine competing hypotheses, validate telemetry data quality, and feed consensus findings into an ultra-low-latency **Groq LPU reasoning agent (`openai/gpt-oss-120b`)** to generate production-ready network CLI remediation procedures.
+Unlike static dashboard monitors that alert on isolated threshold breaches, NetCoop AI runs **six specialized diagnostic agents** over an asynchronous **JSON-RPC v1.0.0 message bus** (`netcoop.agent-message/1.0`). Agents inspect performance, hardware infrastructure, and topological dependencies in parallel, challenge competing hypotheses across time-series windows, enforce strict Section 6 insufficient-evidence guardrails, and synthesize vendor-specific CLI remediation runbooks via **Groq LPU (`openai/gpt-oss-120b`)**.
 
----
+### Key Capabilities for Real External Users
 
-## 📋 Problem Statement Alignment
-
-NetCoop AI addresses 100% of the requirements defined in the **Agentic AI Hackathon Round 2 Problem Statement**:
-
-| Round 2 Requirement | NetCoop AI Implementation | Status |
-| :--- | :--- | :---: |
-| **Probable Root Cause Identification** | Bayesian evidence ranking across 8 fault categories with topological propagation analysis. | `VERIFIED` |
-| **Affected Scope Localization** | Maps impaired nodes, downstream blast radiuses, and unaffected baselines across campus facilities. | `VERIFIED` |
-| **Supporting Evidence Integration** | Correlates anomalous metrics against statistical medians, dynamic warning thresholds, and critical bounds. | `VERIFIED` |
-| **Alternative Causes & Uncertainty** | Explicitly computes competing explanations, uncertainty scoring, and coverage ratios. | `VERIFIED` |
-| **Calibrated Confidence Category** | Scores 0% to 100% mapped into calibrated bands (`High`, `Medium`, `Low`) based on metric coverage. | `VERIFIED` |
-| **Practical Corrective Actions** | Generates vendor-specific CLI scripts (Cisco IOS, Aruba OS, Linux) and operational procedures. | `VERIFIED` |
-| **Insufficient Evidence Guardrails** | **Hard rule:** The system never claims an exact root cause when telemetry coverage is inadequate. | `VERIFIED` |
-| **Multi-Agent Interoperability** | Asynchronous JSON-RPC v1.0.0 message envelopes with typed payloads (`task`, `finding`, `challenge`, `result`). | `VERIFIED` |
+1. **Live Multi-Target Network & Host Probing (`/api/netcoop/probe-live`)**
+   - **Real DNS Resolution Timing**: Executes native OS `dns.lookup()` queries against default or user-specified domains, recording resolution latency (`ms`), resolved IPv4 endpoints, and `NXDOMAIN`/`SERVFAIL` failures.
+   - **Real TCP Socket Handshakes**: Opens multi-round `net.Socket()` TCP connections to measure real 3-way handshake RTT (`ms`), inter-round jitter (`ms`), and connection/packet loss (`%`) for any custom `host:port` list entered by the user.
+   - **Real Client-Edge Telemetry (`CLIENT_BROWSER_EDGE`)**: Measures the external user's own browser-to-server HTTPS round-trip latency (`performance.now()`), jitter, browser downlink bandwidth (`navigator.connection`), client IP, and edge region.
+   - **Real Host OS Counters**: Computes two-point CPU tick deltas (`os.cpus()`) and physical memory utilization (`os.totalmem()` / `os.freemem()`).
+2. **Arbitrary External Telemetry Ingestion (`.json`, `.ndjson`, `.csv`)**
+   - Paste, upload, or drag-and-drop real network logs from Prometheus, SNMP pollers, NetFlow exporters, or ping scripts.
+   - Automatically normalizes field aliases (`rtt` &rarr; `latency_ms`, `loss` &rarr; `packet_loss_pct`, `rssi` &rarr; `signal_dbm`, `util` &rarr; `link_utilization_pct`), converts units (`s` &rarr; `ms`, `0..1` ratios &rarr; `%`, `bps`/`kbps`/`gbps` &rarr; `Mbps`), and builds the topological dependency graph dynamically.
+3. **Deterministic 6-Agent Correlation + Two-Pass Challenge Arbitration**
+   - When the top two fault hypotheses score within `0.15` of each other or contradicting indicators reach `0.25`, `correlation_agent` issues live JSON-RPC `challenge` envelopes to the specialist agents to verify whether anomalies are sustained across the window or isolated spikes.
+4. **Groq LPU CLI Remediation & Operator Change Control**
+   - Synthesizes copy-ready Cisco IOS / ArubaOS / Linux CLI commands via Groq LPU (`openai/gpt-oss-120b`) with deterministic fallback, paired with a human-in-the-loop **Operator Change Control** authorization workflow.
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
-```
-                       ┌───────────────────────────────────────────────┐
-                       │     Raw Telemetry (JSON / NDJSON / CSV)       │
-                       └───────────────────────┬───────────────────────┘
-                                               │
-                                     [ Input Normalizer ]
-                                 (Schema & Range Validation)
-                                               │
-               ┌───────────────────────────────┴───────────────────────────────┐
-               ▼                                                               ▼
-  ┌─────────────────────────┐                                     ┌─────────────────────────┐
-  │   Performance Agent     │                                     │  Infrastructure Agent   │
-  │ (Latency, Jitter, Loss) │                                     │ (CPU, RAM, Queue Drops) │
-  └────────────┬────────────┘                                     └────────────┬────────────┘
-               │                                                               │
-               │              ┌─────────────────────────────────┐              │
-               └─────────────►│    JSON-RPC v1.0.0 MessageBus   │◄─────────────┘
-                              │    (Asynchronous Agent Bus)     │
-               ┌─────────────►│                                 │◄─────────────┐
-               │              └────────────────┬────────────────┘              │
-               │                               │                               │
-  ┌────────────┴────────────┐                  │                  ┌────────────┴────────────┐
-  │   Connectivity Agent    │                  ▼                  │ Fault Correlation Agent │
-  │  (Topology & DNS/DHCP)  │     ┌─────────────────────────┐     │  (Consensus & Ranking)  │
-  └─────────────────────────┘     │   Recommendation Agent  │     └─────────────────────────┘
-                                  │ (Mitigations & Guardrails│
-                                  └────────────┬────────────┘
-                                               │
-                                               ▼
-                              ┌─────────────────────────────────┐
-                              │     Groq LPU Reasoning Agent    │
-                              │      (openai/gpt-oss-120b)      │
-                              └────────────────┬────────────────┘
-                                               │
-                                               ▼
-                       ┌───────────────────────────────────────────────┐
-                       │    Unified Multi-Agent Diagnostic Report      │
-                       └───────────────────────────────────────────────┘
+```text
+  ┌──────────────────────────────┐     ┌────────────────────────────────────────┐
+  │ Live Socket & DNS Probe      │     │ External Telemetry Upload / Paste      │
+  │ (dns.lookup + net.Socket +   │     │ (.json / .ndjson / .csv + unit &       │
+  │  os.cpus + Client Edge RTT)  │     │  alias normalization)                  │
+  └──────────────┬───────────────┘     └───────────────────┬────────────────────┘
+                 └────────────────────┬────────────────────┘
+                                      ▼
+                       ┌──────────────────────────────┐
+                       │  Schema & Unit Normalizer    │
+                       │   (netcoop.telemetry/1.0)    │
+                       └──────────────┬───────────────┘
+                                      │
+        ┌─────────────────────────────┼─────────────────────────────┐
+        ▼                             ▼                             ▼
+┌───────────────────┐       ┌───────────────────┐       ┌───────────────────────┐
+│ performance_agent │       │infrastructure_agt │       │  connectivity_agent   │
+│ Latency, Jitter,  │       │ CPU, RAM, Flaps,  │       │ Topology Blast Radius │
+│ Loss, Wi-Fi, Util │       │ CRC Errors, Drops │       │ DNS & DHCP Services   │
+└─────────┬─────────┘       └─────────┬─────────┘       └───────────┬───────────┘
+          │                           │                             │
+          └───────────────────────────┼─────────────────────────────┘
+                                      ▼
+                    ┌───────────────────────────────────┐
+                    │   JSON-RPC v1.0.0 Message Bus     │
+                    │  (task / finding / challenge /    │
+                    │   challenge_response / result)    │
+                    └─────────────────┬─────────────────┘
+                                      ▼
+                    ┌───────────────────────────────────┐
+                    │        correlation_agent          │
+                    │  Two-Pass Hypothesis Scoring,     │
+                    │  Contradiction Penalty & Gating   │
+                    └─────────────────┬─────────────────┘
+                                      ▼
+                    ┌───────────────────────────────────┐
+                    │   reporting_agent + Groq LPU      │
+                    │  Section 6 Report + CLI Runbook   │
+                    │      (openai/gpt-oss-120b)        │
+                    └───────────────────────────────────┘
 ```
 
 ---
 
-## 🤖 Specialized Agent Roles
+## Cooperative Agent Roles
 
-NetCoop AI deploys six cooperative autonomous agents with distinct diagnostic responsibilities:
-
-### 1. Telemetry & Performance Agent (`performance_agent`)
-- **Domain:** End-to-end transport performance and wireless physical layer health.
-- **Metrics Evaluated:** `latency_ms`, `jitter_ms`, `packet_loss_pct`, `throughput_mbps`, `bandwidth_mbps`, `link_utilization_pct`, `signal_dbm`, `retransmission_pct`.
-- **Triggers:** Flags packet loss exceeding 1%, RTT latency spikes past 100ms, and Wi-Fi RSSI degrading below -70 dBm.
-
-### 2. Infrastructure Health Agent (`infrastructure_agent`)
-- **Domain:** Node hardware telemetry, system resources, and physical interface metrics.
-- **Metrics Evaluated:** `cpu_pct`, `memory_pct`, `queue_drops`, `interface_errors`, optical power levels.
-- **Triggers:** Detects CPU/RAM saturation (>80%), egress buffer queue drops (>50 drops/interval), and interface flapping.
-
-### 3. Connectivity Analysis Agent (`connectivity_agent`)
-- **Domain:** Campus topology traversal, link adjacencies, upstream/downstream blast radius, and network infrastructure services.
-- **Metrics Evaluated:** Graph connectivity, upstream parent dependencies, `dns_latency_ms`, `dns_failure_pct`, `dhcp_latency_ms`, `dhcp_failure_pct`.
-- **Triggers:** Differentiates between localized node failures and cascaded upstream link outages.
-
-### 4. Fault Correlation Agent (`correlation_agent`)
-- **Domain:** Multi-agent evidence synthesis, resolution of competing hypotheses, and root-cause localization.
-- **Techniques:** Dispatches `challenge` messages to agents to verify whether anomalies are sustained or transient; computes coverage-penalized Bayesian cause ranking.
-
-### 5. Recommendation & Reporting Agent (`reporting_agent`)
-- **Domain:** Report generation, safety gating, and operational mitigation planning.
-- **Responsibilities:** Enforces the insufficient-evidence boundary, formats diagnostic summaries, and prescribes immediate actions.
-
-### 6. Groq LPU Reasoning Agent (`groq_llm_agent`)
-- **Domain:** High-speed LLM inference utilizing `openai/gpt-oss-120b` hosted on Groq Tensor Streaming Units.
-- **Responsibilities:** Interprets consensus telemetry to generate contextual network engineering explanations and vendor-specific CLI configuration commands.
+| Agent ID | Role Name | Primary Responsibilities & Monitored Metrics |
+| :--- | :--- | :--- |
+| `orchestrator` | **Pipeline Orchestrator** | Normalizes telemetry, initializes the JSON-RPC bus, sequences Phases 1–4, and invokes Groq LPU synthesis. |
+| `performance_agent` | **Telemetry & Performance Agent** | Evaluates transport and RF health: `latency_ms`, `jitter_ms`, `packet_loss_pct`, `throughput_mbps`, `bandwidth_mbps`, `link_utilization_pct`, `signal_dbm`, `retransmission_pct`. |
+| `infrastructure_agent` | **Infrastructure Health Agent** | Evaluates device compute and physical interfaces: `cpu_pct`, `memory_pct`, `queue_drops`, `interface_errors`, `device_status`, `status_flaps`. |
+| `connectivity_agent` | **Connectivity & Topology Agent** | Traverses parent/child links to compute `downstream_impact` blast radius and evaluates `dns_latency_ms`, `dns_failure_pct`, `dhcp_latency_ms`, `dhcp_failure_pct`. |
+| `correlation_agent` | **Fault Correlation Agent** | Scores 7 canonical fault hypotheses across all nodes, dispatches `challenge` envelopes when top candidates conflict, and computes calibrated confidence. |
+| `reporting_agent` | **Recommendation & Reporting Agent** | Enforces Section 6 guardrails (`diagnosed` vs `no_fault_detected` vs `insufficient_evidence` vs `error`) and emits the auditable diagnostic report. |
 
 ---
 
-## 📡 JSON-RPC v1.0.0 Interoperability Protocol
+## JSON-RPC v1.0.0 Interoperability Protocol
 
-All agents exchange structured messages conforming to the **NetCoop Agent Message Schema (`netcoop.agent-message/1.0`)**:
-
-### Standard Message Envelope
+All inter-agent communication is recorded on the inspectable message bus using the `netcoop.agent-message/1.0` envelope specification:
 
 ```json
 {
-  "jsonrpc": "2.0",
-  "id": "M-0004",
-  "run_id": "R-1730424560000-1",
-  "seq": 4,
-  "timestamp": "2026-11-01T04:22:15.341Z",
-  "from": "performance_agent",
-  "to": "correlation_agent",
-  "type": "finding",
-  "in_reply_to": "M-0001",
-  "summary": "performance_agent flagged 3 indicators on HOSTEL_BRAHMAPUTRA_AP_04",
+  "protocol": "netcoop.agent-message/1.0",
+  "message_id": "M-0005",
+  "run_id": "R-1730662000000-1",
+  "seq": 5,
+  "timestamp": "2026-11-04T01:15:10.112Z",
+  "from": "correlation_agent",
+  "to": "performance_agent",
+  "type": "challenge",
+  "in_reply_to": null,
+  "summary": "Challenge to performance_agent: re-check 3 readings",
   "payload": {
-    "device_id": "HOSTEL_BRAHMAPUTRA_AP_04",
-    "items": [
-      {
-        "metric": "signal_dbm",
-        "value": -82.4,
-        "unit": "dBm",
-        "level": "critical",
-        "degree": 1.0,
-        "interpretation": "Severe wireless signal degradation detected"
-      }
+    "challenge_id": "C-1",
+    "reason": "Link congestion (0.82) and Device resource overload (0.71) are too close to separate on first reading",
+    "question": "Is each reading sustained across the recent window, or only a spike?",
+    "requests": [
+      { "device_id": "HOSTEL_CORE_SW_01", "metric": "link_utilization_pct" },
+      { "device_id": "HOSTEL_CORE_SW_01", "metric": "latency_ms" }
     ]
   }
 }
 ```
 
-### Supported Message Types
+### Protocol Execution Phases
 
-| Type | Purpose | Sender $\rightarrow$ Receiver |
-| :--- | :--- | :--- |
-| `task` | Dispatches diagnostic work packages and provides reference finding IDs. | `orchestrator` $\rightarrow$ Agents |
-| `finding` | Reports anomalous metrics, sustained trends, and device states. | Agents $\rightarrow$ `correlation_agent` |
-| `challenge` | Inquires whether a specific metric anomaly was persistent or an isolated spike. | `correlation_agent` $\rightarrow$ Agents |
-| `challenge_response` | Returns time-windowed median, peak, baseline, and degree of persistence. | Agents $\rightarrow$ `correlation_agent` |
-| `result` | Delivers finalized multi-agent diagnosis report or Groq LLM synthesis. | Agents $\rightarrow$ `orchestrator` |
-| `error` | Signals unparseable inputs, schema violations, or normalization failures. | Agents / Schema $\rightarrow$ `orchestrator` |
+1. **Phase 1 — Observation (`task` &rarr; `finding`)**: `performance_agent` and `infrastructure_agent` evaluate time-series windows (baseline vs recent 30% window) on every node.
+2. **Phase 2 — Topology & Scope (`task` &rarr; `finding`)**: `connectivity_agent` maps upstream/downstream relationships, identifies impaired subtrees, and evaluates DNS/DHCP service metrics.
+3. **Phase 3 — Correlation & Challenge (`challenge` &rarr; `challenge_response`)**: `correlation_agent` ranks `(hypothesis, device)` pairs and challenges owning agents if the top two candidates are within `0.15` or contradiction reaches `0.25`.
+4. **Phase 4 — Synthesis (`result`)**: `reporting_agent` compiles the Section 6 report and `groq.js` synthesizes the vendor CLI remediation runbook.
 
 ---
 
-## 📊 Normalized Metrics & Threshold Matrix
+## Mathematical Scoring & Guardrail Formulation
 
-| Metric Key | Canonical Unit | Expected Range | Warning Threshold | Critical Threshold | Responsible Agent |
+Implemented deterministically in [`src/analysis.js`](src/analysis.js):
+
+1. **Indicator Degree of Anomaly ($\delta \in [0, 1]$)**:
+   - $\delta = 0$ below Warning threshold ($W$).
+   - $\delta = 0.5 + 0.5 \times \text{clamp}\left(\frac{x - W}{C - W}, 0, 1\right)$ between Warning ($W$) and Critical ($C$).
+2. **Hypothesis Score ($S$)**:
+   $$\text{ratio} = \frac{\sum w_i \cdot \delta_i}{\sum w_i}, \quad \text{contradiction} = \frac{\sum w_c \cdot \delta_c}{\sum w_c}$$
+   $$S = \max\left(0,\ \text{ratio} - 0.35 \times \text{contradiction}\right)$$
+   *(Capped at `0.20` unless at least one primary indicator for the hypothesis reaches $\delta \ge 0.50$).*
+3. **Calibrated Confidence ($C$)**:
+   $$C_0 = S \times (0.55 + 0.45 \times \text{coverage}) \times \left(0.75 + 0.25 \times \min\left(1, \frac{\text{margin}}{0.30}\right)\right)$$
+   $$C = \min\left(0.95,\ C_0 \times (0.70 + 0.30 \times \text{adequacy})\right)$$
+4. **Section 6 Insufficient-Evidence Guardrail**:
+   - If $S < 0.40$ or $\text{coverage} < 0.35$, or if no anomalies are observed across fewer than 3 of the 7 core metric families, the system outputs `status: "insufficient_evidence"` rather than guessing a root cause.
+
+---
+
+## Canonical Metrics & Threshold Matrix
+
+| Metric Key | Unit | Valid Range | Warning ($W$) | Critical ($C$) | Owning Agent |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| `latency_ms` | ms | 0 – 60,000 | 100 ms | 250 ms | `performance_agent` |
-| `jitter_ms` | ms | 0 – 60,000 | 30 ms | 80 ms | `performance_agent` |
-| `packet_loss_pct` | % | 0 – 100 | 1.0 % | 5.0 % | `performance_agent` |
-| `throughput_mbps` | Mbps | 0 – 10,000,000 | — | — | `performance_agent` |
-| `bandwidth_mbps` | Mbps | 0 – 10,000,000 | — | — | `performance_agent` |
-| `link_utilization_pct` | % | 0 – 100 | 80.0 % | 92.0 % | `performance_agent` |
-| `signal_dbm` | dBm | -120 – 0 | -70 dBm | -80 dBm | `performance_agent` |
-| `retransmission_pct` | % | 0 – 100 | 10.0 % | 25.0 % | `performance_agent` |
-| `cpu_pct` | % | 0 – 100 | 80.0 % | 92.0 % | `infrastructure_agent` |
-| `memory_pct` | % | 0 – 100 | 85.0 % | 95.0 % | `infrastructure_agent` |
-| `queue_drops` | drops/int | 0 – $10^{12}$ | 50 drops | 150 drops | `infrastructure_agent` |
-| `interface_errors` | err/int | 0 – $10^{12}$ | 10 errors | 100 errors | `infrastructure_agent` |
-| `dns_latency_ms` | ms | 0 – 120,000 | 200 ms | 800 ms | `connectivity_agent` |
-| `dns_failure_pct` | % | 0 – 100 | 5.0 % | 20.0 % | `connectivity_agent` |
-| `dhcp_latency_ms` | ms | 0 – 120,000 | 500 ms | 2,000 ms | `connectivity_agent` |
-| `dhcp_failure_pct` | % | 0 – 100 | 5.0 % | 20.0 % | `connectivity_agent` |
+| `latency_ms` | `ms` | `0 – 60,000` | `50 ms` | `150 ms` | `performance_agent` |
+| `jitter_ms` | `ms` | `0 – 60,000` | `15 ms` | `40 ms` | `performance_agent` |
+| `packet_loss_pct` | `%` | `0 – 100` | `1 %` | `5 %` | `performance_agent` |
+| `throughput_mbps` | `Mbps` | `0 – 1,000,000` | informational | informational | `performance_agent` |
+| `bandwidth_mbps` | `Mbps` | `0 – 1,000,000` | informational | informational | `performance_agent` |
+| `link_utilization_pct` | `%` | `0 – 100` | `75 %` | `90 %` | `performance_agent` |
+| `signal_dbm` | `dBm` | `-120 – 0` | `-67 dBm` | `-78 dBm` | `performance_agent` |
+| `retransmission_pct` | `%` | `0 – 100` | `8 %` | `20 %` | `performance_agent` |
+| `cpu_pct` | `%` | `0 – 100` | `75 %` | `90 %` | `infrastructure_agent` |
+| `memory_pct` | `%` | `0 – 100` | `80 %` | `92 %` | `infrastructure_agent` |
+| `queue_drops` | `pkt` | `0 – 10^12` | `20 pkt` | `100 pkt` | `infrastructure_agent` |
+| `interface_errors` | `err` | `0 – 10^12` | `10 err` | `80 err` | `infrastructure_agent` |
+| `dns_latency_ms` | `ms` | `0 – 60,000` | `80 ms` | `250 ms` | `connectivity_agent` |
+| `dns_failure_pct` | `%` | `0 – 100` | `2 %` | `10 %` | `connectivity_agent` |
+| `dhcp_latency_ms` | `ms` | `0 – 60,000` | `200 ms` | `800 ms` | `connectivity_agent` |
+| `dhcp_failure_pct` | `%` | `0 – 100` | `2 %` | `10 %` | `connectivity_agent` |
 
 ---
 
-## 🧮 Mathematical Formulation & Scoring
+## Web Console Workspace (`public/`)
 
-### 1. Bayesian Degree of Anomaly
-For any observed metric value $x$, its normalized degree of anomaly $\delta \in [0, 1]$ is computed as:
+Accessible live at **[https://netcoop.vercel.app/](https://netcoop.vercel.app/)**:
 
-$$\delta(x) = \begin{cases} 
-0 & x < W \\
-0.5 \cdot \frac{x - W}{C - W} & W \le x < C \\
-0.5 + 0.5 \cdot \min\left(1, \frac{x - C}{C}\right) & x \ge C 
-\end{cases}$$
-
-*(where $W$ is the Warning threshold, and $C$ is the Critical threshold).*
-
-### 2. Evidence Coverage Penalty & Confidence Gating
-A candidate root cause $H$ with raw support score $S_{raw}(H) \in [0, 1]$ is evaluated against required diagnostic metrics $\mathcal{M}_{req}(H)$. If only a subset $\mathcal{M}_{obs} \subset \mathcal{M}_{req}$ is present in the input telemetry:
-
-$$\text{Coverage}(H) = \frac{|\mathcal{M}_{obs} \cap \mathcal{M}_{req}(H)|}{|\mathcal{M}_{req}(H)|}$$
-
-$$\text{Confidence}(H) = S_{raw}(H) \times \left(0.5 + 0.5 \times \text{Coverage}(H)\right)$$
-
-### 3. Insufficient Evidence Safety Guardrail
-If the maximum candidate score fails to meet the threshold:
-
-$$\max_H \text{Confidence}(H) < 0.40 \quad \lor \quad \text{Coverage}(H) < 0.50$$
-
-The system **refuses** to attribute an exact root cause. It transitions to `status: "insufficient_evidence"` and lists the unmonitored metrics required before an assessment can be made.
+1. **System Runtime (`#tab-boot`)**
+   - Displays the NetCoop identity card, 6-agent readiness status, 4 live hardware/network KPI cards (`Host Gateway Node`, `Host CPU & Memory`, `Live Target RTT / DNS`, `Latest Verdict`), the **Live Probed Network Targets & Local Host Gateway** table (including `CLIENT_BROWSER_EDGE` browser-to-edge RTT and click-to-inspect raw time-series samples), and a live runtime event log.
+2. **Live Diagnostics (`#tab-studio`)**
+   - **Live Network Target Prober**: Enter any custom domain, IP, or `host:port` list (or click preset target groups) to measure real DNS + TCP socket telemetry and diagnose immediately.
+   - **Telemetry Payload Editor**: Paste, edit, format, download, or upload/drag-and-drop custom `.json`, `.ndjson`, or `.csv` network telemetry.
+   - **8 Benchmark Fault Scenarios**: Single-click campus fault presets (`normal`, `link_congestion`, `weak_wifi`, `interface_fault`, `dns_failure`, `dhcp_failure`, `interop_failure`, `device_overload`).
+   - **Diagnostic Verdict & Evidence Suite**: Displays root-cause verdict, calibrated confidence, **Per-Node Telemetry Summary**, **Supporting Telemetry Evidence**, **Groq LPU CLI Remediation Runbook**, **Operator Change Control** sign-off, **Hypothesis Cause Ranking**, and raw Section 6 JSON export.
+3. **Network Topology (`#tab-topology`)**
+   - Dynamically computes tree depth from `topology.links` or device `parent`/`uplink` declarations to render a multi-tier hierarchical **SVG Dependency Graph**, node health cards, and the **Topology Link Adjacencies** table.
+4. **Agent Message Bus (`#tab-bus`)**
+   - Live filterable stream of all JSON-RPC v1.0.0 agent envelopes (filter by agent ID, envelope type, or full-text search) with a raw JSON-RPC envelope inspector modal and `.json` export.
+5. **Protocol Spec (`#tab-protocol`)**
+   - Live specification reference rendered from `/api/netcoop/protocol` detailing all 6 agent contracts, 4 scoring weights, 4 state-machine phases, and 16 canonical metric thresholds.
+6. **Command Palette (`/` or `Ctrl+K`)**
+   - Instant keyboard navigation across live probe actions, tabs, fault scenarios, and monitored node inspectors.
 
 ---
 
-## ⚡ Groq LPU AI Synthesis Engine
+## REST API Reference
 
-NetCoop AI pairs deterministic multi-agent correlation with the **Groq LPU (Language Processing Unit)** running **`openai/gpt-oss-120b`**:
-
-- **Sub-Second Latency:** Delivers full contextual reasoning in ~1.2 seconds.
-- **Strict JSON Enforcement:** Operates under `response_format: { type: "json_object" }` to prevent prompt drift or unparseable text.
-- **Actionable CLI Generation:** Synthesizes copy-pasteable terminal commands for network administrators:
+### `POST /api/netcoop/probe-live` (or `GET /api/netcoop/probe-live`)
+Actively probes real DNS resolution latency, multi-round TCP socket handshake RTT, jitter, packet loss, and host CPU/RAM counters, optionally running the full 6-agent diagnostic pipeline.
 
 ```bash
-# Generated Cisco Catalyst Remediation
-configure terminal
-interface GigabitEthernet1/0/24
- switchport mode trunk
- switchport trunk allowed vlan 10,20,30
- spanning-tree portfast trunk
- speed auto 1000
- duplex full
-end
-write memory
+curl -X POST https://netcoop.vercel.app/api/netcoop/probe-live \
+  -H "Content-Type: application/json" \
+  -d '{
+    "targets": "1.1.1.1:443, 8.8.8.8:443, github.com:443, api.groq.com:443",
+    "diagnose": true,
+    "samples": 5,
+    "interval": 45
+  }'
 ```
 
-- **Offline Resilience:** If network access or the Groq API key is unavailable, NetCoop AI falls back automatically to its rule-based heuristic recommendations.
-
----
-
-## 🏛️ IIT Bhubaneswar Campus Topology
-
-The application simulates an 8-node tier-3 campus network architecture:
-
-```
-                      [ core-router-01 ] (Cisco ASR 9000 - Datacenter)
-                              │
-                      [ dist-switch-01 ] (Cisco Catalyst 9500 - Academic)
-                              ├── [ srv-dns-01 ]  (BIND 9 Linux Resolver)
-                              ├── [ srv-dhcp-01 ] (ISC Kea Scope Pool)
-                              │
-               ┌──────────────┴──────────────┐
-               ▼                             ▼
-       [ HOSTEL_BRAHMAPUTRA_AP_04 ]            [ sw-hostel-01 ]
-      (Aruba AP-555 Wi-Fi)        (Juniper EX4300 Switch)
-         │           │                       │
-     [laptop-01] [laptop-02]            [desktop-lab-01]
-```
-
----
-
-## 🧪 Built-In Test Scenarios
-
-NetCoop AI includes 8 reproducible test scenarios available via the UI and API:
-
-| Scenario Key | Root Cause Injected | Affected Nodes | Expected Outcome |
-| :--- | :--- | :--- | :---: |
-| `normal` | Clean telemetry within operational bounds. | None | `no_fault_detected` (90%) |
-| `link_congestion` | Saturated uplink utilization (95%) on `dist-sw-01`. | `dist-sw-01`, downstream APs | `diagnosed` (87%) |
-| `weak_wifi` | RSSI degradation (-82 dBm) and high retries on AP. | `laptop-02`, `HOSTEL_BRAHMAPUTRA_AP_04` | `diagnosed` (86%) |
-| `interface_fault` | CRC error spikes and flapping on access switch. | `sw-hostel-01` | `diagnosed` (65%) |
-| `dns_failure` | Resolution timeouts (>950ms) on `srv-dns-01`. | Campus-wide clients | `diagnosed` (95%) |
-| `dhcp_failure` | Lease offer timeouts and scope pool starvation. | `srv-dhcp-01`, `laptop-01` | `diagnosed` (60%) |
-| `interop_failure` | Incompatible schema version (`netcoop.telemetry/2.0`). | Global | `error` (Gated) |
-| `device_overload` | CPU (98%) and RAM (96%) saturation on `core-router-01`. | Core infrastructure | `diagnosed` (95%) |
-
----
-
-## 💻 Web Application UI/UX
-
-The web application is built with vanilla ES modules, CSS variables, and zero heavy frontend frameworks:
-
-1. **Diagnosis Studio Tab:**
-   - 5-KPI live health ribbon.
-   - Interactive Telemetry Input editor with syntax preservation.
-   - 8-scenario quick-loader (*loads telemetry into editor for inspection prior to execution*).
-   - High-fidelity verdict banner featuring progress bar, confidence rating, and affected asset count.
-   - Evidence tables, cause rankings, data quality audits, and collapsible raw JSON reports.
-2. **Agent Message Bus Tab:**
-   - Live stream of all JSON-RPC v1.0.0 agent communications.
-   - Inspect modal allowing deep inspection of message payloads and timing.
-3. **Interoperability Protocol Tab:**
-   - Interactive documentation of schemas, agent lifecycles, and metric thresholds.
-4. **Campus Topology Tab:**
-   - Visual cards detailing hardware models, locations, subnets, and active roles.
-5. **Theme Engine:**
-   - Seamless switching between dark and light themes with `localStorage` persistence.
-
----
-
-## 🔌 REST API Specification
-
-### 1. `POST /api/netcoop/diagnose`
-Run a cooperative multi-agent diagnosis on provided telemetry.
+### `POST /api/netcoop/diagnose`
+Run a full cooperative 6-agent diagnosis on any JSON, NDJSON, or CSV telemetry payload.
 
 ```bash
-curl -X POST http://localhost:4000/api/netcoop/diagnose \
+curl -X POST https://netcoop.vercel.app/api/netcoop/diagnose \
   -H "Content-Type: application/json" \
   -d '{
     "telemetry": {
       "schema": "netcoop.telemetry/1.0",
-      "devices": [{"device_id": "core-sw-01"}],
-      "samples": [{"device_id": "core-sw-01", "cpu_pct": 98.5, "timestamp": "2026-11-01T04:00:00Z"}]
+      "devices": [
+        { "id": "CORE_RTR_01", "type": "core_router" },
+        { "id": "DIST_SW_02", "type": "distribution_switch", "parent": "CORE_RTR_01" }
+      ],
+      "samples": [
+        { "device_id": "DIST_SW_02", "link_utilization_pct": 96.4, "queue_drops": 185, "latency_ms": 142, "packet_loss_pct": 4.2 }
+      ]
     }
   }'
 ```
 
-### 2. `GET /api/netcoop/scenarios`
-Retrieve all built-in test scenarios.
+### `GET /api/netcoop/scenarios` & `GET /api/netcoop/scenarios/:key`
+List or generate telemetry for any of the 8 built-in campus benchmark scenarios.
 
-### 3. `POST /api/netcoop/scenarios/:key`
-Generate complete simulated telemetry for a given scenario key.
-
-### 5. `GET /api/netcoop/probe-live`
-Actively measure live host hardware, RAM, CPU, active network interfaces, and DNS query latency from the operating system runtime, producing a genuine non-synthetic telemetry dataset.
-
-### 4. `GET /api/netcoop/protocol`
-Fetch the active JSON-RPC protocol specification, scoring weights, and role definitions.
+### `GET /api/netcoop/protocol`
+Return the JSON-RPC v1.0.0 protocol schema, scoring weights, and agent role definitions.
 
 ---
 
-## 🚀 Quickstart Guide
-
-### Prerequisites
-- [Node.js](https://nodejs.org/) v18.0.0 or higher
-- (Optional) [Groq API Key](https://console.groq.com/) for LPU acceleration
+## Quickstart & Local Development
 
 ### 1. Clone & Install
 ```bash
@@ -359,126 +254,73 @@ cd Netcoop
 npm install
 ```
 
-### 2. Configure Environment
-Create a `.env` file from the provided example:
-```bash
-cp .env.example .env
-```
-Edit `.env` to include your Groq API key:
+### 2. Environment Configuration (Optional Groq API Key)
+Create a `.env` file in the project root:
 ```env
 NETCOOP_PORT=4000
 NETCOOP_GROQ_KEY=gsk_your_groq_api_key_here
 NETCOOP_GROQ_MODEL=openai/gpt-oss-120b
 ```
+*(If `NETCOOP_GROQ_KEY` is omitted, the deterministic 6-agent engine and heuristic CLI synthesizer run automatically without external dependencies.)*
 
-### 3. Launch Application
-
-**Web Dashboard (Interactive UI):**
+### 3. Run Web Server, CLI, or MCP Server
 ```bash
+# Start web server on http://localhost:4000
 npm start
-```
-Open your browser at: **`http://localhost:4000`**
 
-**CLI Mode (Problem Statement Deliverable #5):**
-```bash
-# Run diagnosis on scenario
+# Run CLI diagnostics on a scenario or custom telemetry file
 npm run cli -- --scenario link_congestion
-
-# Print pure Section 6 JSON report
 npm run cli -- --scenario weak_wifi --json
 
-# List available scenarios
-npm run cli -- --list
-```
-
-**Model Context Protocol (MCP) Server (Problem Statement §4 Optional Enhancement):**
-```bash
-# Launch standard JSON-RPC 2.0 MCP server over stdio
+# Launch JSON-RPC 2.0 Model Context Protocol (MCP) server over stdio
 npm run mcp
 ```
 
-For auto-reloading during development:
-```bash
-npm run dev
-```
-
 ---
 
-## 🎥 4-Minute Demo Video Walkthrough (Deliverable #4)
+## Automated Verification Suite
 
-In direct fulfillment of Round 2 Problem Statement **Deliverable #4** (*"A three-to-five-minute recording demonstrating an end-to-end diagnosis, inter-agent communication, and the final report"*), a full automated, high-definition (1440x900) video walkthrough has been recorded via Playwright:
-
-* **Video File (WebM 1440x900, 25fps, 4m 06s):** [`demo_video/NetCoop_AI_4min_Demo_Testing_Walkthrough.webm`](demo_video/NetCoop_AI_4min_Demo_Testing_Walkthrough.webm)
-* **Interactive Player Page:** Double-click [`demo_video/view_demo.html`](demo_video/view_demo.html) to open the walkthrough in Google Chrome or Microsoft Edge with interactive chapter navigation.
-* **Automated Recording Script:** Run `node scripts/record-demo.js` to re-record the entire 4-minute demo at any time.
-
-### Video Chapters:
-1. **0:00 – 0:35 (Part 1):** System Boot sequence, live cooperative agent kernel initialization, and 6 specialized diagnostic agent cards.
-2. **0:35 – 1:10 (Part 2):** Campus Topology visualizer inspecting IIT Bhubaneswar core routers, distribution switches, Wi-Fi APs, and server farm.
-3. **1:10 – 1:45 (Part 3):** JSON-RPC v1.0.0 Interoperability Protocol specification, agent contracts, and 16-metric arbitration threshold matrix.
-4. **1:45 – 2:20 (Part 4):** Scenario 1 (Normal Operation Baseline) diagnosis demonstrating clean telemetry evaluation and "NO FAULT DETECTED" verdict.
-5. **2:20 – 3:00 (Part 5):** Scenario 2 (Hostel Core Switch Link Congestion) demonstrating multi-hypothesis arbitration, confidence ranking, Human-in-the-Loop (HITL) operator review gate, and Section 6 JSON report.
-6. **3:00 – 3:35 (Part 6):** Agent Message Bus deep inspection inspecting raw JSON-RPC async Task, Finding, Dispute Challenge, and Corroboration envelopes.
-7. **3:35 – 4:06 (Part 7):** Live Real Host Network Prober measuring non-synthetic host CPU, RAM, active network adapters, and DNS latency.
-
----
-
-## 📊 Hackathon Submission Presentation (PPTX)
-
-In addition to the working application and demo video, an official 11-slide presentation deck is provided in native PowerPoint format (`.pptx`):
-
-* **Presentation File:** [`NetCoop_AI_Presentation_Final.pptx`](NetCoop_AI_Presentation_Final.pptx) (and [`NetCoop_AI_Presentation.pptx`](NetCoop_AI_Presentation.pptx))
-* **Slides Outline & Coverage:**
-  1. **Title Page:** Project Name, Problem Statement, Theme, Category, Team Void-Dev & Members.
-  2. **Problem Statement:** Real-world campus network anomalies at scale, silent cascading drops, and lack of multi-agent consensus.
-  3. **Idea & Approach Details:** Cooperative agent bus, dispute arbitration, Groq neural acceleration, and step-by-step pipeline.
-  4. **Technical Approach:** Complete multi-layer system architecture (Ingestion, JSON-RPC 1.0 Bus, Groq LPUs, Section 6 Output).
-  5. **Technology Stack & Process Flow:** Vanilla ES6+ SPA, Node.js 18+ LTS, Groq LPU inference (`openai/gpt-oss-120b`), native OS telemetry prober.
-  6. **Workflow Diagram:** End-to-end diagnostic flowchart from telemetry ingestion to automated Cisco/Aruba CLI runbooks.
-  7. **Use Case Diagram:** Interaction between Network Operators, NOC Engineers, Campus Admins, and Diagnostic Agents.
-  8. **Feasibility & Viability:** Concrete engineering solutions for telemetry noise, LLM hallucinations, and multi-vendor hardware.
-  9. **Impact & Benefits:** Measurable quantitative benefits (73% MTTR reduction, 4.2x faster localization) across academic and hostel networks.
-  10. **Future Scope & Scalability:** 6-pillar expansion roadmap (NetConf/Ansible closed-loop execution, eBPF gNMI streaming, multi-campus mesh).
-  11. **Implementation Approach & Architectural Rigor:** Strict Section 6 schema compliance, mathematical telemetry scoring, and HITL gate.
-
----
-
-## 🧪 Automated Verification Suite
-
-NetCoop AI includes a comprehensive standalone test suite verifying protocol compliance, normalization, and all 8 scenarios:
+Run the 7-stage verification suite covering protocol schema, JSON/CSV/NDJSON normalization, all 8 campus fault scenarios, insufficient-evidence guardrails, Section 6 schema compliance, and live host/network probing:
 
 ```bash
 npm test
 ```
 
-### Verification Output:
 ```text
 ======================================================
    NetCoop AI — Automated Test Suite
 ======================================================
 
-[1/5] Verifying Protocol Schema & Metadata...
+[1/7] Verifying Protocol Schema & Metadata...
   ✓ Protocol v1.0.0 and 16 metric definitions verified
 
-[2/5] Testing Telemetry Input Normalization...
+[2/7] Testing Telemetry Input Normalization...
   ✓ JSON telemetry parsed correctly
   ✓ CSV telemetry parsed correctly
 
-[3/5] Testing Scenario Registry...
+[3/7] Testing Scenario Registry...
   ✓ Loaded 8 built-in test scenarios
 
-[4/5] Running Multi-Agent Diagnosis on all 8 Scenarios...
+[4/7] Running Multi-Agent Diagnosis on all 8 Scenarios...
   • normal               -> no_fault_detected  [90%] | No fault detected: all reported metrics are normal
-  • link_congestion      -> diagnosed          [87%] | Likely link congestion on dist-sw-01
-  • weak_wifi            -> diagnosed          [86%] | Likely weak Wi-Fi signal at HOSTEL_BRAHMAPUTRA_AP_04
-  • interface_fault      -> diagnosed          [65%] | Likely physical or interface fault on sw-hostel-01
-  • dns_failure          -> diagnosed          [95%] | Likely DNS resolution failure or slowness
-  • dhcp_failure         -> diagnosed          [60%] | Possible DHCP failure or slowness seen at srv-dhcp-01
-  • interop_failure      -> error              [0%]  | Incompatible schema version "2.0"
-  • device_overload      -> diagnosed          [95%] | Likely resource overload on core-router-01
+  • link_congestion      -> diagnosed          [95%] | Likely link congestion on HOSTEL_CORE_SW_01
+  • weak_wifi            -> diagnosed          [88%] | Likely weak Wi-Fi signal at STUDENT_LAPTOP_14
+  • interface_fault      -> diagnosed          [65%] | Likely physical or interface fault on DEPT_CS_SW_02
+  • dns_failure          -> diagnosed          [95%] | Likely DNS resolution failure or slowness seen at CAMPUS_DNS_01
+  • dhcp_failure         -> diagnosed          [60%] | Possible DHCP failure or slowness seen at CAMPUS_DHCP_01
+  • interop_failure      -> error              [0%]  | Input validation failed: Incompatible schema version
+  • device_overload      -> diagnosed          [95%] | Likely resource overload on IITBBS_CORE_SW_01
 
-[5/5] Testing Guardrails (Must not claim exact root cause with insufficient evidence)...
+[5/7] Testing Guardrails (Must not claim exact root cause with insufficient evidence)...
   ✓ System correctly reports no false alarms when telemetry is clean/sparse
+
+[6/7] Verifying Exact Section 6 Output Schema Compliance...
+  ✓ Report schema precisely satisfies Problem Statement Section 6 specifications
+
+[7/7] Testing External Arbitrary Telemetry & Live Host Probing...
+  ✓ Live host network probe captured 20 real measurements
+  ✓ Arbitrary external CSV with custom devices diagnosed with real computed evidence
+  ✓ Arbitrary external NDJSON normalized and unit-converted without canned responses
 
 ======================================================
    ALL NETCOOP TESTS PASSED SUCCESSFULLY (100%)
@@ -487,8 +329,6 @@ npm test
 
 ---
 
-## 📄 License
+## License
 
-This project is licensed under the [MIT License](LICENSE) — free for academic, hackathon, and production use.
-
-**Developed with ❤️ for the Agentic AI Hackathon (Round 2) — IIT Bhubaneswar Campus.**
+Released under the [MIT License](LICENSE).
