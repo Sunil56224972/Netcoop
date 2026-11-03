@@ -1,7 +1,7 @@
 {
   "name": "netcoop-ai",
   "version": "1.0.0",
-  "description": "Multi-Agent Network Fault Diagnosis and Interoperability Web Application for IIT Bhubaneswar Campus Infrastructure.",
+  "description": "Cooperative Multi-Agent Network Fault Diagnosis, Live TCP/DNS Socket Probing & Root-Cause Localization Engine.",
   "main": "server.js",
   "bin": {
     "netcoop": "./cli.js"
@@ -14,11 +14,23 @@
     "test": "node test/test.js"
   },
   "keywords": [
-    "multi-agent",
-    "network-fault-diagnosis",
+    "multi-agent-systems",
     "agentic-ai",
+    "network-diagnostics",
+    "fault-localization",
+    "network-telemetry",
+    "root-cause-analysis",
+    "json-rpc",
     "groq",
-    "telemetry",
+    "llm-agents",
+    "network-monitoring",
+    "network-topology",
+    "mcp-server",
+    "nodejs",
+    "express",
+    "network-automation",
+    "aiops",
+    "observability",
     "iit-bhubaneswar"
   ],
   "author": "Sunil",
