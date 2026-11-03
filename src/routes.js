@@ -24,13 +24,20 @@ module.exports = function netcoopRoutes(ctx = {}) {
     }
   });
 
-  // GET or POST /api/netcoop/probe-live — actively measure real host, CPU, RAM & network telemetry
+  // GET or POST /api/netcoop/probe-live — actively measure real host, CPU, RAM, DNS & TCP RTT telemetry
   const handleLiveProbe = async (req, res) => {
     try {
+      const targets = (req.body && req.body.targets) || req.query.targets || null;
+      const runDiag = Boolean((req.body && req.body.diagnose) || req.query.diagnose === '1' || req.query.diagnose === 'true');
       const data = await probeLiveTelemetry({
-        samples: Number(req.query.samples || (req.body && req.body.samples) || 6),
-        intervalMs: Number(req.query.interval || (req.body && req.body.interval) || 150)
+        samples: Number(req.query.samples || (req.body && req.body.samples) || 4),
+        intervalMs: Number(req.query.interval || (req.body && req.body.interval) || 100),
+        targets
       });
+      if (runDiag) {
+        const diagnosis = await diagnose(data);
+        return res.json({ ok: true, telemetry: data, diagnosis });
+      }
       res.json({ ok: true, telemetry: data });
     } catch (err) {
       console.error('[NetCoop] probe-live error:', err);
