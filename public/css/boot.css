@@ -633,6 +633,11 @@
 }
 
 /* ─── Topology Graph & Node Cards ─────────────────────────────────────────── */
+.list__item.nc-sc {
+  grid-template-columns: 126px minmax(0, 1fr) auto;
+  gap: 14px;
+}
+
 .nc-topo-svg-wrap {
   width: 100%;
   overflow-x: auto;

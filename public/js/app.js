@@ -208,12 +208,21 @@ function summarizeTelemetryDataset(telemetryObj, reportObj = null) {
 
   const rawSamples = Array.isArray(telemetryObj.samples) ? telemetryObj.samples : (Array.isArray(telemetryObj) ? telemetryObj : []);
   const declaredDevices = Array.isArray(telemetryObj.devices) ? telemetryObj.devices : [];
-  const links = (telemetryObj.topology && Array.isArray(telemetryObj.topology.links)) ? telemetryObj.topology.links : [];
+  const rawLinks = (telemetryObj.topology && Array.isArray(telemetryObj.topology.links)) ? [...telemetryObj.topology.links] : [];
+  const linkKeySet = new Set(rawLinks.map((l) => `${l.from || l.upstream || l.parent}->${l.to || l.downstream || l.child}`));
 
   const devMap = new Map();
   declaredDevices.forEach((d) => {
     const did = d && (d.id || d.device_id);
     if (!did) return;
+    const parentId = d.parent || d.uplink || d.upstream || null;
+    if (parentId) {
+      const k = `${parentId}->${did}`;
+      if (!linkKeySet.has(k)) {
+        linkKeySet.add(k);
+        rawLinks.push({ from: parentId, to: did });
+      }
+    }
     devMap.set(did, {
       id: did,
       type: d.type || 'network_node',
@@ -226,6 +235,7 @@ function summarizeTelemetryDataset(telemetryObj, reportObj = null) {
       metrics: {}
     });
   });
+  const links = rawLinks;
 
   rawSamples.forEach((s) => {
     const id = s.device_id || s.device || s.host;
@@ -1041,26 +1051,46 @@ function renderTopologySvg(summary) {
   const { devices, links } = summary;
   if (!devices.length) return '';
 
-  // Organize nodes into tiers: upstream roots vs downstream children
-  const childIds = new Set(links.map((l) => l.to || l.downstream || l.child));
-  const roots = devices.filter((d) => !childIds.has(d.id));
-  const tier1 = roots.length ? roots : [devices[0]];
-  const tier1Set = new Set(tier1.map((d) => d.id));
-  const tier2 = devices.filter((d) => !tier1Set.has(d.id));
+  // Compute true tree depth (tier 0, 1, 2, 3...) from upstream->downstream links
+  const parentOf = new Map();
+  links.forEach((l) => {
+    const from = l.from || l.upstream || l.parent;
+    const to = l.to || l.downstream || l.child;
+    if (from && to && from !== to) parentOf.set(to, from);
+  });
 
-  const width = 880;
-  const height = tier2.length ? 220 : 130;
+  const depthOf = (id, visited = new Set()) => {
+    if (visited.has(id)) return 0;
+    visited.add(id);
+    const p = parentOf.get(id);
+    return p ? 1 + depthOf(p, visited) : 0;
+  };
+
+  const tiers = new Map();
+  let maxDepth = 0;
+  devices.forEach((d) => {
+    const depth = depthOf(d.id);
+    if (depth > maxDepth) maxDepth = depth;
+    if (!tiers.has(depth)) tiers.set(depth, []);
+    tiers.get(depth).push(d);
+  });
+
+  const maxNodesInTier = Math.max(...[...tiers.values()].map((arr) => arr.length), 1);
+  const boxW = 164;
+  const boxH = 42;
+  const width = Math.max(920, maxNodesInTier * (boxW + 28) + 40);
+  const rowGap = 78;
+  const height = Math.max(120, (maxDepth + 1) * rowGap + 24);
   const pos = new Map();
 
-  tier1.forEach((d, idx) => {
-    const x = Math.round(((idx + 1) / (tier1.length + 1)) * width);
-    pos.set(d.id, { x, y: 46, d });
-  });
-
-  tier2.forEach((d, idx) => {
-    const x = Math.round(((idx + 1) / (tier2.length + 1)) * width);
-    pos.set(d.id, { x, y: 162, d });
-  });
+  for (let depth = 0; depth <= maxDepth; depth++) {
+    const rowNodes = tiers.get(depth) || [];
+    const y = 42 + depth * rowGap;
+    rowNodes.forEach((d, idx) => {
+      const x = Math.round(((idx + 1) / (rowNodes.length + 1)) * width);
+      pos.set(d.id, { x, y, d });
+    });
+  }
 
   const linkLines = links.map((l) => {
     const fromId = l.from || l.upstream || l.parent;
@@ -1069,27 +1099,28 @@ function renderTopologySvg(summary) {
     const p2 = pos.get(toId);
     if (!p1 || !p2) return '';
     const isImp = p1.d.isImpaired || p2.d.isImpaired;
-    return `<line x1="${p1.x}" y1="${p1.y + 18}" x2="${p2.x}" y2="${p2.y - 18}" stroke="${isImp ? 'var(--crit)' : 'var(--line-strong)'}" stroke-width="${isImp ? '2' : '1.5'}" stroke-dasharray="${isImp ? '4 3' : 'none'}" />`;
+    const midY = Math.round((p1.y + boxH / 2 + (p2.y - boxH / 2)) / 2);
+    return `<path d="M ${p1.x} ${p1.y + boxH / 2} C ${p1.x} ${midY}, ${p2.x} ${midY}, ${p2.x} ${p2.y - boxH / 2}" fill="none" stroke="${isImp ? 'var(--crit)' : 'var(--line-strong)'}" stroke-width="${isImp ? '2' : '1.5'}" stroke-dasharray="${isImp ? '4 3' : 'none'}" />`;
   }).join('');
 
   const nodeBoxes = [...pos.values()].map(({ x, y, d }) => {
     const stroke = d.isRoot ? 'var(--crit)' : d.isImpaired ? 'var(--high)' : 'var(--ok)';
     const fill = 'var(--surface)';
-    const labelStr = d.id.length > 20 ? d.id.slice(0, 19) + '…' : d.id;
-    const subStr = d.avgLatency != null ? `${fmtDec(d.avgLatency, 1)} ms` : (d.ip !== '-' ? d.ip : d.role.slice(0, 16));
+    const labelStr = d.id.length > 21 ? d.id.slice(0, 20) + '…' : d.id;
+    const subStr = d.avgLatency != null ? `${fmtDec(d.avgLatency, 1)} ms RTT · ${fmtDec(d.avgLoss || 0, 1)}% loss` : (d.ip !== '-' ? d.ip : d.role.slice(0, 18));
     return `
-      <g class="nc-svg-node" data-dev="${esc(d.id)}" style="cursor:pointer" transform="translate(${x - 74}, ${y - 20})">
-        <rect width="148" height="40" rx="4" fill="${fill}" stroke="${stroke}" stroke-width="1.75" />
-        <circle cx="12" cy="14" r="3.5" fill="${stroke}" />
-        <text x="22" y="17" fill="var(--ink)" font-family="var(--font-mono)" font-size="10.5" font-weight="600">${esc(labelStr)}</text>
-        <text x="12" y="31" fill="var(--ink-3)" font-family="var(--font-mono)" font-size="9.5">${esc(subStr)}</text>
+      <g class="nc-svg-node" data-dev="${esc(d.id)}" style="cursor:pointer" transform="translate(${x - boxW / 2}, ${y - boxH / 2})">
+        <rect width="${boxW}" height="${boxH}" rx="4" fill="${fill}" stroke="${stroke}" stroke-width="1.75" />
+        <circle cx="12" cy="15" r="3.5" fill="${stroke}" />
+        <text x="22" y="18" fill="var(--ink)" font-family="var(--font-mono)" font-size="10.5" font-weight="600">${esc(labelStr)}</text>
+        <text x="12" y="32" fill="var(--ink-3)" font-family="var(--font-mono)" font-size="9.5">${esc(subStr)}</text>
       </g>
     `;
   }).join('');
 
   return `
     <div class="nc-topo-svg-wrap">
-      <svg class="nc-topo-svg" viewBox="0 0 ${width} ${height}" aria-label="Network Topology Dependency Graph">
+      <svg class="nc-topo-svg" style="max-height:${height}px" viewBox="0 0 ${width} ${height}" aria-label="Network Topology Dependency Graph">
         ${linkLines}
         ${nodeBoxes}
       </svg>
