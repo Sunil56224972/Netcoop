@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/views.css">
-  <link rel="stylesheet" href="css/boot.css">
+  <link rel="stylesheet" href="css/boot.css?v=5">
   <script>
     (function() {
       const saved = localStorage.getItem('netcoop-theme');
@@ -27,21 +27,78 @@
   </script>
 </head>
 <body>
-  <!-- Boot -->
-  <div id="netcoop-boot-screen" class="nc-splash">
-    <div class="nc-splash__inner">
-      <img src="images/netcoop-splash.png" alt="NetCoop" class="nc-splash__logo" />
-      <div class="nc-splash__bar"><div class="nc-splash__fill" id="boot-progress-bar"></div></div>
-      <p class="nc-splash__status" id="boot-status-text">Preparing workspace&hellip;</p>
+  <!-- NetCoop AI System Boot Screen -->
+  <div id="netcoop-boot-screen" class="boot-screen" aria-label="NetCoop AI System Boot">
+    <div class="nc-boot-panel">
+      <div class="nc-boot-panel__head">
+        <span class="nc-boot-panel__title">
+          <span class="nc-boot-panel__dot"></span>
+          NetCoop Diagnostic Runtime
+        </span>
+        <span class="nc-boot-panel__meta">IIT-BBS &middot; v1.0.0</span>
+      </div>
+
+      <div class="nc-boot-stage">
+        <img src="images/netcoop-logo-light.png" alt="NetCoop — Multi-Agent Network Intelligence" class="nc-logo-light" width="184" />
+        <img src="images/netcoop-logo-dark.png" alt="NetCoop — Multi-Agent Network Intelligence" class="nc-logo-dark" width="184" />
+      </div>
+
+      <table class="nc-boot-checks" aria-label="Subsystem verification">
+        <tbody>
+          <tr id="boot-row-0">
+            <td class="nc-boot-checks__id">01</td>
+            <td class="nc-boot-checks__name">Campus Topology Graph</td>
+            <td class="nc-boot-checks__spec">8 nodes</td>
+            <td class="nc-boot-checks__state"><span class="nc-check-badge is-sync" id="boot-chk-0">SYNC</span></td>
+          </tr>
+          <tr id="boot-row-1">
+            <td class="nc-boot-checks__id">02</td>
+            <td class="nc-boot-checks__name">JSON-RPC Message Bus</td>
+            <td class="nc-boot-checks__spec">v1.0.0</td>
+            <td class="nc-boot-checks__state"><span class="nc-check-badge" id="boot-chk-1">WAIT</span></td>
+          </tr>
+          <tr id="boot-row-2">
+            <td class="nc-boot-checks__id">03</td>
+            <td class="nc-boot-checks__name">Diagnostic Agent Mesh</td>
+            <td class="nc-boot-checks__spec">6 agents</td>
+            <td class="nc-boot-checks__state"><span class="nc-check-badge" id="boot-chk-2">WAIT</span></td>
+          </tr>
+          <tr id="boot-row-3">
+            <td class="nc-boot-checks__id">04</td>
+            <td class="nc-boot-checks__name">Groq LPU Inference</td>
+            <td class="nc-boot-checks__spec">gpt-oss-120b</td>
+            <td class="nc-boot-checks__state"><span class="nc-check-badge" id="boot-chk-3">WAIT</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="nc-boot-panel__foot">
+        <div class="boot-status-box">
+          <div class="boot-status-row">
+            <div class="boot-status-lead">
+              <span class="boot-pulse-dot"></span>
+              <span id="boot-status-text" class="boot-status-text">Initializing campus topology mesh&hellip;</span>
+            </div>
+            <span id="boot-percent" class="boot-percent">0%</span>
+          </div>
+          <div class="boot-progress-track">
+            <div id="boot-progress-bar" class="boot-progress-bar"></div>
+          </div>
+        </div>
+      </div>
     </div>
-    <footer class="nc-splash__foot">IIT Bhubaneswar &nbsp;&middot;&nbsp; Tejas India Hackathon 2026</footer>
+
+    <div class="nc-boot-caption">
+      <span>IIT Bhubaneswar Campus Infrastructure</span>
+      <button type="button" class="nc-boot-skip" id="boot-skip-btn">Skip &rarr;</button>
+    </div>
   </div>
 
   <div class="shell" style="min-height:100vh;display:flex;flex-direction:column">
     <!-- NetCoop AI Topbar -->
     <header class="topbar">
       <div class="topbar__brand" id="boot-reboot-btn" role="button" tabindex="0" title="NetCoop AI — Click to reboot system">
-        <img src="images/netcoop-emblem.png" alt="NetCoop Logo" class="topbar-logo" />
+        <img src="images/netcoop-emblem.png" alt="NetCoop Logo" class="topbar-logo" width="26" height="26" />
         <div class="crumbs">
           <span>IIT Bhubaneswar</span>
           <span>/</span>
@@ -51,7 +108,7 @@
 
       <div class="topbar__spacer"></div>
 
-      <div class="status-pill" id="status-pill-btn" style="cursor:pointer" title="Click to inspect system telemetry boot status">
+      <div class="status-pill" id="status-pill-btn" style="cursor:pointer" title="Click to replay system boot sequence">
         <span class="status-dot"></span>
         <span id="top-status">AI idle</span>
       </div>
@@ -72,7 +129,7 @@
     <!-- Main View Content Area -->
     <main class="view" style="padding-top:16px">
       <div class="page-head">
-        <img src="images/netcoop-emblem.png" alt="NetCoop AI Logo" class="page-head__logo" />
+        <img src="images/netcoop-emblem.png" alt="NetCoop AI Logo" class="page-head__logo" width="38" height="38" />
         <div class="page-head__text">
           <h1 class="page-title">NetCoop AI</h1>
           <p class="page-sub">Multi-agent cooperative network fault diagnosis &amp; root cause localization.</p>
@@ -83,7 +140,7 @@
       <nav class="tabs" role="tablist">
         <button class="tab is-on" data-tab="boot" role="tab" aria-selected="true">
           <span class="tab-boot-badge">
-            <img src="images/netcoop-emblem.png" alt="NetCoop" class="tab-boot-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block';" />
+            <img src="images/netcoop-emblem.png" alt="NetCoop" class="tab-boot-logo" width="14" height="14" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block';" />
             <svg class="tab-boot-power-fallback" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
               <line x1="12" y1="2" x2="12" y2="12"></line>
@@ -106,127 +163,145 @@
         </button>
       </nav>
 
-      <!-- Tab 0: System Boot Tab (Booting Tab with Animated Logo) -->
+      <!-- Tab 0: System Boot & Runtime Overview -->
       <div id="tab-boot" class="tab-pane stack reveal">
-                <section class="boot-tab-hero">
-
-
-          <div style="margin-bottom:18px">
-            <img src="images/netcoop-emblem.png" alt="NetCoop AI Logo" class="boot-tab-logo" id="boot-tab-interactive-logo" title="NetCoop AI — Click to reboot diagnostic agents" />
+        <section class="nc-boot-overview">
+          <div class="nc-boot-brand-cell" id="boot-tab-interactive-logo" title="Click to replay full-screen boot sequence">
+            <img src="images/netcoop-logo-light.png" alt="NetCoop — Multi-Agent Network Intelligence" class="nc-logo-light" width="168" />
+            <img src="images/netcoop-logo-dark.png" alt="NetCoop — Multi-Agent Network Intelligence" class="nc-logo-dark" width="168" />
+            <span class="nc-boot-brand-hint">Click emblem to replay boot</span>
           </div>
 
+          <div class="nc-boot-summary-cell">
+            <div class="panel__head">
+              <h2 class="panel__title">Cooperative Diagnostic Runtime</h2>
+              <span class="panel__meta" style="display:inline-flex;align-items:center;gap:8px">
+                <span class="pill pill--CONTAINED">6 / 6 Agents Online</span>
+              </span>
+            </div>
 
-          <h2 class="boot-tab-title">NETCOOP AI KERNEL</h2>
-          <p class="boot-tab-sub">
-            Multi-Agent Cooperative Network Fault Diagnosis &amp; Root Cause Localization System for IIT Bhubaneswar Campus Infrastructure.
-          </p>
+            <div class="nc-boot-summary-body">
+              <p class="nc-boot-summary-lead">
+                Autonomous multi-agent fault localization and peer hypothesis arbitration for IIT Bhubaneswar campus network infrastructure over the JSON-RPC v1.0.0 message bus.
+              </p>
 
-          <div class="boot-tab-badges">
-            <span class="pill pill--CONTAINED"><span class="status-dot" style="background:#10b981"></span> Telemetry Active</span>
-            <span class="pill pill--admin">JSON-RPC v1.0.0 Bus</span>
-            <span class="pill pill--viewer">Groq LPUs (gpt-oss-120b)</span>
-            <span class="pill pill--viewer">6 Cooperative Agents</span>
-            <span class="pill pill--viewer">8 Topology Nodes</span>
-          </div>
+              <div class="nc-boot-kpis">
+                <div class="nc-boot-kpi">
+                  <div class="nc-boot-kpi__label">Agent Mesh</div>
+                  <div class="nc-boot-kpi__val">6 Active</div>
+                  <div class="nc-boot-kpi__sub">5 domain + Groq LLM</div>
+                </div>
+                <div class="nc-boot-kpi">
+                  <div class="nc-boot-kpi__label">Inference Engine</div>
+                  <div class="nc-boot-kpi__val">gpt-oss-120b</div>
+                  <div class="nc-boot-kpi__sub">Groq LPU runtime</div>
+                </div>
+                <div class="nc-boot-kpi">
+                  <div class="nc-boot-kpi__label">Message Protocol</div>
+                  <div class="nc-boot-kpi__val">JSON-RPC 1.0</div>
+                  <div class="nc-boot-kpi__sub">Peer challenge bus</div>
+                </div>
+                <div class="nc-boot-kpi">
+                  <div class="nc-boot-kpi__label">Campus Topology</div>
+                  <div class="nc-boot-kpi__val">8 Nodes</div>
+                  <div class="nc-boot-kpi__sub">Core, dist, edge, Wi-Fi</div>
+                </div>
+              </div>
 
-          <div class="boot-tab-actions">
-            <button class="btn btn--primary" id="btn-reboot-tab"><i data-icon="refresh"></i> Reboot Agents &amp; Re-run Booting</button>
-            <button class="btn" id="btn-tab-to-studio"><i data-icon="terminal"></i> Open Diagnosis Studio</button>
-            <button class="btn" id="btn-tab-to-topology"><i data-icon="network"></i> Inspect Campus Nodes</button>
-          </div>
+              <div class="boot-status-box">
+                <div class="boot-status-row">
+                  <div class="boot-status-lead">
+                    <span class="boot-pulse-dot"></span>
+                    <span id="tab-boot-status-text" class="boot-status-text">All agents initialized and standing by for telemetry diagnosis</span>
+                  </div>
+                  <span id="tab-boot-percent" class="boot-percent">100%</span>
+                </div>
+                <div class="boot-progress-track">
+                  <div id="tab-boot-progress-bar" class="boot-progress-bar" style="width:100%"></div>
+                </div>
+              </div>
 
-          <!-- Live Booting Progress Bar -->
-          <div class="boot-status-box" style="max-width:820px">
-            <div class="boot-status-row">
-              <div class="boot-status-lead">
-                <span class="boot-pulse-dot"></span>
-                <span id="tab-boot-status-text" class="boot-status-text">All agents booted and ready for telemetry diagnosis</span>
+              <div class="nc-boot-controls">
+                <div class="nc-boot-actions">
+                  <button class="btn btn--primary" id="btn-reboot-tab"><i data-icon="refresh"></i> Re-run Boot Sequence</button>
+                  <button class="btn" id="btn-tab-to-studio"><i data-icon="terminal"></i> Open Diagnosis Studio</button>
+                  <button class="btn" id="btn-tab-to-topology"><i data-icon="network"></i> Inspect Campus Nodes</button>
+                </div>
+                <span class="small mono muted">Section 6 Schema Guardrails Active</span>
               </div>
-              <span id="tab-boot-percent" class="boot-percent">100%</span>
-            </div>
-            <div class="boot-progress-track">
-              <div id="tab-boot-progress-bar" class="boot-progress-bar" style="width:100%">
-                <span class="boot-progress-spark"></span>
-              </div>
-              <div class="boot-track-ticks" aria-hidden="true">
-                <span style="left:0%"></span>
-                <span style="left:25%"></span>
-                <span style="left:50%"></span>
-                <span style="left:75%"></span>
-                <span style="left:100%"></span>
-              </div>
-            </div>
-          </div>
-
-                    <!-- High-Tech Agent Boot Log Console -->
-          <div class="boot-tab-console">
-            <div class="boot-tab-console__head">
-              <div class="boot-console-dots">
-                <span class="boot-console-dot boot-console-dot--red"></span>
-                <span class="boot-console-dot boot-console-dot--amber"></span>
-                <span class="boot-console-dot boot-console-dot--green"></span>
-              </div>
-              <span style="margin-left:6px">netcoop-agent-mesh-boot.log</span>
-              <span style="margin-left:auto;font-size:11px">LIVE FEED</span>
-            </div>
-            <div class="boot-tab-console__body" id="tab-boot-log">
-              <div class="boot-log-line"><span class="boot-log-time">[00:00:01]</span> <span class="boot-log-tag boot-log-tag--sync">INIT</span> Core Multi-Agent Kernel loaded (Node.js v18+, Express v4.21, JSON-RPC v1.0.0 bus ready)</div>
-              <div class="boot-log-line"><span class="boot-log-time">[00:00:02]</span> <span class="boot-log-tag boot-log-tag--ok">BOOT</span> Telemetry &amp; Performance Agent (performance_agent) online &rarr; latency, jitter, loss, utilization</div>
-              <div class="boot-log-line"><span class="boot-log-time">[00:00:03]</span> <span class="boot-log-tag boot-log-tag--ok">BOOT</span> Infrastructure Health Agent (infrastructure_agent) online &rarr; CPU, RAM, queue drops, interface errors</div>
-              <div class="boot-log-line"><span class="boot-log-time">[00:00:04]</span> <span class="boot-log-tag boot-log-tag--ok">BOOT</span> Connectivity Analysis Agent (connectivity_agent) online &rarr; campus topology graph &amp; blast radius</div>
-              <div class="boot-log-line"><span class="boot-log-time">[00:00:05]</span> <span class="boot-log-tag boot-log-tag--sync">BOOT</span> Fault Correlation Agent (correlation_agent) online &rarr; multi-hypothesis ranking &amp; challenge bus</div>
-              <div class="boot-log-line"><span class="boot-log-time">[00:00:06]</span> <span class="boot-log-tag boot-log-tag--ok">BOOT</span> Recommendation &amp; Reporting Agent (reporting_agent) online &rarr; Section 6 schema &amp; guardrails active</div>
-              <div class="boot-log-line"><span class="boot-log-time">[00:00:07]</span> <span class="boot-log-tag boot-log-tag--ok">READY</span> Groq LLM Reasoning Agent (groq_llm_agent) online &rarr; ultra-fast gpt-oss-120b inference connected</div>
-              <div class="boot-log-line"><span class="boot-log-time">[00:00:08]</span> <span class="boot-log-tag boot-log-tag--ok">READY</span> IIT Bhubaneswar Campus Telemetry Mesh: ONLINE • Standing by for telemetry input</div>
-            </div>
-          </div>
-
-          <!-- 6 Cooperative Agent Cards Grid (Conforming to Problem Statement Architecture) -->
-          <div class="boot-agent-grid">
-            <div class="boot-agent-card">
-              <div class="boot-agent-card__head">
-                <span class="boot-agent-card__name"><i data-icon="activity"></i> Performance Agent</span>
-                <span class="pill pill--CONTAINED">Active</span>
-              </div>
-              <div class="boot-agent-card__meta">performance_agent &bull; Latency, Loss, Jitter, Utilization</div>
-            </div>
-            <div class="boot-agent-card">
-              <div class="boot-agent-card__head">
-                <span class="boot-agent-card__name"><i data-icon="cpu"></i> Infrastructure Agent</span>
-                <span class="pill pill--CONTAINED">Active</span>
-              </div>
-              <div class="boot-agent-card__meta">infrastructure_agent &bull; CPU, RAM, Queue Drops, Errors</div>
-            </div>
-            <div class="boot-agent-card">
-              <div class="boot-agent-card__head">
-                <span class="boot-agent-card__name"><i data-icon="network"></i> Connectivity Agent</span>
-                <span class="pill pill--CONTAINED">Active</span>
-              </div>
-              <div class="boot-agent-card__meta">connectivity_agent &bull; Campus Topology &amp; Blast Radius</div>
-            </div>
-            <div class="boot-agent-card">
-              <div class="boot-agent-card__head">
-                <span class="boot-agent-card__name"><i data-icon="layers"></i> Fault Correlation</span>
-                <span class="pill pill--CONTAINED">Active</span>
-              </div>
-              <div class="boot-agent-card__meta">correlation_agent &bull; Hypothesis Ranking &amp; Challenges</div>
-            </div>
-            <div class="boot-agent-card">
-              <div class="boot-agent-card__head">
-                <span class="boot-agent-card__name"><i data-icon="file"></i> Reporting Agent</span>
-                <span class="pill pill--CONTAINED">Active</span>
-              </div>
-              <div class="boot-agent-card__meta">reporting_agent &bull; Section 6 JSON Report &amp; Guardrails</div>
-            </div>
-            <div class="boot-agent-card">
-              <div class="boot-agent-card__head">
-                <span class="boot-agent-card__name"><i data-icon="zap"></i> Groq LLM Agent</span>
-                <span class="pill pill--admin">Groq LPU</span>
-              </div>
-              <div class="boot-agent-card__meta">groq_llm_agent &bull; gpt-oss-120b CLI Runbook Synthesis</div>
             </div>
           </div>
         </section>
+
+        <div class="nc-boot-split">
+          <!-- Initialization Sequence Log -->
+          <section class="panel">
+            <div class="panel__head">
+              <h2 class="panel__title">Runtime Initialization Sequence</h2>
+              <span class="panel__meta mono">netcoop-kernel.log</span>
+            </div>
+            <div class="boot-tab-console__body" id="tab-boot-log">
+              <div class="boot-log-line"><span class="boot-log-time">00:00.04</span> <span class="boot-log-tag boot-log-tag--sync">INIT</span> <span>Multi-agent runtime mounted (Express v4.21, JSON-RPC v1.0.0 bus)</span></div>
+              <div class="boot-log-line"><span class="boot-log-time">00:00.18</span> <span class="boot-log-tag boot-log-tag--ok">OK</span> <span>performance_agent bound &rarr; latency, jitter, packet loss, link utilization</span></div>
+              <div class="boot-log-line"><span class="boot-log-time">00:00.31</span> <span class="boot-log-tag boot-log-tag--ok">OK</span> <span>infrastructure_agent bound &rarr; CPU, memory, queue drops, interface errors</span></div>
+              <div class="boot-log-line"><span class="boot-log-time">00:00.46</span> <span class="boot-log-tag boot-log-tag--ok">OK</span> <span>connectivity_agent bound &rarr; IIT Bhubaneswar 8-node dependency graph</span></div>
+              <div class="boot-log-line"><span class="boot-log-time">00:00.62</span> <span class="boot-log-tag boot-log-tag--sync">SYNC</span> <span>correlation_agent bound &rarr; cross-domain hypothesis arbitration</span></div>
+              <div class="boot-log-line"><span class="boot-log-time">00:00.79</span> <span class="boot-log-tag boot-log-tag--ok">OK</span> <span>reporting_agent bound &rarr; Section 6 compliance &amp; safety guardrails</span></div>
+              <div class="boot-log-line"><span class="boot-log-time">00:00.94</span> <span class="boot-log-tag boot-log-tag--ok">READY</span> <span>groq_llm_agent connected &rarr; openai/gpt-oss-120b LPU runbook synthesis</span></div>
+            </div>
+          </section>
+
+          <!-- Registered Agents Table -->
+          <section class="panel">
+            <div class="panel__head">
+              <h2 class="panel__title">Registered Diagnostic Agents</h2>
+              <span class="panel__meta">6 cooperative workers</span>
+            </div>
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Agent ID</th>
+                    <th>Diagnostic Domain</th>
+                    <th class="num">State</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="mono">performance_agent</td>
+                    <td class="muted">Latency, loss, jitter, throughput</td>
+                    <td class="num"><span class="pill pill--CONTAINED">Online</span></td>
+                  </tr>
+                  <tr>
+                    <td class="mono">infrastructure_agent</td>
+                    <td class="muted">CPU, RAM, queue drops, CRC errors</td>
+                    <td class="num"><span class="pill pill--CONTAINED">Online</span></td>
+                  </tr>
+                  <tr>
+                    <td class="mono">connectivity_agent</td>
+                    <td class="muted">Campus topology &amp; blast radius</td>
+                    <td class="num"><span class="pill pill--CONTAINED">Online</span></td>
+                  </tr>
+                  <tr>
+                    <td class="mono">correlation_agent</td>
+                    <td class="muted">Hypothesis ranking &amp; peer challenges</td>
+                    <td class="num"><span class="pill pill--CONTAINED">Online</span></td>
+                  </tr>
+                  <tr>
+                    <td class="mono">reporting_agent</td>
+                    <td class="muted">Section 6 JSON report &amp; guardrails</td>
+                    <td class="num"><span class="pill pill--CONTAINED">Online</span></td>
+                  </tr>
+                  <tr>
+                    <td class="mono">groq_llm_agent</td>
+                    <td class="muted">gpt-oss-120b CLI runbook synthesis</td>
+                    <td class="num"><span class="pill pill--NEW">Groq LPU</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
       </div>
 
       <!-- Tab 1: Diagnosis Studio -->
@@ -310,6 +385,6 @@
   <div class="toasts" id="toasts"></div>
 
   <!-- Frontend Logic -->
-  <script type="module" src="js/app.js"></script>
+  <script type="module" src="js/app.js?v=5"></script>
 </body>
 </html>

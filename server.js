@@ -14,10 +14,19 @@ const HOST = process.env.HOST || '0.0.0.0';
 
 const app = express();
 app.disable('x-powered-by');
+app.set('etag', false);
 
 // Middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Prevent stale 304 Not Modified on Vercel serverless (which sets static 2018 mtime)
+app.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
 
 // Mount NetCoop API routes
 const router = netcoopRoutes({});
@@ -25,11 +34,19 @@ app.use('/api/netcoop', router);
 app.use('/api', router); // Convenient alias
 
 // Serve frontend static assets
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+  etag: false,
+  lastModified: false,
+  maxAge: 0
+}));
 
 // SPA fallback
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.sendFile(path.join(__dirname, 'public', 'index.html'), {
+    etag: false,
+    lastModified: false
+  });
 });
 
 // Start Server
@@ -55,4 +72,3 @@ if (require.main === module) {
 }
 
 module.exports = app;
-

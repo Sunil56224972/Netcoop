@@ -1,94 +1,466 @@
-/* ===  NetCoop AI — Splash Screen  =======================================
-   Minimal brand splash. Logo, progress, done.
-   No terminal cosplay, no fake POST, no spec grids.
-   ======================================================================== */
+/* ==========================================================================
+   NetCoop AI — Handcrafted System Boot & Runtime Overview
+   Swiss / IBM Plex Engineering Aesthetic — Zero AI Clutter
+   ========================================================================== */
 
-/* --- overlay ------------------------------------------------------------ */
+/* ─── Full-Screen Boot Overlay ────────────────────────────────────────────── */
+#netcoop-boot-screen,
+.boot-screen,
 .nc-splash {
-  position: fixed;
-  inset: 0;
-  z-index: 99999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #fff;
-  transition: opacity .5s cubic-bezier(.4,0,.2,1);
-}
-.nc-splash.out { opacity: 0; pointer-events: none; }
-
-/* --- centred content ---------------------------------------------------- */
-.nc-splash__inner {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 99999 !important;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0;
-  /* nudge up just a touch so it feels optically centred */
-  margin-top: -28px;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg, #f4f5f7);
+  color: var(--ink, #15181d);
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* --- logo --------------------------------------------------------------- */
-.nc-splash__logo {
-  width: 210px;
+#netcoop-boot-screen.is-loaded,
+#netcoop-boot-screen.out,
+.boot-screen.is-loaded,
+.nc-splash.out {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Defensive size guard so no image inside boot screen can ever render oversized */
+#netcoop-boot-screen img,
+.boot-screen img,
+.nc-splash img {
+  max-width: 196px !important;
+  max-height: 196px !important;
+  width: 196px;
   height: auto;
   object-fit: contain;
-  margin-bottom: 36px;
-  /* very gentle entrance */
-  animation: splash-logo-in .6s cubic-bezier(.16,1,.3,1) both;
-}
-@keyframes splash-logo-in {
-  from { opacity: 0; transform: scale(.92) translateY(8px); }
-  to   { opacity: 1; transform: none; }
+  display: block;
 }
 
-/* --- progress track ----------------------------------------------------- */
-.nc-splash__bar {
-  width: 180px;
-  height: 3px;
-  border-radius: 3px;
-  background: #eee;
+/* ─── Architectural Boot Panel ────────────────────────────────────────────── */
+.nc-boot-panel {
+  width: 100%;
+  max-width: 460px;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--line-strong, #cdd2d8);
+  border-radius: var(--r-lg, 6px);
+  box-shadow: var(--shadow-2, 0 8px 24px -8px rgba(16, 24, 40, 0.18));
   overflow: hidden;
-  margin-bottom: 18px;
-  animation: splash-bar-in .4s .25s cubic-bezier(.16,1,.3,1) both;
-}
-@keyframes splash-bar-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  animation: nc-boot-rise 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.nc-splash__fill {
+@keyframes nc-boot-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.nc-boot-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 38px;
+  padding: 0 14px;
+  background: var(--surface-2, #f6f7f9);
+  border-bottom: 1px solid var(--line, #e1e4e8);
+  font-size: 12px;
+}
+
+.nc-boot-panel__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--ink, #15181d);
+}
+
+.nc-boot-panel__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent, #2d5bd1);
+}
+
+.nc-boot-panel__meta {
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  color: var(--ink-3, #7a818c);
+}
+
+/* ─── Brand Lockup Stage (Social Network Logo) ────────────────────────────── */
+.nc-boot-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 24px 24px;
+  background: var(--surface, #ffffff);
+  border-bottom: 1px solid var(--line, #e1e4e8);
+}
+
+.nc-logo-light,
+.nc-logo-dark {
+  width: 184px !important;
+  max-width: 184px !important;
+  height: auto !important;
+  object-fit: contain;
+  user-select: none;
+}
+
+.nc-logo-dark {
+  display: none !important;
+}
+
+[data-theme="dark"] .nc-logo-light {
+  display: none !important;
+}
+
+[data-theme="dark"] .nc-logo-dark {
+  display: block !important;
+}
+
+/* ─── Subsystem Verification Rows ─────────────────────────────────────────── */
+.nc-boot-checks {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  border-bottom: 1px solid var(--line, #e1e4e8);
+}
+
+.nc-boot-checks tr + tr td {
+  border-top: 1px solid var(--line, #e1e4e8);
+}
+
+.nc-boot-checks td {
+  padding: 8px 14px;
+  vertical-align: middle;
+}
+
+.nc-boot-checks__id {
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  color: var(--ink-3, #7a818c);
+  width: 28px;
+}
+
+.nc-boot-checks__name {
+  font-weight: 500;
+  color: var(--ink, #15181d);
+}
+
+.nc-boot-checks__spec {
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  color: var(--ink-3, #7a818c);
+  text-align: right;
+}
+
+.nc-boot-checks__state {
+  width: 74px;
+  text-align: right;
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.nc-check-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  color: var(--ink-3, #7a818c);
+}
+
+.nc-check-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--line-strong, #cdd2d8);
+}
+
+.nc-check-badge.is-sync {
+  color: var(--accent, #2d5bd1);
+}
+.nc-check-badge.is-sync::before {
+  background: var(--accent, #2d5bd1);
+}
+
+.nc-check-badge.is-ok {
+  color: var(--ok, #1d7a52);
+}
+.nc-check-badge.is-ok::before {
+  background: var(--ok, #1d7a52);
+}
+
+/* ─── Boot Progress Footer ────────────────────────────────────────────────── */
+.nc-boot-panel__foot {
+  padding: 12px 14px 14px;
+  background: var(--surface-2, #f6f7f9);
+}
+
+.boot-status-box {
+  width: 100%;
+}
+
+.boot-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 7px;
+  font-size: 12px;
+}
+
+.boot-status-lead {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.boot-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ok, #1d7a52);
+  flex: none;
+}
+
+.boot-status-text {
+  color: var(--ink-2, #4b525c);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.boot-percent {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink, #15181d);
+  font-variant-numeric: tabular-nums;
+  flex: none;
+}
+
+.boot-progress-track {
+  position: relative;
+  width: 100%;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--line-strong, #cdd2d8);
+  overflow: hidden;
+}
+
+.boot-progress-bar {
   width: 0%;
   height: 100%;
+  border-radius: 2px;
+  background: var(--accent, #2d5bd1);
+  transition: width 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.boot-track-ticks,
+.boot-progress-spark {
+  display: none;
+}
+
+.nc-boot-caption {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 460px;
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  color: var(--ink-3, #7a818c);
+}
+
+.nc-boot-skip {
+  border: 0;
+  background: none;
+  padding: 2px 6px;
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  color: var(--ink-2, #4b525c);
+  cursor: pointer;
   border-radius: 3px;
-  background: #3b82f6;
-  transition: width .35s cubic-bezier(.4,0,.2,1);
+}
+.nc-boot-skip:hover {
+  background: var(--surface-3, #eceef1);
+  color: var(--ink, #15181d);
 }
 
-/* --- status text -------------------------------------------------------- */
-.nc-splash__status {
-  font: 500 12px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-  color: #999;
-  letter-spacing: .01em;
+/* ─── System Boot Tab (#tab-boot) Architectural Layout ────────────────────── */
+.nc-boot-overview {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+
+.nc-boot-brand-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  text-align: center;
+}
+
+.nc-boot-brand-cell img {
+  width: 168px !important;
+  max-width: 168px !important;
+  height: auto !important;
+  object-fit: contain;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.nc-boot-brand-cell img:hover {
+  opacity: 0.88;
+}
+
+.nc-boot-brand-hint {
+  margin-top: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+.nc-boot-summary-cell {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.nc-boot-summary-body {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+}
+
+.nc-boot-summary-lead {
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.55;
   margin: 0;
-  min-height: 16px;
-  animation: splash-bar-in .4s .35s cubic-bezier(.16,1,.3,1) both;
 }
 
-/* --- footer ------------------------------------------------------------- */
-.nc-splash__foot {
-  position: absolute;
-  bottom: 28px;
-  font: 400 11px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-  color: #bbb;
-  letter-spacing: .02em;
+.nc-boot-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
 }
 
+.nc-boot-kpi {
+  padding: 10px 12px;
+  min-width: 0;
+}
 
-/* =======================================================================
-   Everything below is NON-boot UI (topbar logos, diagnosis, tab hero, etc.)
-   Kept exactly as before — no changes.
-   ======================================================================= */
+.nc-boot-kpi + .nc-boot-kpi {
+  border-left: 1px solid var(--line);
+}
 
-/* ─── Topbar Brand ─────────────────────────────────────────────────────── */
+.nc-boot-kpi__label {
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+
+.nc-boot-kpi__val {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nc-boot-kpi__sub {
+  font-size: 11px;
+  color: var(--ink-3);
+  margin-top: 1px;
+}
+
+.nc-boot-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+
+.nc-boot-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ─── Log & Agent Table Split Grid ────────────────────────────────────────── */
+.nc-boot-split {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 14px;
+}
+
+.boot-tab-console__body {
+  padding: 10px 14px;
+  font: 12px/1.7 var(--font-mono);
+  color: var(--ink);
+  max-height: 290px;
+  overflow-y: auto;
+}
+
+.boot-log-line {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--line);
+}
+.boot-log-line:last-child {
+  border-bottom: 0;
+}
+
+.boot-log-time {
+  color: var(--ink-3);
+  font-size: 11.5px;
+  flex: none;
+}
+
+.boot-log-tag {
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 10.5px;
+  flex: none;
+}
+.boot-log-tag--ok   { background: var(--ok-soft); color: var(--ok); }
+.boot-log-tag--sync { background: var(--accent-soft); color: var(--accent); }
+.boot-log-tag--warn { background: var(--med-soft); color: var(--med); }
+
+/* ─── Topbar & Page Head Branding ─────────────────────────────────────────── */
 .topbar__brand {
   display: inline-flex;
   align-items: center;
@@ -99,42 +471,29 @@
 }
 
 .topbar-logo {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   object-fit: contain;
   flex: none;
-  border-radius: 6px;
-  transition: transform 0.25s var(--ease-out), filter 0.25s var(--ease-out);
-}
-
-.topbar__brand:hover .topbar-logo {
-  transform: scale(1.1) rotate(4deg);
-  filter: drop-shadow(0 2px 8px rgba(2, 132, 199, 0.4));
+  border-radius: 5px;
 }
 
 .page-head {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
 
 .page-head__logo {
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   object-fit: contain;
   flex: none;
-  filter: drop-shadow(0 3px 10px rgba(2, 132, 199, 0.2));
-  transition: transform 0.28s var(--ease-out), filter 0.28s var(--ease-out);
 }
 
-.page-head__logo:hover {
-  transform: scale(1.08) rotate(-4deg);
-  filter: drop-shadow(0 6px 14px rgba(2, 132, 199, 0.35));
-}
-
-/* ─── Diagnosis Active State ──────────────────────────────────────────── */
+/* ─── Diagnosis Active State ──────────────────────────────────────────────── */
 .diagnosis-pulse-card {
-  padding: 36px 24px;
+  padding: 32px 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -147,43 +506,29 @@
 
 .diagnosis-logo-wrap {
   position: relative;
-  width: 68px;
-  height: 68px;
-  margin-bottom: 16px;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 14px;
   display: grid;
   place-items: center;
 }
 
-.diagnosis-logo-glow {
-  position: absolute;
-  inset: -6px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(2, 132, 199, 0.3) 0%, rgba(14, 165, 233, 0.15) 50%, transparent 75%);
-  filter: blur(10px);
-  animation: boot-glow-pulse 2s ease-in-out infinite alternate;
-}
-
-@keyframes boot-glow-pulse {
-  0% { opacity: 0.6; }
-  100% { opacity: 1; }
-}
-
 .diagnosis-logo-img {
-  width: 52px;
-  height: 52px;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
   z-index: 2;
 }
 
 .diagnosis-status-title {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--ink);
-  margin: 0 0 6px;
+  margin: 0 0 4px;
 }
 
 .diagnosis-status-sub {
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--ink-2);
   max-width: 520px;
   line-height: 1.5;
@@ -192,16 +537,16 @@
 
 .diagnosis-agent-chips {
   display: flex;
-  gap: 8px;
-  margin-top: 14px;
+  gap: 6px;
+  margin-top: 12px;
   flex-wrap: wrap;
   justify-content: center;
 }
 
 .diagnosis-chip {
   font: 500 11.5px/1.4 var(--font-mono);
-  padding: 3px 8px;
-  border-radius: 4px;
+  padding: 2px 8px;
+  border-radius: 3px;
   background: var(--surface-2);
   border: 1px solid var(--line);
   color: var(--ink-2);
@@ -214,262 +559,71 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #10b981;
+  background: var(--ok);
 }
 
-/* ─── System Boot Tab Hero ────────────────────────────────────────────── */
-.boot-tab-hero {
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 42px 32px 34px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--r-lg);
-  box-shadow: var(--shadow-2);
-}
-
-.boot-tab-logo {
-  width: 120px;
-  height: 120px;
-  object-fit: contain;
-  z-index: 2;
-  filter: drop-shadow(0 8px 24px rgba(2, 132, 199, 0.25));
-  cursor: pointer;
-  transition: transform 0.25s var(--ease-out);
-}
-
-.boot-tab-logo:hover {
-  transform: scale(1.06) translateY(-4px);
-  filter: drop-shadow(0 14px 32px rgba(2, 132, 199, 0.4));
-}
-
-.boot-tab-title {
-  font-size: 26px;
-  font-weight: 800;
-  letter-spacing: -0.025em;
-  margin: 0 0 6px;
-  color: var(--ink);
-}
-
-.boot-tab-sub {
-  font-size: 13.5px;
-  color: var(--ink-2);
-  margin: 0 0 16px;
-  max-width: 620px;
-  line-height: 1.5;
-}
-
-.boot-tab-badges {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 24px;
-}
-
-.boot-tab-actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-bottom: 26px;
-}
-
-.boot-tab-console {
-  width: 100%;
-  max-width: 820px;
-  text-align: left;
-  border-radius: var(--r-sm);
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  overflow: hidden;
-}
-
-.boot-tab-console__head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: var(--surface-3);
-  border-bottom: 1px solid var(--line);
-  font: 500 11.5px/1 var(--font-mono);
-  color: var(--ink-2);
-}
-
-.boot-console-dots { display: flex; gap: 5px; }
-.boot-console-dot { width: 9px; height: 9px; border-radius: 50%; }
-.boot-console-dot--red { background: #e5675d; }
-.boot-console-dot--amber { background: #ddb056; }
-.boot-console-dot--green { background: #4bab7d; }
-
-.boot-tab-console__body {
-  padding: 14px 16px;
-  font: 12px/1.65 var(--font-mono);
-  color: var(--ink);
-  max-height: 220px;
-  overflow-y: auto;
-}
-
-.boot-log-line {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  padding: 2px 0;
-}
-
-.boot-log-time { color: var(--ink-3); }
-.boot-log-tag { font-weight: 600; padding: 1px 4px; border-radius: 3px; font-size: 10.5px; }
-.boot-log-tag--ok { background: var(--ok-soft); color: var(--ok); }
-.boot-log-tag--sync { background: var(--accent-soft); color: var(--accent); }
-.boot-log-tag--warn { background: var(--med-soft); color: var(--med); }
-
-.boot-agent-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  width: 100%;
-  margin-top: 24px;
-}
-
-.boot-agent-card {
-  padding: 14px 16px;
-  border-radius: var(--r-sm);
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  transition: transform 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
-}
-
-.boot-agent-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--accent);
-}
-
-.boot-agent-card__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.boot-agent-card__name {
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--ink);
-}
-
-.boot-agent-card__meta {
-  font: 11.5px/1.5 var(--font-mono);
-  color: var(--ink-3);
-}
-
-/* ─── Tab Boot Badge ──────────────────────────────────────────────────── */
+/* ─── Tab Boot Badge ──────────────────────────────────────────────────────── */
 .tab-boot-badge {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
-  background: rgba(2, 132, 199, 0.08);
-  border: 1px solid rgba(2, 132, 199, 0.28);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), inset 0 0 4px rgba(2, 132, 199, 0.12);
-  transition: all 0.22s var(--ease-out);
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--line-strong);
   flex: none;
-  overflow: visible;
-}
-
-[data-theme="dark"] .tab-boot-badge {
-  background: rgba(30, 58, 138, 0.25);
-  border-color: rgba(56, 189, 248, 0.35);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), inset 0 0 6px rgba(56, 189, 248, 0.18);
 }
 
 .tab-boot-logo {
-  width: 15px;
-  height: 15px;
+  width: 14px;
+  height: 14px;
   object-fit: contain;
   display: block;
-  flex: none;
-  filter: drop-shadow(0 1px 2px rgba(2, 132, 199, 0.4));
-  transition: transform 0.22s var(--ease-out), filter 0.22s var(--ease-out);
 }
 
 .tab-boot-power-fallback {
-  width: 13px;
-  height: 13px;
+  width: 12px;
+  height: 12px;
   stroke: var(--accent);
   display: none;
-  flex: none;
-}
-
-.tab.is-on .tab-boot-badge {
-  background: linear-gradient(135deg, rgba(2, 132, 199, 0.18), rgba(37, 99, 235, 0.14));
-  border-color: rgba(2, 132, 199, 0.6);
-  box-shadow: 0 0 8px rgba(2, 132, 199, 0.28), inset 0 0 6px rgba(2, 132, 199, 0.22);
-}
-
-.tab.is-on .tab-boot-logo {
-  animation: tab-boot-logo-breathe 2.4s ease-in-out infinite alternate;
-}
-
-.tab.is-on .tab-boot-power-fallback {
-  animation: tab-boot-power-breathe 2.4s ease-in-out infinite alternate;
 }
 
 .tab-boot-dot {
   position: absolute;
-  top: -2.5px;
-  right: -2.5px;
-  width: 6px;
-  height: 6px;
+  top: -2px;
+  right: -2px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background: #10b981;
-  border: 1.5px solid var(--surface);
-  box-shadow: 0 0 5px rgba(16, 185, 129, 0.8);
-  animation: tab-boot-dot-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  pointer-events: none;
-}
-
-@keyframes tab-boot-dot-pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.55; transform: scale(0.85); }
-}
-
-@keyframes tab-boot-logo-breathe {
-  0% { transform: scale(1); filter: drop-shadow(0 1px 2px rgba(2, 132, 199, 0.4)); }
-  50% { transform: scale(1.12); filter: drop-shadow(0 2px 6px rgba(2, 132, 199, 0.55)); }
-  100% { transform: scale(1.05); filter: drop-shadow(0 2px 4px rgba(2, 132, 199, 0.45)); }
-}
-
-@keyframes tab-boot-power-breathe {
-  0% { transform: scale(1); opacity: 0.85; }
-  50% { transform: scale(1.1); opacity: 1; }
-  100% { transform: scale(1.04); opacity: 0.9; }
-}
-
-.tab:hover .tab-boot-badge {
-  border-color: var(--accent);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.22);
+  background: var(--ok);
+  border: 1px solid var(--surface);
 }
 
 .tab-boot-text {
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  display: inline-block;
-  line-height: 1;
+  font-weight: 500;
 }
 
-/* ─── Responsive ──────────────────────────────────────────────────────── */
-@media (max-width: 600px) {
-  .nc-splash__logo { width: 160px; }
-  .nc-splash__bar  { width: 140px; }
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .nc-boot-overview {
+    grid-template-columns: 1fr;
+  }
+  .nc-boot-brand-cell {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .nc-boot-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .nc-boot-kpi:nth-child(3) {
+    border-left: 0;
+  }
+  .nc-boot-kpi:nth-child(n+3) {
+    border-top: 1px solid var(--line);
+  }
+  .nc-boot-split {
+    grid-template-columns: 1fr;
+  }
 }

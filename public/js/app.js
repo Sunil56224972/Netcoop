@@ -792,48 +792,181 @@ export function switchTab(target) {
 }
 
 // ─── Boot Sequence Orchestrator ──────────────────────────────────────────────
-function runBootSequence(options) {
-  if (!options) options = {};
-  var el = document.getElementById('netcoop-boot-screen');
-  var bar = document.getElementById('boot-progress-bar');
-  var txt = document.getElementById('boot-status-text');
-  if (!el) return;
+let bootTimers = [];
 
-  el.classList.remove('out');
-  el.style.display = '';
-  if (bar) bar.style.width = '0%';
-  if (txt) txt.textContent = 'Preparing workspace\u2026';
-
-  var msgs = [
-    [15,  'Loading network topology\u2026'],
-    [30,  'Connecting diagnostic agents\u2026'],
-    [50,  'Binding Groq LPU inference\u2026'],
-    [70,  'Synchronising agent mesh\u2026'],
-    [90,  'Running self-checks\u2026'],
-    [100, 'Ready']
-  ];
-
-  var t = 0;
-  for (var i = 0; i < msgs.length; i++) {
-    t += 350 + Math.floor(Math.random() * 100);
-    (function(pct, msg, d) {
-      setTimeout(function() {
-        if (bar) bar.style.width = pct + '%';
-        if (txt) txt.textContent = msg;
-      }, d);
-    })(msgs[i][0], msgs[i][1], t);
+function clearBootTimers() {
+  while (bootTimers.length) {
+    clearTimeout(bootTimers.pop());
   }
-
-  setTimeout(function() {
-    el.classList.add('out');
-    setTimeout(function() { el.style.display = 'none'; }, 600);
-    if (options.isReboot) {
-      toast('System rebooted', 'NetCoop AI ready', 'ok');
-    }
-  }, t + 300);
 }
 
-window.netcoopReboot = () => runBootSequence({ isReboot: true });
+function ensureHandcraftedBootDOM() {
+  const el = document.getElementById('netcoop-boot-screen');
+  if (el && !el.querySelector('.nc-boot-panel')) {
+    el.className = 'boot-screen';
+    el.removeAttribute('style');
+    el.innerHTML = `
+      <div class="nc-boot-panel">
+        <div class="nc-boot-panel__head">
+          <span class="nc-boot-panel__title">
+            <span class="nc-boot-panel__dot"></span>
+            NetCoop Diagnostic Runtime
+          </span>
+          <span class="nc-boot-panel__meta">IIT-BBS &middot; v1.0.0</span>
+        </div>
+        <div class="nc-boot-stage">
+          <img src="images/netcoop-logo-light.png" alt="NetCoop — Multi-Agent Network Intelligence" class="nc-logo-light" width="184" />
+          <img src="images/netcoop-logo-dark.png" alt="NetCoop — Multi-Agent Network Intelligence" class="nc-logo-dark" width="184" />
+        </div>
+        <table class="nc-boot-checks" aria-label="Subsystem verification">
+          <tbody>
+            <tr id="boot-row-0">
+              <td class="nc-boot-checks__id">01</td>
+              <td class="nc-boot-checks__name">Campus Topology Graph</td>
+              <td class="nc-boot-checks__spec">8 nodes</td>
+              <td class="nc-boot-checks__state"><span class="nc-check-badge is-sync" id="boot-chk-0">SYNC</span></td>
+            </tr>
+            <tr id="boot-row-1">
+              <td class="nc-boot-checks__id">02</td>
+              <td class="nc-boot-checks__name">JSON-RPC Message Bus</td>
+              <td class="nc-boot-checks__spec">v1.0.0</td>
+              <td class="nc-boot-checks__state"><span class="nc-check-badge" id="boot-chk-1">WAIT</span></td>
+            </tr>
+            <tr id="boot-row-2">
+              <td class="nc-boot-checks__id">03</td>
+              <td class="nc-boot-checks__name">Diagnostic Agent Mesh</td>
+              <td class="nc-boot-checks__spec">6 agents</td>
+              <td class="nc-boot-checks__state"><span class="nc-check-badge" id="boot-chk-2">WAIT</span></td>
+            </tr>
+            <tr id="boot-row-3">
+              <td class="nc-boot-checks__id">04</td>
+              <td class="nc-boot-checks__name">Groq LPU Inference</td>
+              <td class="nc-boot-checks__spec">gpt-oss-120b</td>
+              <td class="nc-boot-checks__state"><span class="nc-check-badge" id="boot-chk-3">WAIT</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="nc-boot-panel__foot">
+          <div class="boot-status-box">
+            <div class="boot-status-row">
+              <div class="boot-status-lead">
+                <span class="boot-pulse-dot"></span>
+                <span id="boot-status-text" class="boot-status-text">Initializing campus topology mesh&hellip;</span>
+              </div>
+              <span id="boot-percent" class="boot-percent">0%</span>
+            </div>
+            <div class="boot-progress-track">
+              <div id="boot-progress-bar" class="boot-progress-bar"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="nc-boot-caption">
+        <span>IIT Bhubaneswar Campus Infrastructure</span>
+        <button type="button" class="nc-boot-skip" id="boot-skip-btn">Skip &rarr;</button>
+      </div>
+    `;
+  }
+}
+
+function dismissBootScreen() {
+  clearBootTimers();
+  const el = document.getElementById('netcoop-boot-screen');
+  if (!el) return;
+  el.classList.add('is-loaded', 'out');
+  setTimeout(() => {
+    el.style.display = 'none';
+  }, 420);
+}
+
+function runBootSequence(options = {}) {
+  ensureHandcraftedBootDOM();
+  clearBootTimers();
+
+  const el = document.getElementById('netcoop-boot-screen');
+  const bar = document.getElementById('boot-progress-bar');
+  const pctEl = document.getElementById('boot-percent');
+  const txt = document.getElementById('boot-status-text');
+  const skipBtn = document.getElementById('boot-skip-btn');
+  if (!el) return;
+
+  if (skipBtn) {
+    skipBtn.onclick = () => dismissBootScreen();
+  }
+
+  el.style.display = 'flex';
+  el.classList.remove('is-loaded', 'out');
+  if (bar) bar.style.width = '0%';
+  if (pctEl) pctEl.textContent = '0%';
+  if (txt) txt.textContent = 'Initializing campus topology mesh…';
+
+  for (let i = 0; i < 4; i++) {
+    const chk = document.getElementById('boot-chk-' + i);
+    if (chk) {
+      chk.className = 'nc-check-badge' + (i === 0 ? ' is-sync' : '');
+      chk.textContent = i === 0 ? 'SYNC' : 'WAIT';
+    }
+  }
+
+  const steps = [
+    { pct: 24, msg: 'Mounting IIT Bhubaneswar 8-node topology…', states: ['OK', 'SYNC', 'WAIT', 'WAIT'], delay: 320 },
+    { pct: 52, msg: 'Binding JSON-RPC v1.0.0 cooperative bus…',  states: ['OK', 'OK',   'SYNC', 'WAIT'], delay: 720 },
+    { pct: 80, msg: 'Registering 6 diagnostic worker agents…',   states: ['OK', 'OK',   'OK',   'SYNC'], delay: 1180 },
+    { pct: 100, msg: 'Groq LPU inference connected — runtime ready', states: ['OK', 'OK', 'OK', 'OK'], delay: 1650 }
+  ];
+
+  steps.forEach((step) => {
+    const tid = setTimeout(() => {
+      if (bar) bar.style.width = step.pct + '%';
+      if (pctEl) pctEl.textContent = step.pct + '%';
+      if (txt) txt.textContent = step.msg;
+      step.states.forEach((st, idx) => {
+        const chk = document.getElementById('boot-chk-' + idx);
+        if (!chk) return;
+        chk.textContent = st;
+        chk.className = 'nc-check-badge' + (st === 'OK' ? ' is-ok' : st === 'SYNC' ? ' is-sync' : '');
+      });
+    }, step.delay);
+    bootTimers.push(tid);
+  });
+
+  const endTid = setTimeout(() => {
+    dismissBootScreen();
+    if (options.isReboot) {
+      toast('Runtime rebooted', 'All 6 cooperative agents online', 'ok');
+    }
+  }, 2150);
+  bootTimers.push(endTid);
+}
+
+function runTabBootSequence() {
+  const bar = document.getElementById('tab-boot-progress-bar');
+  const pct = document.getElementById('tab-boot-percent');
+  const txt = document.getElementById('tab-boot-status-text');
+  if (bar) bar.style.width = '0%';
+  if (pct) pct.textContent = '0%';
+  if (txt) txt.textContent = 'Re-initializing 6 cooperative diagnostic agents…';
+
+  const steps = [
+    [25, 'Mounting campus topology & JSON-RPC bus…', 250],
+    [60, 'Verifying performance, infra & connectivity agents…', 600],
+    [85, 'Connecting Groq LPU (openai/gpt-oss-120b)…', 950],
+    [100, 'All agents initialized and standing by for telemetry diagnosis', 1300]
+  ];
+
+  steps.forEach(([p, m, d]) => {
+    setTimeout(() => {
+      if (bar) bar.style.width = p + '%';
+      if (pct) pct.textContent = p + '%';
+      if (txt) txt.textContent = m;
+    }, d);
+  });
+}
+
+window.netcoopReboot = () => {
+  runTabBootSequence();
+  runBootSequence({ isReboot: true });
+};
 
 // ─── Initialize Application ───────────────────────────────────────────────
 
@@ -929,10 +1062,10 @@ function boot() {
 
   // Tab-level Booting triggers
   const btnRebootTab = $('#btn-reboot-tab');
-  if (btnRebootTab) btnRebootTab.onclick = () => runTabBootSequence();
+  if (btnRebootTab) btnRebootTab.onclick = () => window.netcoopReboot();
 
   const bootTabLogo = $('#boot-tab-interactive-logo');
-  if (bootTabLogo) bootTabLogo.onclick = () => runTabBootSequence();
+  if (bootTabLogo) bootTabLogo.onclick = () => window.netcoopReboot();
 
   const btnTabToStudio = $('#btn-tab-to-studio');
   if (btnTabToStudio) btnTabToStudio.onclick = () => switchTab('studio');
