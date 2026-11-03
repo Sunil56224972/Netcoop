@@ -183,18 +183,20 @@ async function probeLiveTelemetry(opts = {}) {
 
   const devices = [
     {
+      id: hostId,
       device_id: hostId,
-      type: 'switch',
+      type: 'core_router',
       name: `${hostname} (${primaryIface.name})`,
-      ip: primaryIface.ip,
+      ip: `${primaryIface.ip} (${primaryIface.name})`,
       mac: primaryIface.mac,
-      role: `Local Host Runtime (${os.platform()} ${os.arch()}, ${(os.cpus() || []).length} cores)`
+      role: `Local Host Gateway (${os.platform()} ${os.arch()}, ${(os.cpus() || []).length} cores)`
     },
     ...dnsResults.map((t) => ({
+      id: t.device_id,
       device_id: t.device_id,
       type: t.type,
       name: t.host,
-      ip: t.ip,
+      ip: `${t.ip}:${t.port} (${t.host})`,
       port: t.port,
       role: t.role,
       dns_latency_ms: t.dns.latency_ms,
@@ -255,6 +257,7 @@ async function probeLiveTelemetry(opts = {}) {
       device_id: hostId,
       timestamp,
       cpu_pct: cpuPct,
+      mem_pct: memPct,
       memory_pct: memPct,
       latency_ms: avgHostLatency,
       packet_loss_pct: probeRound.length ? Math.round((failedCount / probeRound.length) * 100) : 0,
@@ -278,13 +281,10 @@ async function probeLiveTelemetry(opts = {}) {
         timestamp,
         latency_ms: tcp.ok ? tcp.rtt_ms : 950,
         jitter_ms: jitterMs,
-        packet_loss_pct: tcp.ok ? 0 : 100
+        packet_loss_pct: tcp.ok ? 0 : 100,
+        dns_latency_ms: dns_ms,
+        dns_failure_pct: target.dns.ok ? 0 : 100
       };
-
-      if (target.type === 'dns_server' || !target.dns.ok) {
-        sampleEntry.dns_latency_ms = dns_ms;
-        sampleEntry.dns_failure_pct = target.dns.ok ? 0 : 100;
-      }
 
       samples.push(sampleEntry);
     }
@@ -308,8 +308,11 @@ async function probeLiveTelemetry(opts = {}) {
       cpu_model: (os.cpus() && os.cpus()[0] && os.cpus()[0].model) ? os.cpus()[0].model.trim() : 'Server CPU',
       total_ram_gb: Math.round((os.totalmem() / (1024 ** 3)) * 10) / 10,
       free_ram_gb: Math.round((os.freemem() / (1024 ** 3)) * 10) / 10,
+      total_mem_gb: Math.round((os.totalmem() / (1024 ** 3)) * 10) / 10,
+      used_mem_gb: Math.round(((os.totalmem() - os.freemem()) / (1024 ** 3)) * 10) / 10,
       uptime_hours: Math.round((os.uptime() / 3600) * 10) / 10,
-      interfaces: ifaces
+      interfaces: ifaces,
+      active_interfaces: ifaces
     },
     devices,
     topology,

@@ -212,13 +212,15 @@ function summarizeTelemetryDataset(telemetryObj, reportObj = null) {
 
   const devMap = new Map();
   declaredDevices.forEach((d) => {
-    if (!d || !d.id) return;
-    devMap.set(d.id, {
-      id: d.id,
+    const did = d && (d.id || d.device_id);
+    if (!did) return;
+    devMap.set(did, {
+      id: did,
       type: d.type || 'network_node',
-      name: d.name || d.id,
+      name: d.name || did,
       role: d.role || d.type || 'Monitored Node',
       ip: d.ip || d.target_host || '-',
+      dns_latency_ms: d.dns_latency_ms ?? null,
       location: d.location || '',
       samples: [],
       metrics: {}
@@ -278,9 +280,9 @@ function summarizeTelemetryDataset(telemetryObj, reportObj = null) {
       avgLatency: avg(d.metrics.latency_ms),
       avgJitter: avg(d.metrics.jitter_ms),
       avgLoss: avg(d.metrics.packet_loss_pct),
-      avgDns: avg(d.metrics.dns_latency_ms),
+      avgDns: avg(d.metrics.dns_latency_ms) ?? d.dns_latency_ms ?? null,
       avgCpu: avg(d.metrics.cpu_pct),
-      avgMem: avg(d.metrics.mem_pct),
+      avgMem: avg(d.metrics.mem_pct || d.metrics.memory_pct),
       avgUtil: avg(d.metrics.utilization_pct),
       avgRssi: avg(d.metrics.wifi_rssi_dbm),
       avgDrops: avg(d.metrics.queue_drops),
