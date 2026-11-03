@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/views.css">
-  <link rel="stylesheet" href="css/boot.css?v=6">
+  <link rel="stylesheet" href="css/boot.css?v=8">
   <script>
     (function() {
       const saved = localStorage.getItem('netcoop-theme');
@@ -358,8 +358,8 @@
             <div class="nc-prober-presets">
               <span class="small muted">Quick presets:</span>
               <button type="button" class="nc-preset-chip" data-targets="one.one.one.one:443, dns.google:443, github.com:443, api.groq.com:443">Global Core (Cloudflare, Google, GitHub, Groq)</button>
-              <button type="button" class="nc-preset-chip" data-targets="iitbbs.ac.in:443, one.one.one.one:443, dns.google:53, github.com:443">IIT Bhubaneswar + Upstream DNS</button>
-              <button type="button" class="nc-preset-chip" data-targets="one.one.one.one:53, dns.google:53, 9.9.9.9:53, 208.67.222.222:53">DNS Anycast Resolvers (1.1.1.1, 8.8.8.8, 9.9.9.9, OpenDNS)</button>
+              <button type="button" class="nc-preset-chip" data-targets="iitbbs.ac.in:443, one.one.one.one:443, dns.google:443, github.com:443">IIT Bhubaneswar + Upstream DNS</button>
+              <button type="button" class="nc-preset-chip" data-targets="one.one.one.one:443, dns.google:443, 9.9.9.9:443, 208.67.222.222:443">DNS Anycast Resolvers (1.1.1.1, 8.8.8.8, 9.9.9.9, OpenDNS)</button>
             </div>
           </div>
         </section>
@@ -474,6 +474,6 @@
   <div class="toasts" id="toasts"></div>
 
   <!-- Frontend Logic -->
-  <script type="module" src="js/app.js?v=6"></script>
+  <script type="module" src="js/app.js?v=8"></script>
 </body>
 </html>

@@ -35,6 +35,8 @@ let appState = {
   topologyViewMode: 'active' // 'active' | 'live'
 };
 
+let activeOpSeq = 0;
+
 // ─── Runtime Log Appender ───────────────────────────────────────────────────
 const bootStartEpoch = performance.now();
 function appendRuntimeLog(tag, text, level = 'ok') {
@@ -203,7 +205,40 @@ function initTabs() {
 }
 
 // ─── Telemetry Summary Computation Helper ───────────────────────────────────
-function summarizeTelemetryDataset(telemetryObj, reportObj = null) {
+function parseRawTelemetryToObject(input) {
+  if (!input) return null;
+  if (typeof input === 'object') return input;
+  const text = String(input).trim();
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch (_e) {
+    // Parse NDJSON or CSV
+    const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    if (!lines.length) return null;
+    if (lines[0].startsWith('{')) {
+      const samples = [];
+      lines.forEach((l) => { try { samples.push(JSON.parse(l)); } catch (_err) {} });
+      return { samples };
+    }
+    const headers = lines[0].split(',').map((h) => h.trim());
+    if (headers.length < 2) return null;
+    const samples = lines.slice(1).map((line) => {
+      const cols = line.split(',').map((c) => c.trim());
+      const obj = {};
+      headers.forEach((h, idx) => {
+        const val = cols[idx];
+        const n = Number(val);
+        obj[h] = val !== '' && !Number.isNaN(n) ? n : val;
+      });
+      return obj;
+    });
+    return { samples };
+  }
+}
+
+function summarizeTelemetryDataset(telemetryInput, reportObj = null) {
+  const telemetryObj = parseRawTelemetryToObject(telemetryInput);
   if (!telemetryObj || typeof telemetryObj !== 'object') return { devices: [], links: [], sampleCount: 0 };
 
   const rawSamples = Array.isArray(telemetryObj.samples) ? telemetryObj.samples : (Array.isArray(telemetryObj) ? telemetryObj : []);
@@ -578,6 +613,7 @@ function paintScenarios() {
 }
 
 async function loadScenario(key, autoRun = true) {
+  const opSeq = ++activeOpSeq;
   const statusEl = $('#nc-status');
   appState.activeScenarioKey = key;
   $$('.nc-sc').forEach((b) => {
@@ -587,6 +623,7 @@ async function loadScenario(key, autoRun = true) {
   try {
     const res = await fetch(`/api/netcoop/scenarios/${encodeURIComponent(key)}`, { method: 'POST' });
     const data = await res.json();
+    if (opSeq !== activeOpSeq) return;
     if (!data.telemetry) throw new Error(data.error || 'No telemetry returned');
     appState.currentTelemetry = data.telemetry;
     $('#nc-raw').value = JSON.stringify(data.telemetry, null, 2);
@@ -594,7 +631,7 @@ async function loadScenario(key, autoRun = true) {
     appendRuntimeLog('SCENARIO', `Loaded IIT Bhubaneswar scenario "${key}" (${(data.telemetry.samples || []).length} samples)`, 'sync');
 
     if (autoRun) {
-      await runDiagnosis();
+      await runDiagnosis({ opSeq });
     } else if (statusEl) {
       statusEl.textContent = `Scenario "${key}" loaded — click Run 6-Agent Diagnosis`;
     }
@@ -605,7 +642,8 @@ async function loadScenario(key, autoRun = true) {
 }
 
 // ─── Diagnosis Execution ────────────────────────────────────────────────────
-async function runDiagnosis() {
+async function runDiagnosis(opts = {}) {
+  const opSeq = opts.opSeq || ++activeOpSeq;
   const raw = $('#nc-raw').value.trim();
   if (!raw) {
     toast('Empty telemetry payload', 'Paste telemetry, click Probe & Diagnose Live, or choose a scenario.', 'error');
@@ -652,7 +690,7 @@ async function runDiagnosis() {
       telemetry = JSON.parse(raw);
       appState.currentTelemetry = telemetry;
     } catch (_e) {
-      // CSV or NDJSON string
+      appState.currentTelemetry = parseRawTelemetryToObject(raw);
     }
 
     const res = await fetch('/api/netcoop/diagnose', {
@@ -667,9 +705,11 @@ async function runDiagnosis() {
     }
 
     const result = await res.json();
+    if (opSeq !== activeOpSeq) return;
     applyDiagnosisResult(result);
     toast('Diagnosis complete', result.report.suspected_root_cause || 'Report ready', 'ok');
   } catch (err) {
+    if (opSeq !== activeOpSeq) return;
     if (statusEl) statusEl.textContent = '';
     setTopStatus('Diagnosis error', 'warn');
     toast('Diagnosis failed', err.message, 'error');
@@ -1799,6 +1839,7 @@ window.netcoopReboot = () => {
 // ─── Live Network Probing & External File Upload ────────────────────────────
 async function probeLiveSystem(opts = {}) {
   const { runDiag = true, customTargets = null, switchToStudio = false, silent = false } = opts;
+  const opSeq = ++activeOpSeq;
   const statusEl = $('#nc-status');
   const btnDiag = $('#nc-probe-diagnose-btn');
   const btnOnly = $('#nc-probe-live-btn');
@@ -1822,19 +1863,15 @@ async function probeLiveSystem(opts = {}) {
     const res = await fetch('/api/netcoop/probe-live', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ targets, diagnose: runDiag, samples: 4, interval: 90 })
+      body: JSON.stringify({ targets, diagnose: runDiag, samples: 4, interval: 80 })
     });
     const data = await res.json();
     if (!data.ok || !data.telemetry) throw new Error(data.error || 'Failed to capture live metrics');
 
     appState.liveProbeTelemetry = data.telemetry;
-    appState.currentTelemetry = data.telemetry;
-    appState.activeScenarioKey = null;
-    $$('.nc-sc').forEach((b) => { b.style.background = ''; });
-
-    const rawEl = $('#nc-raw');
-    if (rawEl) rawEl.value = JSON.stringify(data.telemetry, null, 2);
-    updatePayloadMeta();
+    if (data.diagnosis) {
+      appState.liveProbeDiagnosis = data.diagnosis;
+    }
 
     appendRuntimeLog(
       'PROBE',
@@ -1847,21 +1884,35 @@ async function probeLiveSystem(opts = {}) {
       tabBootTxt.textContent = `Live telemetry captured: ${data.telemetry.samples.length} samples from ${data.telemetry.devices.length} nodes (${data.telemetry.source})`;
     }
 
-    if (data.diagnosis) {
-      appState.liveProbeDiagnosis = data.diagnosis;
-      applyDiagnosisResult(data.diagnosis);
+    // Only overwrite active studio editor/results if no newer user action superseded this probe
+    if (opSeq === activeOpSeq) {
+      appState.currentTelemetry = data.telemetry;
+      appState.activeScenarioKey = null;
+      $$('.nc-sc').forEach((b) => { b.style.background = ''; });
+
+      const rawEl = $('#nc-raw');
+      if (rawEl) rawEl.value = JSON.stringify(data.telemetry, null, 2);
+      updatePayloadMeta();
+
+      if (data.diagnosis) {
+        applyDiagnosisResult(data.diagnosis);
+      } else {
+        paintRuntimeOverview();
+        if (appState.activeTab === 'topology') paintTopology();
+        setTopStatus(`Probed ${data.telemetry.devices.length} live nodes`, 'ok');
+      }
     } else {
       paintRuntimeOverview();
-      if (appState.activeTab === 'topology') paintTopology();
-      setTopStatus(`Probed ${data.telemetry.devices.length} live nodes`, 'ok');
     }
 
     if (!silent) {
       toast('Live Network Probed', `${data.telemetry.samples.length} real TCP/DNS samples captured`, 'ok');
     }
   } catch (err) {
-    if (statusEl) statusEl.textContent = '';
-    setTopStatus('Live probe error', 'warn');
+    if (opSeq === activeOpSeq) {
+      if (statusEl) statusEl.textContent = '';
+      setTopStatus('Live probe error', 'warn');
+    }
     if (!silent) toast('Live Probe Failed', err.message, 'error');
   } finally {
     [btnDiag, btnOnly, globalBtn, rtBtn].forEach((b) => { if (b) b.classList.remove('is-busy'); });
@@ -2022,6 +2073,7 @@ function boot() {
   initTheme();
   initTabs();
   loadScenarios();
+  loadAndPaintProtocol();
   initExternalHandlers();
 
   // Auto-run real live network probe + diagnosis on startup so every view has real data immediately

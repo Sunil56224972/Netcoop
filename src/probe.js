@@ -229,7 +229,7 @@ async function probeLiveTelemetry(opts = {}) {
             dns_ms: t.dns.latency_ms
           };
         }
-        const tcp = await measureTcpRtt(t.ip || t.host, t.port, 2000);
+        const tcp = await measureTcpRtt(t.ip || t.host, t.port, 1100);
         return {
           target: t,
           tcp,
