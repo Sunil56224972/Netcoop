@@ -2250,80 +2250,78 @@ function openCommandPalette() {
   };
 }
 
-// ─── Boot Sequence Orchestrator ─────────────────────────────────────────────
+// ─── Boot Sequence Orchestrator (3-Column Minimalist White-Theme Boot) ──────
 let bootTimers = [];
+let bootIntervals = [];
+let bootRafId = null;
+
+const BOOT_TICKER_LINES = [
+  'PROBING LIVE DNS & TCP SOCKETS...',
+  'MOUNTING JSON-RPC V1.0.0 BUS...',
+  'SYNCHRONIZING 6 COOPERATIVE AGENTS...',
+  'INITIALIZING CAMPUS TOPOLOGY GRAPH...',
+  'DECRYPTING TELEMETRY DATA STREAMS...',
+  'CALIBRATING SECTION 6 GUARDRAILS...'
+];
+
+const BOOT_RIGHT_MESSAGE = [
+  '// HANG TIGHT, OPERATOR. LIVE DATA PROBE',
+  'IS IN PROGRESS. CORRELATING TELEMETRY, SO',
+  'ACCURATE ROOT CAUSE IS WORTH THE WAIT...'
+].join('\n');
+
+const BOOT_SCRAMBLE_GLYPHS = '▓▒░/<>[]{}#*+=~';
 
 function clearBootTimers() {
   while (bootTimers.length) {
     clearTimeout(bootTimers.pop());
   }
+  while (bootIntervals.length) {
+    clearInterval(bootIntervals.pop());
+  }
+  if (bootRafId !== null) {
+    cancelAnimationFrame(bootRafId);
+    bootRafId = null;
+  }
+}
+
+function renderBootTickerTrack(trackEl, offset, activeSlot = 2) {
+  if (!trackEl) return;
+  let html = '';
+  for (let i = 0; i < 7; i++) {
+    const text = BOOT_TICKER_LINES[(offset + i) % BOOT_TICKER_LINES.length];
+    if (i === activeSlot) {
+      html += `<div class="nc-cine-ticker__line is-active"><span>${esc(text)}</span></div>`;
+    } else {
+      html += `<div class="nc-cine-ticker__line">// ${esc(text)}</div>`;
+    }
+  }
+  trackEl.innerHTML = html;
 }
 
 function ensureHandcraftedBootDOM() {
   const el = document.getElementById('netcoop-boot-screen');
-  if (el && !el.querySelector('.nc-boot-panel')) {
+  if (el && !el.querySelector('.nc-cine-boot')) {
     el.className = 'boot-screen';
     el.removeAttribute('style');
     el.innerHTML = `
-      <div class="nc-boot-panel">
-        <div class="nc-boot-panel__head">
-          <span class="nc-boot-panel__title">
-            <span class="nc-boot-panel__dot"></span>
-            NetCoop Diagnostic Runtime
-          </span>
-          <span class="nc-boot-panel__meta">IIT-BBS &middot; v1.0.0</span>
+      <div class="nc-cine-boot">
+        <div class="nc-cine-left" aria-hidden="true">
+          <div class="nc-cine-ticker">
+            <div class="nc-cine-ticker__track" id="boot-ticker-track"></div>
+          </div>
         </div>
-        <div class="nc-boot-stage">
-          <img src="images/netcoop-logo-light.png" alt="NetCoop — Multi-Agent Network Intelligence" class="nc-logo-light" width="184" />
-          <img src="images/netcoop-logo-dark.png" alt="NetCoop — Multi-Agent Network Intelligence" class="nc-logo-dark" width="184" />
+        <div class="nc-cine-center">
+          <img src="images/netcoop-logo-light.png" alt="NetCoop — Multi-Agent Network Intelligence" class="nc-cine-logo" width="168" />
+          <button type="button" class="nc-cine-counter" id="boot-percent" title="Boot progress">[ 00% ]</button>
         </div>
-        <table class="nc-boot-checks" aria-label="Subsystem verification">
-          <tbody>
-            <tr id="boot-row-0">
-              <td class="nc-boot-checks__id">01</td>
-              <td class="nc-boot-checks__name">Host &amp; Network Probe Engine</td>
-              <td class="nc-boot-checks__spec">DNS / TCP RTT</td>
-              <td class="nc-boot-checks__state"><span class="nc-check-badge is-sync" id="boot-chk-0">SYNC</span></td>
-            </tr>
-            <tr id="boot-row-1">
-              <td class="nc-boot-checks__id">02</td>
-              <td class="nc-boot-checks__name">JSON-RPC Message Bus</td>
-              <td class="nc-boot-checks__spec">v1.0.0</td>
-              <td class="nc-boot-checks__state"><span class="nc-check-badge" id="boot-chk-1">WAIT</span></td>
-            </tr>
-            <tr id="boot-row-2">
-              <td class="nc-boot-checks__id">03</td>
-              <td class="nc-boot-checks__name">Cooperative Agent Mesh</td>
-              <td class="nc-boot-checks__spec">6 workers</td>
-              <td class="nc-boot-checks__state"><span class="nc-check-badge" id="boot-chk-2">WAIT</span></td>
-            </tr>
-            <tr id="boot-row-3">
-              <td class="nc-boot-checks__id">04</td>
-              <td class="nc-boot-checks__name">Groq LPU Inference</td>
-              <td class="nc-boot-checks__spec">gpt-oss-120b</td>
-              <td class="nc-boot-checks__state"><span class="nc-check-badge" id="boot-chk-3">WAIT</span></td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="nc-boot-panel__foot">
-          <div class="boot-status-box">
-            <div class="boot-status-row">
-              <div class="boot-status-lead">
-                <span class="boot-pulse-dot"></span>
-                <span id="boot-status-text" class="boot-status-text">Probing live host interfaces &amp; DNS resolvers&hellip;</span>
-              </div>
-              <span id="boot-percent" class="boot-percent">0%</span>
-            </div>
-            <div class="boot-progress-track">
-              <div id="boot-progress-bar" class="boot-progress-bar"></div>
-            </div>
+        <div class="nc-cine-right">
+          <div class="nc-cine-typewriter" id="boot-typewriter">
+            <span id="boot-typewriter-text"></span><span class="nc-cine-cursor" aria-hidden="true">&#9608;</span>
           </div>
         </div>
       </div>
-      <div class="nc-boot-caption">
-        <span>IIT Bhubaneswar Network Operations</span>
-        <button type="button" class="nc-boot-skip" id="boot-skip-btn">Skip &rarr;</button>
-      </div>
+      <button type="button" class="nc-cine-skip" id="boot-skip-btn">[ SKIP ]</button>
     `;
   }
 }
@@ -2335,7 +2333,7 @@ function dismissBootScreen() {
   el.classList.add('is-loaded', 'out');
   setTimeout(() => {
     el.style.display = 'none';
-  }, 380);
+  }, 450);
 }
 
 function runBootSequence(options = {}) {
@@ -2343,58 +2341,121 @@ function runBootSequence(options = {}) {
   clearBootTimers();
 
   const el = document.getElementById('netcoop-boot-screen');
-  const bar = document.getElementById('boot-progress-bar');
+  const trackEl = document.getElementById('boot-ticker-track');
   const pctEl = document.getElementById('boot-percent');
-  const txt = document.getElementById('boot-status-text');
+  const twTextEl = document.getElementById('boot-typewriter-text');
   const skipBtn = document.getElementById('boot-skip-btn');
   if (!el) return;
 
   if (skipBtn) {
     skipBtn.onclick = () => dismissBootScreen();
   }
+  if (pctEl) {
+    pctEl.onclick = () => dismissBootScreen();
+  }
+
+  // Re-trigger logo entrance cleanly on replay
+  const logoEl = el.querySelector('.nc-cine-logo');
+  if (logoEl) {
+    logoEl.style.animation = 'none';
+    void logoEl.offsetWidth;
+    logoEl.style.animation = '';
+  }
 
   el.style.display = 'flex';
   el.classList.remove('is-loaded', 'out');
-  if (bar) bar.style.width = '0%';
-  if (pctEl) pctEl.textContent = '0%';
-  if (txt) txt.textContent = 'Probing live host interfaces & DNS resolvers…';
 
-  for (let i = 0; i < 4; i++) {
-    const chk = document.getElementById('boot-chk-' + i);
-    if (chk) {
-      chk.className = 'nc-check-badge' + (i === 0 ? ' is-sync' : '');
-      chk.textContent = i === 0 ? 'SYNC' : 'WAIT';
-    }
+  let tickerOffset = 0;
+  if (trackEl) {
+    trackEl.style.transition = 'none';
+    trackEl.style.transform = 'translateY(0)';
+    renderBootTickerTrack(trackEl, tickerOffset, 2);
+  }
+  if (pctEl) {
+    pctEl.classList.remove('is-done');
+    pctEl.textContent = '[ 00% ]';
+  }
+  if (twTextEl) {
+    twTextEl.textContent = '// ';
   }
 
-  const steps = [
-    { pct: 28, msg: 'Measuring TCP socket RTT & DNS lookup latency…', states: ['OK', 'SYNC', 'WAIT', 'WAIT'], delay: 260 },
-    { pct: 56, msg: 'Binding JSON-RPC v1.0.0 cooperative bus…',       states: ['OK', 'OK',   'SYNC', 'WAIT'], delay: 580 },
-    { pct: 84, msg: 'Registering 6 diagnostic worker agents…',        states: ['OK', 'OK',   'OK',   'SYNC'], delay: 920 },
-    { pct: 100, msg: 'Groq LPU inference connected — runtime ready',  states: ['OK', 'OK',   'OK',   'OK'],   delay: 1280 }
-  ];
+  // 1. Continuous 6-row upward scrolling ticker with Slot #3 inverted highlight bar
+  const tickerInterval = setInterval(() => {
+    if (!trackEl) return;
+    trackEl.style.transition = 'transform 0.26s cubic-bezier(0.22, 1, 0.36, 1)';
+    trackEl.style.transform = 'translateY(-22px)';
 
-  steps.forEach((step) => {
-    const tid = setTimeout(() => {
-      if (bar) bar.style.width = step.pct + '%';
-      if (pctEl) pctEl.textContent = step.pct + '%';
-      if (txt) txt.textContent = step.msg;
-      step.states.forEach((st, idx) => {
-        const chk = document.getElementById('boot-chk-' + idx);
-        if (!chk) return;
-        chk.textContent = st;
-        chk.className = 'nc-check-badge' + (st === 'OK' ? ' is-ok' : st === 'SYNC' ? ' is-sync' : '');
-      });
-    }, step.delay);
-    bootTimers.push(tid);
-  });
+    const midTid = setTimeout(() => {
+      renderBootTickerTrack(trackEl, tickerOffset, 3);
+    }, 125);
+    bootTimers.push(midTid);
 
+    const snapTid = setTimeout(() => {
+      tickerOffset = (tickerOffset + 1) % BOOT_TICKER_LINES.length;
+      trackEl.style.transition = 'none';
+      trackEl.style.transform = 'translateY(0)';
+      renderBootTickerTrack(trackEl, tickerOffset, 2);
+    }, 265);
+    bootTimers.push(snapTid);
+  }, 470);
+  bootIntervals.push(tickerInterval);
+
+  // 2. Center [ XX% ] -> ( DONE ) counter + Right scramble-decode typewriter
+  const startTs = performance.now();
+  const COUNT_MS = 2500;
+  const DECODE_MS = 1480;
+
+  const tickFrame = (now) => {
+    const elapsed = now - startTs;
+
+    // Right column scramble-decode
+    if (twTextEl) {
+      if (elapsed < DECODE_MS) {
+        const pDecode = Math.max(0, elapsed / DECODE_MS);
+        const lockedLen = Math.max(3, Math.floor(pDecode * BOOT_RIGHT_MESSAGE.length));
+        const locked = BOOT_RIGHT_MESSAGE.slice(0, lockedLen);
+        const remSlice = BOOT_RIGHT_MESSAGE.slice(lockedLen, lockedLen + 5);
+        let tail = '';
+        for (let i = 0; i < remSlice.length; i++) {
+          tail += remSlice[i] === '\n'
+            ? '\n'
+            : BOOT_SCRAMBLE_GLYPHS[Math.floor(Math.random() * BOOT_SCRAMBLE_GLYPHS.length)];
+        }
+        twTextEl.textContent = locked + tail;
+      } else {
+        twTextEl.textContent = BOOT_RIGHT_MESSAGE;
+      }
+    }
+
+    // Center [ XX% ] -> ( DONE )
+    if (pctEl) {
+      if (elapsed < COUNT_MS) {
+        const p = Math.max(0, Math.min(1, elapsed / COUNT_MS));
+        const eased = 1 - Math.pow(1 - p, 2.85);
+        const numPct = Math.min(99, Math.floor(eased * 100));
+        const label = numPct < 10 ? `0${numPct}` : String(numPct);
+        pctEl.textContent = `[ ${label}% ]`;
+      } else {
+        pctEl.textContent = '( DONE )';
+        pctEl.classList.add('is-done');
+      }
+    }
+
+    if (elapsed < COUNT_MS + 100) {
+      bootRafId = requestAnimationFrame(tickFrame);
+    } else {
+      bootRafId = null;
+    }
+  };
+  bootRafId = requestAnimationFrame(tickFrame);
+
+  // Hold ( DONE ) cleanly while ticker cycles once more, then dismiss into white-themed console
   const endTid = setTimeout(() => {
     dismissBootScreen();
     if (options.isReboot) {
       toast('Runtime verified', 'All 6 cooperative agents online', 'ok');
     }
-  }, 1680);
+  }, 3350);
   bootTimers.push(endTid);
 }
 

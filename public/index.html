@@ -10,88 +10,55 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/base.css?v=9">
-  <link rel="stylesheet" href="css/layout.css?v=9">
-  <link rel="stylesheet" href="css/components.css?v=9">
-  <link rel="stylesheet" href="css/views.css?v=9">
-  <link rel="stylesheet" href="css/boot.css?v=9">
+  <link rel="stylesheet" href="css/base.css?v=10">
+  <link rel="stylesheet" href="css/layout.css?v=10">
+  <link rel="stylesheet" href="css/components.css?v=10">
+  <link rel="stylesheet" href="css/views.css?v=10">
+  <link rel="stylesheet" href="css/boot.css?v=10">
   <script>
     (function() {
       const saved = localStorage.getItem('netcoop-theme');
-      if (saved) {
-        document.documentElement.setAttribute('data-theme', saved);
-      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      if (saved === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
       }
     })();
   </script>
 </head>
 <body>
-  <!-- NetCoop AI System Boot Screen -->
+  <!-- NetCoop AI Minimalist 3-Column Boot Screen (White Theme) -->
   <div id="netcoop-boot-screen" class="boot-screen" aria-label="NetCoop AI System Boot">
-    <div class="nc-boot-panel">
-      <div class="nc-boot-panel__head">
-        <span class="nc-boot-panel__title">
-          <span class="nc-boot-panel__dot"></span>
-          NetCoop Diagnostic Runtime
-        </span>
-        <span class="nc-boot-panel__meta">IIT-BBS &middot; v1.0.0</span>
+    <div class="nc-cine-boot">
+      <!-- Left Column: Continuous 6-Line Scrolling Telemetry Stream -->
+      <div class="nc-cine-left" aria-hidden="true">
+        <div class="nc-cine-ticker">
+          <div class="nc-cine-ticker__track" id="boot-ticker-track">
+            <div class="nc-cine-ticker__line">// PROBING LIVE DNS &amp; TCP SOCKETS...</div>
+            <div class="nc-cine-ticker__line">// MOUNTING JSON-RPC V1.0.0 BUS...</div>
+            <div class="nc-cine-ticker__line is-active"><span>SYNCHRONIZING 6 COOPERATIVE AGENTS...</span></div>
+            <div class="nc-cine-ticker__line">// INITIALIZING CAMPUS TOPOLOGY GRAPH...</div>
+            <div class="nc-cine-ticker__line">// DECRYPTING TELEMETRY DATA STREAMS...</div>
+            <div class="nc-cine-ticker__line">// CALIBRATING SECTION 6 GUARDRAILS...</div>
+          </div>
+        </div>
       </div>
 
-      <div class="nc-boot-stage">
-        <img src="images/netcoop-logo-light.png" alt="NetCoop — Multi-Agent Network Intelligence" class="nc-logo-light" width="184" />
-        <img src="images/netcoop-logo-dark.png" alt="NetCoop — Multi-Agent Network Intelligence" class="nc-logo-dark" width="184" />
+      <!-- Center Column: NetCoop Brand Logo + [ XX% ] / ( DONE ) -->
+      <div class="nc-cine-center">
+        <img src="images/netcoop-logo-light.png" alt="NetCoop — Multi-Agent Network Intelligence" class="nc-cine-logo" width="168" />
+        <button type="button" class="nc-cine-counter" id="boot-percent" title="Boot progress">[ 00% ]</button>
       </div>
 
-      <table class="nc-boot-checks" aria-label="Subsystem verification">
-        <tbody>
-          <tr id="boot-row-0">
-            <td class="nc-boot-checks__id">01</td>
-            <td class="nc-boot-checks__name">Host &amp; Network Probe Engine</td>
-            <td class="nc-boot-checks__spec">DNS / TCP RTT</td>
-            <td class="nc-boot-checks__state"><span class="nc-check-badge is-sync" id="boot-chk-0">SYNC</span></td>
-          </tr>
-          <tr id="boot-row-1">
-            <td class="nc-boot-checks__id">02</td>
-            <td class="nc-boot-checks__name">JSON-RPC Message Bus</td>
-            <td class="nc-boot-checks__spec">v1.0.0</td>
-            <td class="nc-boot-checks__state"><span class="nc-check-badge" id="boot-chk-1">WAIT</span></td>
-          </tr>
-          <tr id="boot-row-2">
-            <td class="nc-boot-checks__id">03</td>
-            <td class="nc-boot-checks__name">Cooperative Agent Mesh</td>
-            <td class="nc-boot-checks__spec">6 workers</td>
-            <td class="nc-boot-checks__state"><span class="nc-check-badge" id="boot-chk-2">WAIT</span></td>
-          </tr>
-          <tr id="boot-row-3">
-            <td class="nc-boot-checks__id">04</td>
-            <td class="nc-boot-checks__name">Groq LPU Inference</td>
-            <td class="nc-boot-checks__spec">gpt-oss-120b</td>
-            <td class="nc-boot-checks__state"><span class="nc-check-badge" id="boot-chk-3">WAIT</span></td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="nc-boot-panel__foot">
-        <div class="boot-status-box">
-          <div class="boot-status-row">
-            <div class="boot-status-lead">
-              <span class="boot-pulse-dot"></span>
-              <span id="boot-status-text" class="boot-status-text">Probing live host interfaces &amp; DNS resolvers&hellip;</span>
-            </div>
-            <span id="boot-percent" class="boot-percent">0%</span>
-          </div>
-          <div class="boot-progress-track">
-            <div id="boot-progress-bar" class="boot-progress-bar"></div>
-          </div>
+      <!-- Right Column: Scramble-Decode Operator Notice + Blinking Block Cursor -->
+      <div class="nc-cine-right">
+        <div class="nc-cine-typewriter" id="boot-typewriter">
+          <span id="boot-typewriter-text">// HANG TIGHT, OPERATOR. LIVE DATA PROBE</span><span class="nc-cine-cursor" aria-hidden="true">&#9608;</span>
         </div>
       </div>
     </div>
 
-    <div class="nc-boot-caption">
-      <span>IIT Bhubaneswar Network Operations</span>
-      <button type="button" class="nc-boot-skip" id="boot-skip-btn">Skip &rarr;</button>
-    </div>
+    <button type="button" class="nc-cine-skip" id="boot-skip-btn">[ SKIP ]</button>
   </div>
 
   <div class="nc-app-shell">
@@ -492,6 +459,6 @@
   <div class="toasts" id="toasts"></div>
 
   <!-- Frontend Logic -->
-  <script type="module" src="js/app.js?v=9"></script>
+  <script type="module" src="js/app.js?v=10"></script>
 </body>
 </html>
