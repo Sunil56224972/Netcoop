@@ -16,8 +16,12 @@ const app = express();
 app.disable('x-powered-by');
 app.set('etag', false);
 
-// Middleware
+// Middleware — support JSON, URL-encoded forms, and direct raw CSV / TSV / NDJSON payloads
 app.use(express.json({ limit: '10mb' }));
+app.use(express.text({
+  type: ['text/*', 'application/csv', 'application/vnd.ms-excel', 'application/x-ndjson'],
+  limit: '10mb'
+}));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Prevent stale 304 Not Modified on Vercel serverless (which sets static 2018 mtime)

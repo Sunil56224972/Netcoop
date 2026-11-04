@@ -158,6 +158,56 @@ async function runTests() {
   assert.ok(ndjsonDiag.quality.unit_conversions.length > 0, 'Normalizer must perform automatic unit conversions');
   console.log('  ✓ Arbitrary external NDJSON normalized and unit-converted without canned responses');
 
+  // E. Direct HTTP Express text/csv Ingestion & ?format=csv Report Export
+  const { Readable } = require('stream');
+  const app = require('../server');
+  const invokeApp = (url, contentType, rawBody) => new Promise((resolve, reject) => {
+    const buf = Buffer.from(rawBody, 'utf8');
+    const req = Readable.from([buf]);
+    req.method = 'POST';
+    req.url = url;
+    req.headers = {
+      'content-type': contentType,
+      'content-length': String(buf.length)
+    };
+    req.connection = {};
+    req.socket = {};
+
+    const resHeaders = {};
+    const chunks = [];
+    const res = {
+      statusCode: 200,
+      setHeader(k, v) { resHeaders[String(k).toLowerCase()] = v; },
+      getHeader(k) { return resHeaders[String(k).toLowerCase()]; },
+      removeHeader(k) { delete resHeaders[String(k).toLowerCase()]; },
+      status(code) { this.statusCode = code; return this; },
+      write(chunk) { chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk))); return true; },
+      end(chunk) {
+        if (chunk) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk)));
+        resolve({ status: this.statusCode, headers: resHeaders, text: Buffer.concat(chunks).toString('utf8') });
+      }
+    };
+    try {
+      app(req, res, reject);
+    } catch (e) {
+      reject(e);
+    }
+  });
+
+  const jsonRes = await invokeApp('/api/netcoop/diagnose', 'text/csv', enterpriseCsv);
+  assert.strictEqual(jsonRes.status, 200);
+  const jsonBody = JSON.parse(jsonRes.text);
+  assert.strictEqual(jsonBody.report.status, 'diagnosed');
+  assert.strictEqual(jsonBody.meta.format, 'csv');
+
+  const csvRes = await invokeApp('/api/netcoop/diagnose?format=csv', 'text/csv', enterpriseCsv);
+  assert.strictEqual(csvRes.status, 200);
+  assert.ok(String(csvRes.headers['content-type'] || '').includes('text/csv'));
+  assert.ok(csvRes.text.includes('incident_id,run_id,timestamp_utc,verdict_status'));
+  assert.ok(csvRes.text.includes('MUMBAI_DIST_SW_07'));
+  assert.ok(csvRes.text.includes('SUSPECTED_ROOT_CAUSE'));
+  console.log('  ✓ Direct HTTP text/csv upload & ?format=csv diagnostic spreadsheet export verified');
+
   console.log('\n======================================================');
   console.log('   ALL NETCOOP TESTS PASSED SUCCESSFULLY (100%)');
   console.log('======================================================\n');

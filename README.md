@@ -236,6 +236,11 @@ curl -X POST https://netcoop.vercel.app/api/netcoop/diagnose \
       ]
     }
   }'
+
+# Or send raw CSV directly and receive a 28-column CSV diagnostic spreadsheet (?format=csv):
+curl -X POST "https://netcoop.vercel.app/api/netcoop/diagnose?format=csv" \
+  -H "Content-Type: text/csv" \
+  --data-binary $'timestamp,device_id,ip_address,uplink,bw_util,tx_drops,ping_ms,ploss\n2026-11-05T01:00:00Z,CORE_01,10.0.0.1,,28%,0,4.2ms,0%\n2026-11-05T01:00:00Z,EDGE_SW_04,10.0.4.1,CORE_01,97.2%,230,185ms,5.9%'
 ```
 
 ### `GET /api/netcoop/scenarios` & `GET /api/netcoop/scenarios/:key`
