@@ -594,6 +594,136 @@
 .boot-log-tag--sync { background: var(--accent-soft); color: var(--accent); }
 .boot-log-tag--warn { background: var(--med-soft); color: var(--med); }
 
+/* ─── Non-Overlapping Panel Headers & Editor Sub-Toolbar ──────────────────── */
+.panel__head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  padding: 8px 14px;
+  min-height: 42px;
+  height: auto;
+  border-bottom: 1px solid var(--line);
+}
+
+.panel__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.panel__title svg {
+  width: 15px;
+  height: 15px;
+  color: var(--ink-3);
+  flex: none;
+}
+
+.panel__meta {
+  line-height: 1.35;
+  min-width: 0;
+}
+
+#rt-probe-source-label {
+  max-width: 420px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.panel__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 0;
+  white-space: nowrap;
+  cursor: pointer;
+  line-height: 1.35;
+}
+
+.panel__link svg {
+  width: 13px;
+  height: 13px;
+  flex: none;
+}
+
+.panel__head-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.panel__head > .panel__meta + .panel__head-actions,
+.panel__head > .panel__meta + .panel__link {
+  margin-left: 4px;
+}
+
+.panel__head-actions .panel__link,
+.panel__head-actions .panel__meta {
+  margin-left: 0;
+}
+
+.nc-editor-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+  padding: 7px 14px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+}
+
+.nc-editor-tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.nc-tool-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 25px;
+  padding: 0 9px;
+  border-radius: 3px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink-2);
+  font: 500 11.5px/1 var(--font-ui);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s, color 0.12s;
+}
+
+.nc-tool-chip svg {
+  width: 12.5px;
+  height: 12.5px;
+  flex: none;
+}
+
+.nc-tool-chip:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+.nc-tool-chip--accent {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line-strong));
+  color: var(--accent);
+}
+
+.nc-tool-chip--accent:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
 /* ─── Live Network Target Prober Bar ──────────────────────────────────────── */
 .nc-prober-row {
   display: flex;
@@ -616,13 +746,20 @@
 }
 
 .nc-preset-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   height: 24px;
+  max-width: 100%;
   padding: 0 8px;
   border-radius: 3px;
   border: 1px solid var(--line);
   background: var(--surface-2);
   color: var(--ink-2);
   font: 500 11.5px/1 var(--font-ui);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   cursor: pointer;
   transition: border-color 0.12s, background 0.12s, color 0.12s;
 }

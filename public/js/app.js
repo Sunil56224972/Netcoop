@@ -1391,7 +1391,7 @@ function paintResults() {
     <section class="panel">
       <div class="panel__head">
         <h2 class="panel__title"><i data-icon="server"></i> Per-Node Telemetry Summary (${summary.devices.length} Nodes)</h2>
-        <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+        <div class="panel__head-actions">
           <span class="panel__meta">Click any node to inspect raw samples</span>
           <button class="panel__link" id="res-table-csv-btn">${icon('download')} Download Node CSV</button>
         </div>
@@ -1600,9 +1600,11 @@ function paintResults() {
   <section class="panel">
     <div class="panel__head">
       <h2 class="panel__title"><i data-icon="code"></i> Section 6 Unified JSON Report</h2>
-      <span class="panel__meta mono">${esc(r.schema || 'netcoop.report/1.0')}</span>
-      <button class="panel__link" id="nc-copy-json" style="margin-left:12px">${icon('copy')} Copy JSON</button>
-      <button class="panel__link" id="nc-toggle-json" style="margin-left:10px">Show Raw JSON</button>
+      <div class="panel__head-actions">
+        <span class="panel__meta mono">${esc(r.schema || 'netcoop.report/1.0')}</span>
+        <button class="panel__link" id="nc-copy-json">${icon('copy')} Copy JSON</button>
+        <button class="panel__link" id="nc-toggle-json">Show Raw JSON</button>
+      </div>
     </div>
     <div id="nc-json-body" style="display:none">
       <pre class="code" style="max-height:480px;overflow:auto;padding:14px;font-size:12px;margin:0;border:0;border-top:1px solid var(--line);border-radius:0">${esc(JSON.stringify(result.report, null, 2))}</pre>
@@ -1774,10 +1776,10 @@ function paintTopology() {
   container.innerHTML = `
     <div class="stack">
       <section class="panel">
-        <div class="panel__head" style="flex-wrap:wrap;height:auto;min-height:44px;padding:8px 14px">
+        <div class="panel__head">
           <h2 class="panel__title"><i data-icon="network"></i> Live Topology &amp; Dependency Graph (${summary.devices.length} Nodes, ${summary.links.length} Links)</h2>
-          <span class="panel__meta mono">${esc(sourceTitle)}</span>
-          <div style="display:flex;align-items:center;gap:6px;margin-left:12px">
+          <div class="panel__head-actions">
+            <span class="panel__meta mono">${esc(sourceTitle)}</span>
             <button class="btn btn--sm" id="topo-load-live-btn"><i data-icon="globe"></i> Probe Live Targets</button>
             <button class="btn btn--sm" id="topo-load-campus-btn"><i data-icon="layers"></i> Load IIT-BBS 8-Node Reference</button>
           </div>

@@ -10,11 +10,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/layout.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/views.css">
-  <link rel="stylesheet" href="css/boot.css?v=8">
+  <link rel="stylesheet" href="css/base.css?v=9">
+  <link rel="stylesheet" href="css/layout.css?v=9">
+  <link rel="stylesheet" href="css/components.css?v=9">
+  <link rel="stylesheet" href="css/views.css?v=9">
+  <link rel="stylesheet" href="css/boot.css?v=9">
   <script>
     (function() {
       const saved = localStorage.getItem('netcoop-theme');
@@ -246,8 +246,8 @@
         <section class="panel">
           <div class="panel__head">
             <h2 class="panel__title"><i data-icon="globe"></i> Live Probed Network Targets &amp; Local Host Gateway</h2>
-            <span class="panel__meta mono" id="rt-probe-source-label">Measuring real TCP &amp; DNS endpoints&hellip;</span>
-            <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+            <div class="panel__head-actions">
+              <span class="panel__meta mono" id="rt-probe-source-label">Measuring real TCP &amp; DNS endpoints&hellip;</span>
               <button class="panel__link" id="rt-export-csv-btn" title="Export live probed telemetry table as CSV"><i data-icon="download"></i> Export Probe (.csv)</button>
               <button class="panel__link" id="rt-open-in-studio">Inspect in Diagnostics &rarr;</button>
             </div>
@@ -362,7 +362,7 @@
               <span class="small muted">Quick presets:</span>
               <button type="button" class="nc-preset-chip" data-targets="one.one.one.one:443, dns.google:443, github.com:443, api.groq.com:443">Global Core (Cloudflare, Google, GitHub, Groq)</button>
               <button type="button" class="nc-preset-chip" data-targets="iitbbs.ac.in:443, one.one.one.one:443, dns.google:443, github.com:443">IIT Bhubaneswar + Upstream DNS</button>
-              <button type="button" class="nc-preset-chip" data-targets="one.one.one.one:443, dns.google:443, 9.9.9.9:443, 208.67.222.222:443">DNS Anycast Resolvers (1.1.1.1, 8.8.8.8, 9.9.9.9, OpenDNS)</button>
+              <button type="button" class="nc-preset-chip" data-targets="one.one.one.one:443, dns.google:443, 9.9.9.9:443, 208.67.222.222:443">DNS Anycast Resolvers (1.1.1.1, 8.8.8.8, 9.9.9.9)</button>
             </div>
           </div>
         </section>
@@ -372,14 +372,16 @@
           <section class="panel">
             <div class="panel__head">
               <h2 class="panel__title"><i data-icon="code"></i> Telemetry Payload (CSV / JSON / NDJSON)</h2>
-              <div style="margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-                <span class="small mono muted" id="nc-payload-meta">0 samples</span>
-                <button class="panel__link" id="nc-convert-csv-btn" title="Convert current payload between JSON and CSV">JSON &harr; CSV</button>
-                <button class="panel__link" id="nc-csv-grid-toggle" title="Toggle interactive CSV spreadsheet table preview">Grid Preview</button>
-                <button class="panel__link" id="nc-format-btn" title="Format JSON or clean CSV payload">Format</button>
-                <button class="panel__link" id="nc-upload-btn" title="Upload external .csv, .tsv, .json, or .ndjson file"><i data-icon="upload"></i> Upload CSV / JSON</button>
-                <input type="file" id="nc-file-input" accept=".csv,.tsv,.json,.ndjson,.txt" style="display:none" />
+              <span class="panel__meta mono" id="nc-payload-meta">0 samples</span>
+            </div>
+            <div class="nc-editor-toolbar">
+              <div class="nc-editor-tools">
+                <button type="button" class="nc-tool-chip" id="nc-convert-csv-btn" title="Convert current payload between JSON and CSV">JSON &harr; CSV</button>
+                <button type="button" class="nc-tool-chip" id="nc-csv-grid-toggle" title="Toggle interactive CSV spreadsheet table preview">Grid Preview</button>
+                <button type="button" class="nc-tool-chip" id="nc-format-btn" title="Format JSON or clean CSV payload">Format</button>
               </div>
+              <button type="button" class="nc-tool-chip nc-tool-chip--accent" id="nc-upload-btn" title="Upload external .csv, .tsv, .json, or .ndjson file"><i data-icon="upload"></i> Upload CSV / JSON</button>
+              <input type="file" id="nc-file-input" accept=".csv,.tsv,.json,.ndjson,.txt" style="display:none" />
             </div>
             <div class="panel__body">
               <div class="nc-prober-presets" style="margin-top:0;margin-bottom:10px">
@@ -391,7 +393,7 @@
               </div>
               <textarea id="nc-raw" class="textarea" rows="12" spellcheck="false" placeholder="Paste CSV (comma, semicolon, or tab-separated), JSON, or NDJSON telemetry here, drag & drop a .csv/.json file, or click a CSV template above…"></textarea>
               <div id="nc-csv-grid-wrap" style="display:none;max-height:285px;overflow:auto;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface)"></div>
-              <div class="row wrap" style="display:flex;align-items:center;margin-top:10px;gap:8px">
+              <div class="row wrap" style="display:flex;align-items:center;margin-top:10px;gap:8px;flex-wrap:wrap">
                 <button class="btn btn--primary" id="nc-run"><i data-icon="play"></i> Run 6-Agent Diagnosis</button>
                 <button class="btn" id="nc-download-csv-btn" title="Download current telemetry as CSV spreadsheet"><i data-icon="download"></i> Download (.csv)</button>
                 <button class="btn" id="nc-export-telemetry-btn" title="Download current telemetry raw file"><i data-icon="download"></i> Download Raw</button>
@@ -403,10 +405,10 @@
 
           <section class="panel">
             <div class="panel__head">
-              <h2 class="panel__title"><i data-icon="layers"></i> Benchmark Fault Scenarios (IIT Bhubaneswar)</h2>
-              <span class="panel__meta">Click to load &amp; diagnose</span>
+              <h2 class="panel__title"><i data-icon="layers"></i> Benchmark Fault Scenarios</h2>
+              <span class="panel__meta">IIT Bhubaneswar &middot; Click to diagnose</span>
             </div>
-            <div id="nc-scenarios" style="overflow-y:auto;max-height:365px;scrollbar-width:thin">
+            <div id="nc-scenarios" style="overflow-y:auto;max-height:405px;scrollbar-width:thin">
               <div class="skeleton" style="height:200px;margin:14px"></div>
             </div>
           </section>
@@ -432,9 +434,11 @@
         <section class="panel">
           <div class="panel__head">
             <h2 class="panel__title"><i data-icon="layers"></i> Cooperative Agent Message Bus (JSON-RPC v1.0.0)</h2>
-            <span class="panel__meta mono" id="bus-msg-count">0 messages logged</span>
-            <button class="panel__link" id="bus-export-btn" style="margin-left:12px"><i data-icon="download"></i> Export Bus (.json)</button>
-            <button class="panel__link" id="bus-clear-btn" style="margin-left:10px">Clear Log</button>
+            <div class="panel__head-actions">
+              <span class="panel__meta mono" id="bus-msg-count">0 messages logged</span>
+              <button class="panel__link" id="bus-export-btn"><i data-icon="download"></i> Export Bus (.json)</button>
+              <button class="panel__link" id="bus-clear-btn">Clear Log</button>
+            </div>
           </div>
           <div class="toolbar">
             <div class="input-icon">
@@ -488,6 +492,6 @@
   <div class="toasts" id="toasts"></div>
 
   <!-- Frontend Logic -->
-  <script type="module" src="js/app.js?v=8"></script>
+  <script type="module" src="js/app.js?v=9"></script>
 </body>
 </html>
