@@ -537,51 +537,20 @@
   width: 100%;
 }
 
-/* ─── System Runtime Tab (#tab-boot) Architectural Layout ─────────────────── */
+/* ─── System Runtime Tab (#tab-boot) Full-Width Panel Layout ──────────────── */
 .nc-boot-overview {
-  display: grid;
-  grid-template-columns: 244px minmax(0, 1fr);
+  display: block;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
   overflow: hidden;
 }
 
-.nc-boot-brand-cell {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 24px 20px;
-  background: var(--surface);
-  border-right: 1px solid var(--line);
-  text-align: center;
-  cursor: pointer;
-}
-
-.nc-boot-brand-cell img {
-  width: 168px !important;
-  max-width: 168px !important;
-  height: auto !important;
-  object-fit: contain;
-  transition: opacity 0.15s ease;
-}
-
-.nc-boot-brand-cell:hover img {
-  opacity: 0.88;
-}
-
-.nc-boot-brand-hint {
-  margin-top: 12px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--ink-3);
-}
-
 .nc-boot-summary-cell {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  width: 100%;
 }
 
 .nc-boot-summary-body {
@@ -608,7 +577,7 @@
 }
 
 .nc-boot-kpi {
-  padding: 10px 12px;
+  padding: 12px 16px;
   min-width: 0;
 }
 
@@ -976,13 +945,6 @@
   }
   .nc-main-view {
     padding: 14px 14px 40px;
-  }
-  .nc-boot-overview {
-    grid-template-columns: 1fr;
-  }
-  .nc-boot-brand-cell {
-    border-right: 0;
-    border-bottom: 1px solid var(--line);
   }
   .nc-boot-kpis {
     grid-template-columns: repeat(2, minmax(0, 1fr));
