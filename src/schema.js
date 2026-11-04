@@ -3,11 +3,11 @@
 // NetCoop AI: telemetry schema, metric catalogue and input normaliser.
 //
 // Real telemetry arrives in many shapes: other field names, other units, a
-// different schema version, half-filled rows, broken JSON. This module reads
-// JSON, NDJSON or CSV, maps every field it understands onto one canonical
-// vocabulary (names and units below), converts units, and reports everything it
-// had to repair or reject. Nothing is invented: a value that cannot be read is
-// dropped and counted, never filled in.
+// different schema version, half-filled rows, broken JSON, Excel/PRTG/SolarWinds
+// CSV or TSV exports. This module reads JSON, NDJSON or CSV/TSV, maps every field
+// it understands onto one canonical vocabulary (names and units below), converts
+// units, and reports everything it had to repair or reject. Nothing is invented:
+// a value that cannot be read is dropped and counted, never filled in.
 
 const SCHEMA_ID = 'netcoop.telemetry/1.0';
 const REPORT_SCHEMA = 'netcoop.report/1.0';
@@ -29,22 +29,31 @@ const METRICS = {
   latency_ms: {
     owner: 'performance_agent', unit: 'ms', kind: 'time', min: 0, max: 60000, warn: 100, crit: 250, label: 'Latency',
     text: ['Latency within expected range', 'Elevated network latency', 'Severely elevated network latency'],
-    aliases: [['latency_ms', 1], ['latency', 1], ['rtt_ms', 1], ['rtt', 1], ['delay_ms', 1], ['round_trip_ms', 1], ['latency_avg_ms', 1], ['latency_s', 1000], ['latency_sec', 1000], ['rtt_s', 1000], ['latency_us', 0.001], ['rtt_us', 0.001]]
+    aliases: [
+      ['latency_ms', 1], ['latency', 1], ['rtt_ms', 1], ['rtt', 1], ['delay_ms', 1], ['round_trip_ms', 1],
+      ['latency_avg_ms', 1], ['ping', 1], ['ping_ms', 1], ['avg_rtt', 1], ['avg_rtt_ms', 1], ['rtt_avg', 1],
+      ['response_time', 1], ['response_time_ms', 1], ['icmp_rtt', 1], ['tcp_rtt', 1], ['tcp_rtt_ms', 1],
+      ['latency_s', 1000], ['latency_sec', 1000], ['rtt_s', 1000], ['latency_us', 0.001], ['rtt_us', 0.001]
+    ]
   },
   jitter_ms: {
     owner: 'performance_agent', unit: 'ms', kind: 'time', min: 0, max: 60000, warn: 30, crit: 80, label: 'Jitter',
     text: ['Jitter within expected range', 'Elevated jitter', 'Severe jitter'],
-    aliases: [['jitter_ms', 1], ['jitter', 1], ['jitter_s', 1000], ['jitter_us', 0.001]]
+    aliases: [['jitter_ms', 1], ['jitter', 1], ['jitter_avg', 1], ['avg_jitter', 1], ['pdv_ms', 1], ['jitter_s', 1000], ['jitter_us', 0.001]]
   },
   packet_loss_pct: {
     owner: 'performance_agent', unit: '%', kind: 'pct', min: 0, max: 100, warn: 1, crit: 5, label: 'Packet loss',
     text: ['Packet loss within expected range', 'Elevated packet loss', 'Severe packet loss'],
-    aliases: [['packet_loss_pct', 1], ['packet_loss', 1], ['loss_pct', 1], ['loss', 1], ['pkt_loss', 1], ['pkt_loss_pct', 1], ['packet_loss_percent', 1], ['packet_loss_ratio', 100], ['loss_ratio', 100], ['loss_fraction', 100]]
+    aliases: [
+      ['packet_loss_pct', 1], ['packet_loss', 1], ['loss_pct', 1], ['loss', 1], ['pkt_loss', 1], ['pkt_loss_pct', 1],
+      ['packet_loss_percent', 1], ['ploss', 1], ['ploss_pct', 1], ['drop_rate', 1], ['drop_pct', 1], ['dropped_pct', 1],
+      ['packet_drop_pct', 1], ['loss_percent', 1], ['packet_loss_ratio', 100], ['loss_ratio', 100], ['loss_fraction', 100]
+    ]
   },
   throughput_mbps: {
     owner: 'performance_agent', unit: 'Mbps', kind: 'rate', min: 0, max: 1e7, warn: null, crit: null, label: 'Throughput', info: true,
     text: ['Throughput', 'Throughput', 'Throughput'],
-    aliases: [['throughput_mbps', 1], ['throughput', 1], ['tput_mbps', 1], ['thr_mbps', 1], ['throughput_kbps', 0.001], ['throughput_gbps', 1000], ['throughput_bps', 1e-6]]
+    aliases: [['throughput_mbps', 1], ['throughput', 1], ['tput_mbps', 1], ['thr_mbps', 1], ['rx_mbps', 1], ['tx_mbps', 1], ['throughput_kbps', 0.001], ['throughput_gbps', 1000], ['throughput_bps', 1e-6]]
   },
   bandwidth_mbps: {
     owner: 'performance_agent', unit: 'Mbps', kind: 'rate', min: 0, max: 1e7, warn: null, crit: null, label: 'Bandwidth', info: true,
@@ -54,57 +63,70 @@ const METRICS = {
   link_utilization_pct: {
     owner: 'performance_agent', unit: '%', kind: 'pct', min: 0, max: 100, warn: 80, crit: 92, label: 'Link utilization',
     text: ['Link utilization within expected range', 'High link utilization', 'Saturated link'],
-    aliases: [['link_utilization_pct', 1], ['link_utilization', 1], ['utilization', 1], ['utilisation', 1], ['utilization_pct', 1], ['util_pct', 1], ['link_util', 1], ['link_util_pct', 1], ['utilization_ratio', 100], ['link_utilization_ratio', 100], ['util_ratio', 100], ['utilization_fraction', 100]]
+    aliases: [
+      ['link_utilization_pct', 1], ['link_utilization', 1], ['utilization', 1], ['utilisation', 1], ['utilization_pct', 1],
+      ['util_pct', 1], ['util', 1], ['link_util', 1], ['link_util_pct', 1], ['bw_util', 1], ['if_util', 1], ['port_util', 1],
+      ['bandwidth_util', 1], ['traffic_pct', 1], ['tx_util_pct', 1], ['rx_util_pct', 1],
+      ['utilization_ratio', 100], ['link_utilization_ratio', 100], ['util_ratio', 100], ['utilization_fraction', 100]
+    ]
   },
   signal_dbm: {
     owner: 'performance_agent', unit: 'dBm', kind: 'dbm', min: -120, max: 0, warn: -70, crit: -80, lowerIsWorse: true, label: 'Wireless signal',
     text: ['Wireless signal strength is adequate', 'Weak wireless signal', 'Very weak wireless signal'],
-    aliases: [['signal_dbm', 1], ['rssi', 1], ['rssi_dbm', 1], ['signal_strength', 1], ['signal_strength_dbm', 1], ['wifi_signal_dbm', 1], ['signal', 1]]
+    aliases: [
+      ['signal_dbm', 1], ['rssi', 1], ['rssi_dbm', 1], ['signal_strength', 1], ['signal_strength_dbm', 1],
+      ['wifi_signal_dbm', 1], ['wifi_rssi', 1], ['wifi_rssi_dbm', 1], ['dbm', 1], ['ap_signal', 1], ['client_rssi', 1],
+      ['rf_signal_dbm', 1], ['signal', 1]
+    ]
   },
   retransmission_pct: {
     owner: 'performance_agent', unit: '%', kind: 'pct', min: 0, max: 100, warn: 10, crit: 25, label: 'Retransmissions',
     text: ['Retransmissions within expected range', 'Elevated wireless retransmissions', 'Severe wireless retransmissions'],
-    aliases: [['retransmission_pct', 1], ['retransmissions_pct', 1], ['retransmission_rate', 1], ['retry_pct', 1], ['wifi_retry_pct', 1], ['retransmit_pct', 1], ['retransmission_ratio', 100]]
+    aliases: [
+      ['retransmission_pct', 1], ['retransmissions_pct', 1], ['retransmission_rate', 1], ['retry_pct', 1], ['wifi_retry_pct', 1],
+      ['retransmit_pct', 1], ['retries_pct', 1], ['tx_retries_pct', 1], ['frame_retry_pct', 1], ['tcp_retrans_pct', 1],
+      ['retransmission_ratio', 100]
+    ]
   },
   dns_failure_pct: {
     owner: 'performance_agent', unit: '%', kind: 'pct', min: 0, max: 100, warn: 5, crit: 20, label: 'DNS failures',
     text: ['DNS resolution succeeding', 'Elevated DNS failures', 'Severe DNS failures'],
-    aliases: [['dns_failure_pct', 1], ['dns_fail_pct', 1], ['dns_failure_rate', 1], ['dns_failures_pct', 1], ['dns_failure_ratio', 100]]
+    aliases: [['dns_failure_pct', 1], ['dns_fail_pct', 1], ['dns_failure_rate', 1], ['dns_failures_pct', 1], ['dns_err_pct', 1], ['nxdomain_pct', 1], ['servfail_pct', 1], ['dns_timeout_pct', 1], ['dns_fail', 1], ['dns_failure_ratio', 100]]
   },
   dns_latency_ms: {
     owner: 'performance_agent', unit: 'ms', kind: 'time', min: 0, max: 120000, warn: 200, crit: 800, label: 'DNS lookup time',
     text: ['DNS lookup time within expected range', 'Slow DNS lookups', 'Very slow DNS lookups'],
-    aliases: [['dns_latency_ms', 1], ['dns_resolution_ms', 1], ['dns_lookup_ms', 1], ['dns_time_ms', 1], ['dns_latency_s', 1000]]
+    aliases: [['dns_latency_ms', 1], ['dns_resolution_ms', 1], ['dns_lookup_ms', 1], ['dns_time_ms', 1], ['dns_ms', 1], ['dns_query_ms', 1], ['resolver_ms', 1], ['dns_rtt_ms', 1], ['dns_latency_s', 1000]]
   },
   dhcp_failure_pct: {
     owner: 'performance_agent', unit: '%', kind: 'pct', min: 0, max: 100, warn: 5, crit: 20, label: 'DHCP failures',
     text: ['DHCP leases being issued', 'Elevated DHCP failures', 'Severe DHCP failures'],
-    aliases: [['dhcp_failure_pct', 1], ['dhcp_fail_pct', 1], ['dhcp_failure_rate', 1], ['dhcp_failures_pct', 1], ['dhcp_failure_ratio', 100]]
+    aliases: [['dhcp_failure_pct', 1], ['dhcp_fail_pct', 1], ['dhcp_failure_rate', 1], ['dhcp_failures_pct', 1], ['dhcp_err_pct', 1], ['dhcp_timeout_pct', 1], ['dhcp_nak_pct', 1], ['dhcp_fail', 1], ['dhcp_failure_ratio', 100]]
   },
   dhcp_latency_ms: {
     owner: 'performance_agent', unit: 'ms', kind: 'time', min: 0, max: 120000, warn: 500, crit: 2000, label: 'DHCP response time',
     text: ['DHCP response time within expected range', 'Slow DHCP responses', 'Very slow DHCP responses'],
-    aliases: [['dhcp_latency_ms', 1], ['dhcp_offer_ms', 1], ['dhcp_lease_ms', 1], ['dhcp_time_ms', 1], ['dhcp_latency_s', 1000]]
+    aliases: [['dhcp_latency_ms', 1], ['dhcp_offer_ms', 1], ['dhcp_lease_ms', 1], ['dhcp_time_ms', 1], ['dhcp_ms', 1], ['dhcp_ack_ms', 1], ['dhcp_discover_ms', 1], ['dhcp_latency_s', 1000]]
   },
   cpu_pct: {
     owner: 'infrastructure_agent', unit: '%', kind: 'pct', min: 0, max: 100, warn: 80, crit: 92, label: 'CPU utilization',
     text: ['CPU utilization within expected range', 'High CPU utilization', 'CPU saturated'],
-    aliases: [['cpu_pct', 1], ['cpu', 1], ['cpu_utilization', 1], ['cpu_usage', 1], ['cpu_util', 1], ['cpu_percent', 1], ['cpu_load_pct', 1], ['cpu_ratio', 100]]
+    aliases: [['cpu_pct', 1], ['cpu', 1], ['cpu_utilization', 1], ['cpu_usage', 1], ['cpu_util', 1], ['cpu_percent', 1], ['cpu_load_pct', 1], ['cpu_load', 1], ['processor_pct', 1], ['sys_cpu', 1], ['avg_cpu', 1], ['cpu_ratio', 100]]
   },
   memory_pct: {
     owner: 'infrastructure_agent', unit: '%', kind: 'pct', min: 0, max: 100, warn: 85, crit: 95, label: 'Memory utilization',
     text: ['Memory utilization within expected range', 'High memory utilization', 'Memory nearly exhausted'],
-    aliases: [['memory_pct', 1], ['memory', 1], ['mem_pct', 1], ['memory_utilization', 1], ['memory_usage', 1], ['mem_usage', 1], ['mem_util', 1], ['memory_percent', 1], ['memory_ratio', 100]]
+    aliases: [['memory_pct', 1], ['memory', 1], ['mem_pct', 1], ['memory_utilization', 1], ['memory_usage', 1], ['mem_usage', 1], ['mem_util', 1], ['memory_percent', 1], ['ram', 1], ['ram_pct', 1], ['ram_usage', 1], ['mem', 1], ['used_mem_pct', 1], ['mem_percent', 1], ['memory_ratio', 100]]
   },
   queue_drops: {
     owner: 'infrastructure_agent', unit: 'drops/interval', kind: 'count', min: 0, max: 1e12, warn: 50, crit: 150, label: 'Egress queue drops',
     text: ['No significant queue drops', 'Elevated packet drops', 'Heavy packet drops'],
-    aliases: [['queue_drops', 1], ['egress_queue_drops', 1], ['output_drops', 1], ['tx_drops', 1], ['egress_drops', 1], ['queue_drop_count', 1], ['output_queue_drops', 1]]
+    aliases: [['queue_drops', 1], ['egress_queue_drops', 1], ['output_drops', 1], ['tx_drops', 1], ['egress_drops', 1], ['queue_drop_count', 1], ['output_queue_drops', 1], ['drops', 1], ['buffer_drops', 1], ['tail_drops', 1], ['qos_drops', 1], ['discard_pkts', 1], ['discards', 1], ['out_discards', 1]]
   },
   interface_errors: {
     owner: 'infrastructure_agent', unit: 'errors/interval', kind: 'count', min: 0, max: 1e12, warn: 10, crit: 100, label: 'Interface errors',
     text: ['Interface errors negligible', 'Rising interface errors', 'Heavy interface errors'],
-    aliases: [['interface_errors', 1], ['if_errors', 1], ['crc_errors', 1], ['input_errors', 1], ['rx_errors', 1], ['interface_error_count', 1], ['errors', 1]]
+    aliases: [['interface_errors', 1], ['if_errors', 1], ['crc_errors', 1], ['input_errors', 1], ['rx_errors', 1], ['interface_error_count', 1], ['crc', 1], ['fcs_errors', 1], ['port_errors', 1], ['err_in', 1], ['err_out', 1], ['frame_errors', 1], ['in_errors', 1], ['rx_crc_errors', 1], ['errors', 1]]
   }
 };
 
@@ -133,7 +155,8 @@ const STATUS_WORDS = {
 };
 
 const KEYS = {
-  device: ['device_id', 'device', 'deviceid', 'node', 'node_id', 'host', 'hostname', 'switch_id', 'ap_id', 'router_id', 'name', 'id'],
+  device: ['device_id', 'device', 'deviceid', 'node', 'node_id', 'host', 'hostname', 'switch_id', 'ap_id', 'router_id', 'router', 'switch', 'access_point', 'name', 'id', 'target', 'endpoint', 'ip_address', 'ip', 'ipv4'],
+  ip: ['ip', 'ip_address', 'ipv4', 'mgmt_ip', 'host_ip', 'address', 'target_ip'],
   time: ['timestamp', 'ts', 'time', '@timestamp', 'datetime', 'collected_at', 'observed_at', 'epoch'],
   status: ['device_status', 'status', 'state', 'oper_status', 'operational_status'],
   type: ['device_type', 'type', 'role', 'kind', 'device_role'],
@@ -165,15 +188,40 @@ class Quality {
 }
 
 // ---- Parsing --------------------------------------------------------------------------------
+function detectCsvDelimiter(headerLine) {
+  const counts = { ',': 0, ';': 0, '\t': 0, '|': 0 };
+  let q = false;
+  for (let i = 0; i < headerLine.length; i++) {
+    const c = headerLine[i];
+    if (c === '"') q = !q;
+    else if (!q && counts[c] !== undefined) counts[c] += 1;
+  }
+  let best = ',';
+  let bestN = counts[','];
+  for (const d of [';', '\t', '|']) {
+    if (counts[d] > bestN) { best = d; bestN = counts[d]; }
+  }
+  return best;
+}
+
 function parseCsv(text) {
+  const cleanedLines = String(text)
+    .replace(/^\uFEFF/, '')
+    .replace(/\r\n?/g, '\n')
+    .split('\n')
+    .filter((l) => !l.trim().startsWith('#'));
+  const nonEmptyHeader = cleanedLines.find((l) => l.trim() !== '');
+  if (!nonEmptyHeader) return [];
+  const delim = detectCsvDelimiter(nonEmptyHeader);
+
+  const src = cleanedLines.join('\n');
   const rows = []; let row = []; let field = ''; let q = false;
-  const src = String(text).replace(/\r\n?/g, '\n');
   for (let i = 0; i < src.length; i++) {
     const c = src[i];
     if (q) {
       if (c === '"') { if (src[i + 1] === '"') { field += '"'; i++; } else q = false; } else field += c;
     } else if (c === '"') q = true;
-    else if (c === ',') { row.push(field); field = ''; }
+    else if (c === delim) { row.push(field); field = ''; }
     else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
     else field += c;
   }
@@ -194,14 +242,14 @@ function readInput(input, q) {
     if (text.length > MAX_INPUT_CHARS) throw new InputError(`Input is larger than ${Math.round(MAX_INPUT_CHARS / 1048576)} MB. Split it into smaller files.`, 'too_large');
     try { value = JSON.parse(text); format = 'json'; } catch (err) {
       const looksJson = /^[{[]/.test(text);
-      const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+      const lines = text.split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !l.startsWith('#'));
       const objs = [];
       if (looksJson) {
         for (const [n, line] of lines.entries()) {
           try { const o = JSON.parse(line); objs.push(o); } catch { q.issue('malformed_line', 'Line is not valid JSON and was skipped', `line ${n + 1}: ${line}`); }
         }
       }
-      if (objs.length) { value = objs; format = 'ndjson'; } else if (!looksJson && lines.length > 1 && lines[0].includes(',')) { value = parseCsv(text); format = 'csv'; } else {
+      if (objs.length) { value = objs; format = 'ndjson'; } else if (!looksJson && lines.length > 1 && /[,;\t|]/.test(lines[0])) { value = parseCsv(text); format = 'csv'; } else {
         throw new InputError(`Input is not valid JSON, NDJSON or CSV (${err.message}).`, 'unparsable');
       }
     }
@@ -322,6 +370,7 @@ function normalizeRecord(raw, idx, q, topo) {
   if (pk && !topo.hints.has(device)) topo.hints.set(device, String(flat[pk]).trim());
   const typeKey = KEYS.type.find((k) => typeof flat[k] === 'string' && flat[k].trim());
   const siteKey = KEYS.site.find((k) => typeof flat[k] === 'string' && flat[k].trim());
+  const ipKey = KEYS.ip.find((k) => typeof flat[k] === 'string' && flat[k].trim());
 
   if (!Object.keys(metrics).length && (status == null || status === 'unknown')) { q.issue('no_usable_fields', 'Record carried no metric or status the agents understand and was skipped', raw); return null; }
 
@@ -329,7 +378,8 @@ function normalizeRecord(raw, idx, q, topo) {
     idx, device_id: device, t: ts.t, ts: ts.t ? new Date(ts.t).toISOString() : null,
     status: status === 'unknown' ? null : status, metrics, derived,
     device_type: typeKey ? flat[typeKey].trim().toLowerCase().slice(0, 40) : null,
-    site: siteKey ? flat[siteKey].trim().slice(0, 80) : null
+    site: siteKey ? flat[siteKey].trim().slice(0, 80) : null,
+    ip: ipKey ? flat[ipKey].trim().slice(0, 80) : null
   };
 }
 
@@ -373,7 +423,12 @@ function buildTopology(envelope, hints, q) {
       if (pk != null) link(pk, key, 'devices');
       const type = KEYS.type.map((k) => f[k]).find((v) => typeof v === 'string' && v.trim());
       const site = KEYS.site.map((k) => f[k]).find((v) => typeof v === 'string' && v.trim());
-      devices.set(key, { type: type ? type.trim().toLowerCase().slice(0, 40) : null, site: site ? site.trim().slice(0, 80) : null });
+      const ip = KEYS.ip.map((k) => f[k]).find((v) => typeof v === 'string' && v.trim());
+      devices.set(key, {
+        type: type ? type.trim().toLowerCase().slice(0, 40) : null,
+        site: site ? site.trim().slice(0, 80) : null,
+        ip: ip ? ip.trim().slice(0, 80) : null
+      });
     }
   }
   for (const [down, up] of hints) link(up, down, 'record');
@@ -397,11 +452,45 @@ class Dataset {
   statusSeries(id) { return this.samplesOf(id).filter((s) => s.status).map((s) => ({ t: s.t, v: s.status })); }
   typeOf(id) { return (this.deviceMeta.get(id) && this.deviceMeta.get(id).type) || (this.samplesOf(id).find((s) => s.device_type) || {}).device_type || null; }
   siteOf(id) { return (this.deviceMeta.get(id) && this.deviceMeta.get(id).site) || (this.samplesOf(id).find((s) => s.site) || {}).site || null; }
+  ipOf(id) { return (this.deviceMeta.get(id) && this.deviceMeta.get(id).ip) || (this.samplesOf(id).find((s) => s.ip) || {}).ip || null; }
   parentOf(id) { return this.parents.get(id) || null; }
   ancestors(id) { const out = []; for (let c = this.parents.get(id), n = 0; c && n < 1000; c = this.parents.get(c), n++) out.push(c); return out; }
   children(id) { return [...this.parents].filter(([, p]) => p === id).map(([c]) => c); }
   descendants(id) { const out = []; const todo = this.children(id); while (todo.length) { const c = todo.shift(); out.push(c); todo.push(...this.children(c)); } return out; }
   hasTopology() { return this.parents.size > 0; }
+
+  toNormalizedObject() {
+    const allIds = new Set([...this.ids(), ...this.parents.keys(), ...this.parents.values()]);
+    const devices = [...allIds].map((id) => ({
+      id,
+      device_id: id,
+      type: this.typeOf(id) || (this.children(id).length && !this.parentOf(id) ? 'core_router' : this.children(id).length ? 'distribution_switch' : 'network_node'),
+      role: this.typeOf(id) || (this.siteOf(id) ? `Node · ${this.siteOf(id)}` : 'Monitored Node'),
+      ip: this.ipOf(id) || null,
+      location: this.siteOf(id) || null,
+      parent: this.parentOf(id) || null
+    }));
+    const links = [...this.parents.entries()].map(([child, parent]) => ({ from: parent, to: child }));
+    const samples = [];
+    for (const id of this.ids()) {
+      for (const s of this.samplesOf(id)) {
+        samples.push({
+          device_id: s.device_id,
+          timestamp: s.ts || null,
+          ...(s.status ? { status: s.status } : {}),
+          ...s.metrics
+        });
+      }
+    }
+    return {
+      schema: SCHEMA_ID,
+      format: this.meta.format,
+      source: this.meta.source || `${String(this.meta.format || 'telemetry').toUpperCase()} Dataset (${devices.length} nodes · ${samples.length} samples)`,
+      devices,
+      topology: { links },
+      samples
+    };
+  }
 }
 
 // ---- Entry point ----------------------------------------------------------------------------------
@@ -474,7 +563,8 @@ function summarize(q, dataset, fatal) {
   else if (q.recordsIn && dropped / q.recordsIn > 0.5) grade = 'poor';
   else if (dropped || issues.length || q.conversions.size) grade = 'repaired';
   return {
-    grade, records_in: q.recordsIn, records_used: q.recordsUsed, records_dropped: dropped,
+    grade, format: dataset && dataset.meta ? dataset.meta.format : null,
+    records_in: q.recordsIn, records_used: q.recordsUsed, records_dropped: dropped,
     devices: dataset ? dataset.ids().length : 0,
     issues: issues.map((i) => ({ code: i.code, message: i.message, count: i.count, examples: i.examples })),
     unit_conversions: [...q.conversions.values()],
@@ -485,5 +575,5 @@ function summarize(q, dataset, fatal) {
 
 module.exports = {
   SCHEMA_ID, REPORT_SCHEMA, MESSAGE_SCHEMA, METRICS, CORE_FAMILIES, KEYS, SUPPORTED_MAJOR, MAX_RECORDS, MAX_DEVICES, MAX_INPUT_CHARS,
-  Dataset, normalizeInput, parseCsv, InputError
+  Dataset, normalizeInput, parseCsv, detectCsvDelimiter, InputError
 };

@@ -247,7 +247,10 @@
           <div class="panel__head">
             <h2 class="panel__title"><i data-icon="globe"></i> Live Probed Network Targets &amp; Local Host Gateway</h2>
             <span class="panel__meta mono" id="rt-probe-source-label">Measuring real TCP &amp; DNS endpoints&hellip;</span>
-            <button class="panel__link" id="rt-open-in-studio">Inspect in Diagnostics &rarr;</button>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+              <button class="panel__link" id="rt-export-csv-btn" title="Export live probed telemetry table as CSV"><i data-icon="download"></i> Export Probe (.csv)</button>
+              <button class="panel__link" id="rt-open-in-studio">Inspect in Diagnostics &rarr;</button>
+            </div>
           </div>
           <div id="runtime-live-table-wrap">
             <div class="panel__body"><div class="skeleton" style="height:120px"></div></div>
@@ -368,19 +371,30 @@
         <div class="grid grid-1-1">
           <section class="panel">
             <div class="panel__head">
-              <h2 class="panel__title"><i data-icon="code"></i> Telemetry Payload (JSON / NDJSON / CSV)</h2>
-              <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+              <h2 class="panel__title"><i data-icon="code"></i> Telemetry Payload (CSV / JSON / NDJSON)</h2>
+              <div style="margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
                 <span class="small mono muted" id="nc-payload-meta">0 samples</span>
-                <button class="panel__link" id="nc-format-btn" title="Format JSON payload">Format</button>
-                <button class="panel__link" id="nc-upload-btn" title="Load external .json, .ndjson, or .csv file"><i data-icon="upload"></i> Upload File</button>
-                <input type="file" id="nc-file-input" accept=".json,.csv,.ndjson,.txt" style="display:none" />
+                <button class="panel__link" id="nc-convert-csv-btn" title="Convert current payload between JSON and CSV">JSON &harr; CSV</button>
+                <button class="panel__link" id="nc-csv-grid-toggle" title="Toggle interactive CSV spreadsheet table preview">Grid Preview</button>
+                <button class="panel__link" id="nc-format-btn" title="Format JSON or clean CSV payload">Format</button>
+                <button class="panel__link" id="nc-upload-btn" title="Upload external .csv, .tsv, .json, or .ndjson file"><i data-icon="upload"></i> Upload CSV / JSON</button>
+                <input type="file" id="nc-file-input" accept=".csv,.tsv,.json,.ndjson,.txt" style="display:none" />
               </div>
             </div>
             <div class="panel__body">
-              <textarea id="nc-raw" class="textarea" rows="13" spellcheck="false" placeholder="Paste netcoop.telemetry/1.0 JSON, NDJSON, or CSV telemetry here, drag & drop a file, or click Probe & Diagnose Live above…"></textarea>
+              <div class="nc-prober-presets" style="margin-top:0;margin-bottom:10px">
+                <span class="small muted">CSV templates:</span>
+                <button type="button" class="nc-preset-chip nc-csv-preset" data-csv-preset="congestion">Uplink Congestion (.csv)</button>
+                <button type="button" class="nc-preset-chip nc-csv-preset" data-csv-preset="wifi">Wi-Fi AP Roaming (.csv)</button>
+                <button type="button" class="nc-preset-chip nc-csv-preset" data-csv-preset="crc">Fiber CRC Fault (.csv)</button>
+                <button type="button" class="nc-preset-chip nc-csv-preset" data-csv-preset="dns">DNS Resolver Outage (.csv)</button>
+              </div>
+              <textarea id="nc-raw" class="textarea" rows="12" spellcheck="false" placeholder="Paste CSV (comma, semicolon, or tab-separated), JSON, or NDJSON telemetry here, drag & drop a .csv/.json file, or click a CSV template above…"></textarea>
+              <div id="nc-csv-grid-wrap" style="display:none;max-height:285px;overflow:auto;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface)"></div>
               <div class="row wrap" style="display:flex;align-items:center;margin-top:10px;gap:8px">
                 <button class="btn btn--primary" id="nc-run"><i data-icon="play"></i> Run 6-Agent Diagnosis</button>
-                <button class="btn" id="nc-export-telemetry-btn" title="Download current telemetry JSON"><i data-icon="download"></i> Download Input</button>
+                <button class="btn" id="nc-download-csv-btn" title="Download current telemetry as CSV spreadsheet"><i data-icon="download"></i> Download (.csv)</button>
+                <button class="btn" id="nc-export-telemetry-btn" title="Download current telemetry raw file"><i data-icon="download"></i> Download Raw</button>
                 <button class="btn btn--ghost" id="nc-clear"><i data-icon="x"></i> Clear</button>
                 <span class="small mono" style="color:var(--ink-3);margin-left:auto" id="nc-status"></span>
               </div>

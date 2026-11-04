@@ -207,6 +207,12 @@ async function diagnose(input, opts = {}) {
         if (llm.prevention && llm.prevention.length) {
           report.preventive_measures = llm.prevention;
         }
+      } else {
+        const det = synthesizeDeterministicCli(report, ds);
+        if (det) {
+          report.llm_synthesis = det;
+          report.llm_reasoning = det.reasoning;
+        }
       }
     }
   } catch (err) {
@@ -221,10 +227,118 @@ async function diagnose(input, opts = {}) {
     agents: ROLES.length,
     messages: bus.log.length,
     devices: devices.length,
-    samples: ds.sampleCount
+    samples: ds.sampleCount,
+    format: ds.meta && ds.meta.format ? ds.meta.format : 'json'
   };
 
-  return { report, messages: bus.log, quality: norm.quality, meta };
+  return {
+    report,
+    messages: bus.log,
+    quality: norm.quality,
+    meta,
+    normalized_telemetry: ds.toNormalizedObject()
+  };
+}
+
+/**
+ * Deterministic context-bound CLI & reasoning synthesizer built directly from
+ * the dataset's actual node IDs, IPs, topology links, and measured anomalies
+ * when external Groq API inference is unconfigured or offline.
+ */
+function synthesizeDeterministicCli(report, ds) {
+  const topRank = Array.isArray(report.ranking) && report.ranking[0] ? report.ranking[0] : null;
+  const targetDev = (topRank && topRank.device_id) || (report.affected_devices && report.affected_devices[0]) || ds.ids()[0] || 'TARGET_NODE';
+  const rawIp = ds.ipOf(targetDev) || targetDev;
+  const cleanHost = String(rawIp).split(/[(\s]/)[0].replace(/:\d+$/, '') || targetDev;
+  const parentDev = ds.parentOf(targetDev);
+  const childDevs = ds.children(targetDev);
+  const ev = (report.supporting_evidence || []).slice(0, 3);
+  const evSummary = ev.map(e => `${e.metric}=${e.value}${e.unit ? ' ' + e.unit : ''} on ${e.device_id}`).join(', ');
+  const cat = report.root_cause_category || '';
+
+  let cli = [];
+  let reasoning = '';
+
+  if (report.status === 'no_fault_detected') {
+    reasoning = `All ${ds.sampleCount} telemetry samples across ${ds.ids().length} monitored nodes (${ds.ids().slice(0, 4).join(', ')}) remain within nominal operational bounds.`;
+    cli = [
+      `# Baseline health verification for ${targetDev} (${cleanHost})`,
+      `ping -c 5 ${cleanHost}`,
+      `show interfaces summary | include ${targetDev}`
+    ];
+  } else if (cat === 'link_congestion') {
+    reasoning = `Sustained bandwidth saturation (${evSummary || 'elevated utilization and queue drops'}) localized at ${targetDev}${parentDev ? ` on uplink toward ${parentDev}` : ''}${childDevs.length ? `, impacting ${childDevs.length} downstream node(s) (${childDevs.slice(0, 3).join(', ')})` : ''}.`;
+    cli = [
+      `# Inspect egress queue drops & top flows on ${targetDev} (${cleanHost})`,
+      `show interfaces counters errors | include ${targetDev}`,
+      `show policy-map interface uplink-${parentDev || 'core'}`,
+      `configure terminal && policy-map QOS-SHAPER-${targetDev} && class class-default && shape average percent 85`
+    ];
+  } else if (cat === 'weak_wifi_signal') {
+    reasoning = `RF link degradation (${evSummary || 'low RSSI and elevated frame retries'}) isolated to wireless node ${targetDev}${parentDev ? ` associated via ${parentDev}` : ''}.`;
+    cli = [
+      `# Inspect RF client association & channel interference for ${targetDev}`,
+      `show ap association client-match ${targetDev}`,
+      `show ap arm rf-summary ap-name ${parentDev || targetDev}`,
+      `iw dev wlan0 station dump | grep -E "Station|signal|tx retries"`
+    ];
+  } else if (cat === 'interface_fault') {
+    reasoning = `Physical-layer CRC/frame errors or carrier transitions (${evSummary || 'interface error burst'}) detected directly on ${targetDev}${parentDev ? ` link to ${parentDev}` : ''}, ruling out pure traffic congestion.`;
+    cli = [
+      `# Verify transceiver DOM optical levels & CRC counters on ${targetDev} (${cleanHost})`,
+      `show interfaces transceiver detail | section ${targetDev}`,
+      `show interfaces counters errors`,
+      `clear counters && show interfaces status err-disabled`
+    ];
+  } else if (cat === 'device_overload') {
+    reasoning = `Control-plane compute exhaustion (${evSummary || 'sustained CPU/memory saturation'}) on ${targetDev} (${cleanHost})${childDevs.length ? ` is introducing forwarding delay to ${childDevs.length} downstream nodes` : ''}.`;
+    cli = [
+      `# Audit control-plane CPU processes & memory pools on ${targetDev} (${cleanHost})`,
+      `show processes cpu sorted 5sec | head 15`,
+      `show memory statistics history`,
+      `show platform punt client`
+    ];
+  } else if (cat === 'dns_failure') {
+    reasoning = `Name resolution failure or high lookup latency (${evSummary || 'DNS timeout/NXDOMAIN'}) isolated at ${targetDev} (${cleanHost}) while underlying IP transport remains reachable.`;
+    cli = [
+      `# Benchmark DNS resolver response & trace delegation for ${targetDev} (${cleanHost})`,
+      `dig @1.1.1.1 ${cleanHost} +stats +time=2`,
+      `nslookup -debug ${cleanHost}`,
+      `rndc status && journalctl -u named -n 40 --no-pager`
+    ];
+  } else if (cat === 'dhcp_failure') {
+    reasoning = `DHCP lease allocation timeouts or pool exhaustion (${evSummary || 'elevated DHCP failure rate'}) localized at ${targetDev}${parentDev ? ` behind ${parentDev}` : ''}.`;
+    cli = [
+      `# Check DHCP scope utilization & relay helper toward ${targetDev}`,
+      `show ip dhcp pool summary`,
+      `show ip dhcp binding | count`,
+      `kea-shell --host ${cleanHost} lease4-statistic-get-all`
+    ];
+  } else if (cat === 'device_or_upstream_outage') {
+    reasoning = `Complete endpoint unreachability / 100% packet loss (${evSummary || 'down state'}) detected for ${targetDev} (${cleanHost})${parentDev ? ` via upstream gateway ${parentDev}` : ''}.`;
+    cli = [
+      `# Trace path reachability & TCP port state toward ${targetDev} (${cleanHost})`,
+      `mtr -rwzc 10 ${cleanHost}`,
+      `nc -vz -w 2 ${cleanHost} 443`,
+      `show ip route ${cleanHost} && show arp | include ${cleanHost}`
+    ];
+  } else {
+    reasoning = `Multi-agent correlation evaluated ${ds.sampleCount} samples across ${ds.ids().length} nodes (${evSummary || 'partial metric coverage'}). Collect additional time-series samples to cross the confidence threshold.`;
+    cli = [
+      `# Capture extended diagnostic window for ${targetDev} (${cleanHost})`,
+      `ping -c 20 ${cleanHost}`,
+      `snmpwalk -v2c -c public ${cleanHost} IF-MIB::ifEntry`
+    ];
+  }
+
+  return {
+    model: 'deterministic-cli-engine/1.0',
+    elapsed_ms: 1,
+    reasoning,
+    actions: report.recommended_actions || [],
+    cli_commands: cli,
+    prevention: []
+  };
 }
 
 /**

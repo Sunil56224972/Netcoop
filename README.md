@@ -31,13 +31,14 @@ Unlike static dashboard monitors that alert on isolated threshold breaches, NetC
    - **Real TCP Socket Handshakes**: Opens multi-round `net.Socket()` TCP connections to measure real 3-way handshake RTT (`ms`), inter-round jitter (`ms`), and connection/packet loss (`%`) for any custom `host:port` list entered by the user.
    - **Real Client-Edge Telemetry (`CLIENT_BROWSER_EDGE`)**: Measures the external user's own browser-to-server HTTPS round-trip latency (`performance.now()`), jitter, browser downlink bandwidth (`navigator.connection`), client IP, and edge region.
    - **Real Host OS Counters**: Computes two-point CPU tick deltas (`os.cpus()`) and physical memory utilization (`os.totalmem()` / `os.freemem()`).
-2. **Arbitrary External Telemetry Ingestion (`.json`, `.ndjson`, `.csv`)**
-   - Paste, upload, or drag-and-drop real network logs from Prometheus, SNMP pollers, NetFlow exporters, or ping scripts.
-   - Automatically normalizes field aliases (`rtt` &rarr; `latency_ms`, `loss` &rarr; `packet_loss_pct`, `rssi` &rarr; `signal_dbm`, `util` &rarr; `link_utilization_pct`), converts units (`s` &rarr; `ms`, `0..1` ratios &rarr; `%`, `bps`/`kbps`/`gbps` &rarr; `Mbps`), and builds the topological dependency graph dynamically.
+2. **Enterprise CSV / TSV Workbench &amp; Arbitrary Telemetry Ingestion (`.csv`, `.tsv`, `.json`, `.ndjson`)**
+   - **Multi-Delimiter RFC-4180 CSV Engine**: Paste, upload, or drag-and-drop real exports from SolarWinds, PRTG, Zabbix, Wireshark, PingPlotter, Cisco IOS, ArubaOS, or SNMP pollers — auto-detects comma (`,`), semicolon (`;`), tab (`\t`), or pipe (`|`) delimiters and strips `#` comment headers and UTF-8 BOMs.
+   - **Interactive CSV Spreadsheet Grid &amp; Bidirectional `JSON ↔ CSV` Converter**: Inspect tabular columns with live schema-mapping badges (`bw_util` &rarr; `link_utilization_pct`, `uplink` &rarr; `topology.parent`), convert between JSON and CSV in one click, and load multi-tier CSV fault templates.
+   - **29-Column CSV Diagnostic Result &amp; Probe Exporter**: Export full per-node diagnostic verdicts, computed averages/peaks across all 16 metrics, anomalous evidence, recommended actions, and CLI runbooks as UTF-8 BOM `.csv` spreadsheets ready for Excel, Pandas, or NOC ticketing systems.
 3. **Deterministic 6-Agent Correlation + Two-Pass Challenge Arbitration**
    - When the top two fault hypotheses score within `0.15` of each other or contradicting indicators reach `0.25`, `correlation_agent` issues live JSON-RPC `challenge` envelopes to the specialist agents to verify whether anomalies are sustained across the window or isolated spikes.
-4. **Groq LPU CLI Remediation & Operator Change Control**
-   - Synthesizes copy-ready Cisco IOS / ArubaOS / Linux CLI commands via Groq LPU (`openai/gpt-oss-120b`) with deterministic fallback, paired with a human-in-the-loop **Operator Change Control** authorization workflow.
+4. **Groq LPU &amp; Context-Bound Dynamic CLI Remediation**
+   - Synthesizes copy-ready Cisco IOS / ArubaOS / Linux CLI commands via Groq LPU (`openai/gpt-oss-120b`) or context-bound deterministic synthesis referencing the exact root-cause device ID, IPv4 endpoint, upstream parent, and anomalous readings, paired with **Operator Change Control** authorization.
 
 ---
 

@@ -128,7 +128,25 @@ async function runTests() {
   assert.ok(csvDiag.report.affected_devices.includes('EXT_SW_01'));
   console.log('  ✓ Arbitrary external CSV with custom devices diagnosed with real computed evidence');
 
-  // C. Arbitrary External NDJSON with non-standard units
+  // C. Enterprise Semicolon/Comment CSV with Topology Uplinks, Unit Suffixes & Aliases
+  const enterpriseCsv = [
+    '# Exported from SolarWinds / PRTG Poller',
+    'timestamp;hostname;ip_address;uplink;bw_util;tx_drops;ping_ms;ploss',
+    '2026-11-05T01:00:00Z;MUMBAI_CORE_01;10.90.0.1;;31.0%;0;4.2ms;0.0%',
+    '2026-11-05T01:00:15Z;MUMBAI_CORE_01;10.90.0.1;;32.5%;0;4.5ms;0.0%',
+    '2026-11-05T01:00:30Z;MUMBAI_CORE_01;10.90.0.1;;31.8%;0;4.3ms;0.0%',
+    '2026-11-05T01:00:00Z;MUMBAI_DIST_SW_07;10.90.7.1;MUMBAI_CORE_01;96.5%;210;175ms;5.4%',
+    '2026-11-05T01:00:15Z;MUMBAI_DIST_SW_07;10.90.7.1;MUMBAI_CORE_01;97.8%;245;192ms;6.1%',
+    '2026-11-05T01:00:30Z;MUMBAI_DIST_SW_07;10.90.7.1;MUMBAI_CORE_01;98.4%;270;205ms;6.8%'
+  ].join('\n');
+  const entDiag = await diagnose(enterpriseCsv);
+  assert.strictEqual(entDiag.report.status, 'diagnosed');
+  assert.strictEqual(entDiag.report.root_cause_category, 'link_congestion');
+  assert.ok(entDiag.normalized_telemetry && entDiag.normalized_telemetry.topology.links.length === 1, 'Normalized telemetry must preserve CSV uplink topology');
+  assert.ok(entDiag.report.llm_synthesis && entDiag.report.llm_synthesis.cli_commands.some(c => c.includes('MUMBAI_DIST_SW_07')), 'CLI runbook must dynamically reference CSV node ID');
+  console.log('  ✓ Enterprise multi-delimiter CSV (uplinks, unit suffixes, aliases & dynamic CLI) verified');
+
+  // D. Arbitrary External NDJSON with non-standard units
   const externalNdjson = [
     JSON.stringify({ node: 'EXT_AP_9', rtt_us: 200000, loss_ratio: 0.04, rssi: -84, retry_pct: 22 }),
     JSON.stringify({ node: 'EXT_AP_9', rtt_us: 210000, loss_ratio: 0.05, rssi: -85, retry_pct: 24 }),

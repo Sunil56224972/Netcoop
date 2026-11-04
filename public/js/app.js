@@ -204,36 +204,205 @@ function initTabs() {
   });
 }
 
-// ─── Telemetry Summary Computation Helper ───────────────────────────────────
+// ─── Enterprise CSV / TSV / JSON Normalization & Export Workbench ───────────
+const CSV_METRIC_ALIASES = {
+  latency_ms: 'latency_ms', latency: 'latency_ms', rtt_ms: 'latency_ms', rtt: 'latency_ms', ping: 'latency_ms', ping_ms: 'latency_ms', avg_rtt: 'latency_ms', avg_rtt_ms: 'latency_ms', response_time: 'latency_ms', response_time_ms: 'latency_ms', tcp_rtt: 'latency_ms', tcp_rtt_ms: 'latency_ms',
+  jitter_ms: 'jitter_ms', jitter: 'jitter_ms', avg_jitter: 'jitter_ms', pdv_ms: 'jitter_ms',
+  packet_loss_pct: 'packet_loss_pct', packet_loss: 'packet_loss_pct', loss_pct: 'packet_loss_pct', loss: 'packet_loss_pct', pkt_loss: 'packet_loss_pct', ploss: 'packet_loss_pct', drop_pct: 'packet_loss_pct', loss_percent: 'packet_loss_pct',
+  link_utilization_pct: 'link_utilization_pct', link_utilization: 'link_utilization_pct', utilization_pct: 'link_utilization_pct', utilization: 'link_utilization_pct', util_pct: 'link_utilization_pct', util: 'link_utilization_pct', bw_util: 'link_utilization_pct', if_util: 'link_utilization_pct', port_util: 'link_utilization_pct',
+  signal_dbm: 'signal_dbm', rssi: 'signal_dbm', rssi_dbm: 'signal_dbm', wifi_rssi_dbm: 'signal_dbm', wifi_signal_dbm: 'signal_dbm', wifi_rssi: 'signal_dbm', signal: 'signal_dbm', dbm: 'signal_dbm',
+  retransmission_pct: 'retransmission_pct', retry_pct: 'retransmission_pct', wifi_retry_pct: 'retransmission_pct', retries_pct: 'retransmission_pct', retransmit_pct: 'retransmission_pct',
+  dns_latency_ms: 'dns_latency_ms', dns_lookup_ms: 'dns_latency_ms', dns_resolution_ms: 'dns_latency_ms', dns_ms: 'dns_latency_ms', dns_time_ms: 'dns_latency_ms',
+  dns_failure_pct: 'dns_failure_pct', dns_fail_pct: 'dns_failure_pct', dns_err_pct: 'dns_failure_pct', nxdomain_pct: 'dns_failure_pct', dns_fail: 'dns_failure_pct',
+  dhcp_latency_ms: 'dhcp_latency_ms', dhcp_offer_ms: 'dhcp_latency_ms', dhcp_ms: 'dhcp_latency_ms',
+  dhcp_failure_pct: 'dhcp_failure_pct', dhcp_fail_pct: 'dhcp_failure_pct', dhcp_err_pct: 'dhcp_failure_pct',
+  cpu_pct: 'cpu_pct', cpu: 'cpu_pct', cpu_usage: 'cpu_pct', cpu_utilization: 'cpu_pct', cpu_load: 'cpu_pct', avg_cpu: 'cpu_pct',
+  memory_pct: 'memory_pct', mem_pct: 'memory_pct', memory: 'memory_pct', ram_pct: 'memory_pct', ram: 'memory_pct', mem_usage: 'memory_pct',
+  queue_drops: 'queue_drops', tx_drops: 'queue_drops', output_drops: 'queue_drops', egress_drops: 'queue_drops', drops: 'queue_drops', buffer_drops: 'queue_drops',
+  interface_errors: 'interface_errors', crc_errors: 'interface_errors', if_errors: 'interface_errors', rx_errors: 'interface_errors', input_errors: 'interface_errors', crc: 'interface_errors', errors: 'interface_errors',
+  throughput_mbps: 'throughput_mbps', throughput: 'throughput_mbps', tput_mbps: 'throughput_mbps',
+  bandwidth_mbps: 'bandwidth_mbps', bandwidth: 'bandwidth_mbps', capacity_mbps: 'bandwidth_mbps'
+};
+
+const CSV_PRESETS = {
+  congestion: [
+    '# Enterprise Multi-Tier Switch Telemetry (CSV with Topology Uplinks & Unit Suffixes)',
+    'timestamp,device_id,ip_address,device_type,uplink,link_utilization_pct,queue_drops,latency_ms,jitter_ms,packet_loss_pct,cpu_pct,memory_pct',
+    '2026-11-05T01:10:00Z,IITBBS_CORE_RTR_01,10.10.0.1,core_router,,34.2%,0,4.1ms,0.8ms,0.0%,28%,44%',
+    '2026-11-05T01:10:15Z,IITBBS_CORE_RTR_01,10.10.0.1,core_router,,36.5%,0,4.4ms,0.9ms,0.0%,30%,44%',
+    '2026-11-05T01:10:30Z,IITBBS_CORE_RTR_01,10.10.0.1,core_router,,35.8%,0,4.2ms,0.7ms,0.0%,29%,45%',
+    '2026-11-05T01:10:00Z,HOSTEL_DIST_SW_01,10.10.12.1,distribution_switch,IITBBS_CORE_RTR_01,95.4%,188,164ms,38ms,4.8%,46%,52%',
+    '2026-11-05T01:10:15Z,HOSTEL_DIST_SW_01,10.10.12.1,distribution_switch,IITBBS_CORE_RTR_01,97.2%,234,189ms,44ms,5.6%,48%,53%',
+    '2026-11-05T01:10:30Z,HOSTEL_DIST_SW_01,10.10.12.1,distribution_switch,IITBBS_CORE_RTR_01,98.1%,265,212ms,49ms,6.2%,49%,53%',
+    '2026-11-05T01:10:00Z,MAHANADI_ACCESS_SW_03,10.10.12.33,access_switch,HOSTEL_DIST_SW_01,42.0%,2,171ms,40ms,4.9%,22%,39%',
+    '2026-11-05T01:10:15Z,MAHANADI_ACCESS_SW_03,10.10.12.33,access_switch,HOSTEL_DIST_SW_01,44.1%,3,195ms,45ms,5.5%,23%,39%',
+    '2026-11-05T01:10:30Z,MAHANADI_ACCESS_SW_03,10.10.12.33,access_switch,HOSTEL_DIST_SW_01,43.5%,2,218ms,51ms,6.1%,24%,40%'
+  ].join('\n'),
+
+  wifi: [
+    '# Wireless RF Access Point & Roaming Client Telemetry (CSV)',
+    'timestamp,device_id,ip_address,device_type,uplink,rssi_dbm,retry_pct,latency_ms,jitter_ms,packet_loss_pct,link_utilization_pct',
+    '2026-11-05T01:12:00Z,ACADEMIC_DIST_SW_02,10.20.0.2,distribution_switch,,,0.2,8.1,1.0,0.0,31.5',
+    '2026-11-05T01:12:15Z,ACADEMIC_DIST_SW_02,10.20.0.2,distribution_switch,,,0.3,8.4,1.1,0.0,32.2',
+    '2026-11-05T01:12:30Z,ACADEMIC_DIST_SW_02,10.20.0.2,distribution_switch,,,0.2,8.2,1.0,0.0,30.8',
+    '2026-11-05T01:12:00Z,LIBRARY_ARUBA_AP_07,10.20.4.17,wireless_ap,ACADEMIC_DIST_SW_02,-71.0,8.4,14.2,2.8,0.4,28.0',
+    '2026-11-05T01:12:15Z,LIBRARY_ARUBA_AP_07,10.20.4.17,wireless_ap,ACADEMIC_DIST_SW_02,-72.0,9.1,15.0,3.1,0.5,29.5',
+    '2026-11-05T01:12:30Z,LIBRARY_ARUBA_AP_07,10.20.4.17,wireless_ap,ACADEMIC_DIST_SW_02,-71.5,8.8,14.6,2.9,0.4,27.4',
+    '2026-11-05T01:12:00Z,STUDENT_LAPTOP_WIFI_12,10.20.44.118,wireless_client,LIBRARY_ARUBA_AP_07,-84.5,33.2,154.0,43.5,6.8,14.0',
+    '2026-11-05T01:12:15Z,STUDENT_LAPTOP_WIFI_12,10.20.44.118,wireless_client,LIBRARY_ARUBA_AP_07,-85.8,36.4,168.0,47.0,7.4,15.2',
+    '2026-11-05T01:12:30Z,STUDENT_LAPTOP_WIFI_12,10.20.44.118,wireless_client,LIBRARY_ARUBA_AP_07,-86.2,38.1,179.5,49.8,8.1,13.8'
+  ].join('\n'),
+
+  crc: [
+    '# Physical Layer Fiber Transceiver CRC Fault Telemetry (CSV)',
+    'timestamp,device_id,ip_address,device_type,uplink,status,crc_errors,packet_loss_pct,jitter_ms,link_utilization_pct,queue_drops,cpu_pct',
+    '2026-11-05T01:14:00Z,CAMPUS_CORE_SW_01,10.0.0.1,core_router,,up,0,0.0,1.1,26.4,0,24.0',
+    '2026-11-05T01:14:15Z,CAMPUS_CORE_SW_01,10.0.0.1,core_router,,up,0,0.0,1.2,27.1,0,25.0',
+    '2026-11-05T01:14:30Z,CAMPUS_CORE_SW_01,10.0.0.1,core_router,,up,0,0.0,1.0,26.8,0,24.5',
+    '2026-11-05T01:14:00Z,CSE_LAB_SW_04,10.0.14.4,access_switch,CAMPUS_CORE_SW_01,up,148,5.8,36.0,18.2,0,19.0',
+    '2026-11-05T01:14:15Z,CSE_LAB_SW_04,10.0.14.4,access_switch,CAMPUS_CORE_SW_01,down,215,9.4,52.0,14.5,0,20.0',
+    '2026-11-05T01:14:30Z,CSE_LAB_SW_04,10.0.14.4,access_switch,CAMPUS_CORE_SW_01,up,264,8.2,47.5,16.9,0,19.5',
+    '2026-11-05T01:14:45Z,CSE_LAB_SW_04,10.0.14.4,access_switch,CAMPUS_CORE_SW_01,down,310,11.6,58.0,12.1,0,21.0'
+  ].join('\n'),
+
+  dns: [
+    '# Campus Core BIND DNS Resolver Timeout Telemetry (CSV)',
+    'timestamp,device_id,ip_address,device_type,uplink,dns_latency_ms,dns_failure_pct,latency_ms,packet_loss_pct,cpu_pct,memory_pct',
+    '2026-11-05T01:16:00Z,CAMPUS_EDGE_GW_01,10.0.0.254,core_router,,14.0,0.0,5.2,0.0,31.0,48.0',
+    '2026-11-05T01:16:15Z,CAMPUS_EDGE_GW_01,10.0.0.254,core_router,,15.2,0.0,5.4,0.0,32.0,48.5',
+    '2026-11-05T01:16:30Z,CAMPUS_EDGE_GW_01,10.0.0.254,core_router,,14.8,0.0,5.1,0.0,31.5,48.2',
+    '2026-11-05T01:16:00Z,CAMPUS_DNS_RESOLVER_01,10.0.53.10,dns_server,CAMPUS_EDGE_GW_01,890.0,38.5,6.1,0.0,42.0,61.0',
+    '2026-11-05T01:16:15Z,CAMPUS_DNS_RESOLVER_01,10.0.53.10,dns_server,CAMPUS_EDGE_GW_01,965.0,46.0,6.4,0.0,44.0,62.0',
+    '2026-11-05T01:16:30Z,CAMPUS_DNS_RESOLVER_01,10.0.53.10,dns_server,CAMPUS_EDGE_GW_01,1120.0,54.2,6.2,0.0,45.0,62.5'
+  ].join('\n')
+};
+
+function normKeyClient(k) {
+  return String(k || '').toLowerCase().replace(/[^a-z0-9@]+/g, '_').replace(/^_+|_+$/g, '');
+}
+
+function detectDelimiterClient(headerLine) {
+  const counts = { ',': 0, ';': 0, '\t': 0, '|': 0 };
+  let q = false;
+  for (let i = 0; i < headerLine.length; i++) {
+    const c = headerLine[i];
+    if (c === '"') q = !q;
+    else if (!q && counts[c] !== undefined) counts[c] += 1;
+  }
+  let best = ',';
+  let bestN = counts[','];
+  [';', '\t', '|'].forEach((d) => {
+    if (counts[d] > bestN) { best = d; bestN = counts[d]; }
+  });
+  return best;
+}
+
+function parseCsvClient(text) {
+  const cleaned = String(text || '')
+    .replace(/^\uFEFF/, '')
+    .replace(/\r\n?/g, '\n')
+    .split('\n')
+    .filter((l) => !l.trim().startsWith('#'));
+  const first = cleaned.find((l) => l.trim() !== '');
+  if (!first) return { headers: [], rows: [], delimiter: ',' };
+  const delimiter = detectDelimiterClient(first);
+  const src = cleaned.join('\n');
+
+  const rawRows = [];
+  let row = [];
+  let field = '';
+  let q = false;
+  for (let i = 0; i < src.length; i++) {
+    const c = src[i];
+    if (q) {
+      if (c === '"') {
+        if (src[i + 1] === '"') { field += '"'; i += 1; } else q = false;
+      } else field += c;
+    } else if (c === '"') q = true;
+    else if (c === delimiter) { row.push(field); field = ''; }
+    else if (c === '\n') { row.push(field); rawRows.push(row); row = []; field = ''; }
+    else field += c;
+  }
+  if (field !== '' || row.length) { row.push(field); rawRows.push(row); }
+
+  const nonEmpty = rawRows.filter((r) => r.some((x) => x.trim() !== ''));
+  if (!nonEmpty.length) return { headers: [], rows: [], delimiter };
+  const headers = nonEmpty[0].map((h) => h.trim());
+  const rows = nonEmpty.slice(1).map((r) => {
+    const obj = {};
+    headers.forEach((h, idx) => {
+      obj[h] = r[idx] === undefined ? '' : r[idx].trim();
+    });
+    return obj;
+  });
+  return { headers, rows, delimiter };
+}
+
+function parseNumericMetricCell(rawVal) {
+  if (typeof rawVal === 'number' && Number.isFinite(rawVal)) return rawVal;
+  if (typeof rawVal !== 'string') return null;
+  const s = rawVal.trim();
+  if (!s) return null;
+  const m = s.match(/^(-?\d+(?:\.\d+)?(?:e[+-]?\d+)?)\s*([a-zµ%/]*)$/i);
+  if (!m) return null;
+  let n = Number(m[1]);
+  if (!Number.isFinite(n)) return null;
+  const u = (m[2] || '').toLowerCase();
+  if (u === 's' || u === 'sec' || u === 'secs' || u === 'seconds') n *= 1000;
+  else if (u === 'us' || u === 'µs') n *= 0.001;
+  else if (u === 'gbps' || u === 'gb/s') n *= 1000;
+  else if (u === 'kbps' || u === 'kb/s') n *= 0.001;
+  return n;
+}
+
 function parseRawTelemetryToObject(input) {
   if (!input) return null;
   if (typeof input === 'object') return input;
-  const text = String(input).trim();
+  const text = String(input).replace(/^\uFEFF/, '').trim();
   if (!text) return null;
   try {
     return JSON.parse(text);
   } catch (_e) {
-    // Parse NDJSON or CSV
-    const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    const lines = text.split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !l.startsWith('#'));
     if (!lines.length) return null;
     if (lines[0].startsWith('{')) {
       const samples = [];
       lines.forEach((l) => { try { samples.push(JSON.parse(l)); } catch (_err) {} });
-      return { samples };
+      return { format: 'ndjson', samples };
     }
-    const headers = lines[0].split(',').map((h) => h.trim());
-    if (headers.length < 2) return null;
-    const samples = lines.slice(1).map((line) => {
-      const cols = line.split(',').map((c) => c.trim());
-      const obj = {};
-      headers.forEach((h, idx) => {
-        const val = cols[idx];
-        const n = Number(val);
-        obj[h] = val !== '' && !Number.isNaN(n) ? n : val;
+    const { headers, rows, delimiter } = parseCsvClient(text);
+    if (headers.length < 2 || !rows.length) return null;
+    const samples = rows.map((r) => {
+      const out = {};
+      Object.entries(r).forEach(([k, v]) => {
+        const nk = normKeyClient(k);
+        const canonicalMetric = CSV_METRIC_ALIASES[nk];
+        if (canonicalMetric) {
+          const parsedNum = parseNumericMetricCell(v);
+          if (parsedNum !== null) out[canonicalMetric] = parsedNum;
+        } else if (['device_id', 'device', 'node', 'node_id', 'host', 'hostname', 'switch_id', 'ap_id', 'router_id', 'target', 'endpoint', 'name', 'id'].includes(nk)) {
+          if (!out.device_id && v) out.device_id = v;
+        } else if (['uplink', 'uplink_device', 'parent', 'parent_id', 'upstream', 'upstream_device', 'connected_to'].includes(nk)) {
+          if (v) out.parent = v;
+        } else if (['ip', 'ip_address', 'ipv4', 'mgmt_ip', 'host_ip', 'address', 'target_ip'].includes(nk)) {
+          if (v) out.ip = v;
+          if (!out.device_id && v) out.device_id = v;
+        } else if (['device_type', 'type', 'role', 'kind', 'device_role'].includes(nk)) {
+          if (v) out.device_type = v;
+        } else if (['site', 'location', 'building', 'zone', 'segment'].includes(nk)) {
+          if (v) out.location = v;
+        } else if (['timestamp', 'ts', 'time', 'datetime', 'collected_at'].includes(nk)) {
+          if (v) out.timestamp = v;
+        } else if (['status', 'device_status', 'state', 'oper_status'].includes(nk)) {
+          if (v) out.status = v.toLowerCase();
+        } else {
+          const parsedNum = parseNumericMetricCell(v);
+          out[k] = parsedNum !== null ? parsedNum : v;
+        }
       });
-      return obj;
+      return out;
     });
-    return { samples };
+    return { format: 'csv', delimiter, headers, samples };
   }
 }
 
@@ -246,18 +415,21 @@ function summarizeTelemetryDataset(telemetryInput, reportObj = null) {
   const rawLinks = (telemetryObj.topology && Array.isArray(telemetryObj.topology.links)) ? [...telemetryObj.topology.links] : [];
   const linkKeySet = new Set(rawLinks.map((l) => `${l.from || l.upstream || l.parent}->${l.to || l.downstream || l.child}`));
 
+  const addParentLink = (parentId, childId) => {
+    if (!parentId || !childId || parentId === childId) return;
+    const k = `${parentId}->${childId}`;
+    if (!linkKeySet.has(k)) {
+      linkKeySet.add(k);
+      rawLinks.push({ from: parentId, to: childId });
+    }
+  };
+
   const devMap = new Map();
   declaredDevices.forEach((d) => {
     const did = d && (d.id || d.device_id);
     if (!did) return;
     const parentId = d.parent || d.uplink || d.upstream || null;
-    if (parentId) {
-      const k = `${parentId}->${did}`;
-      if (!linkKeySet.has(k)) {
-        linkKeySet.add(k);
-        rawLinks.push({ from: parentId, to: did });
-      }
-    }
+    if (parentId) addParentLink(parentId, did);
     devMap.set(did, {
       id: did,
       type: d.type || 'network_node',
@@ -272,11 +444,29 @@ function summarizeTelemetryDataset(telemetryInput, reportObj = null) {
       metrics: {}
     });
   });
-  const links = rawLinks;
 
   rawSamples.forEach((s) => {
-    const id = s.device_id || s.device || s.host;
+    const id = s.device_id || s.device || s.host || s.node;
     if (!id) return;
+    const sampleParent = s.parent || s.uplink || s.upstream || null;
+    if (sampleParent) {
+      addParentLink(sampleParent, id);
+      if (!devMap.has(sampleParent)) {
+        devMap.set(sampleParent, {
+          id: sampleParent,
+          type: 'core_router',
+          name: sampleParent,
+          role: 'Upstream Node',
+          ip: '-',
+          dns_latency_ms: null,
+          dns_ok: true,
+          dns_error: null,
+          location: '',
+          samples: [],
+          metrics: {}
+        });
+      }
+    }
     if (!devMap.has(id)) {
       devMap.set(id, {
         id,
@@ -284,28 +474,40 @@ function summarizeTelemetryDataset(telemetryInput, reportObj = null) {
         name: id,
         role: s.role || s.device_type || 'Monitored Node',
         ip: s.ip || '-',
+        dns_latency_ms: null,
+        dns_ok: true,
+        dns_error: null,
         location: s.location || '',
         samples: [],
         metrics: {}
       });
     }
     const entry = devMap.get(id);
+    if ((entry.ip === '-' || !entry.ip) && s.ip) entry.ip = s.ip;
+    if (entry.type === 'network_node' && s.device_type) {
+      entry.type = s.device_type;
+      entry.role = s.device_type;
+    }
     entry.samples.push(s);
     const m = s.metrics || s;
     Object.entries(m).forEach(([k, v]) => {
-      if (['device_id', 'device', 'timestamp', 'ts', 'status'].includes(k)) return;
-      if (typeof v === 'number' && Number.isFinite(v)) {
-        if (!entry.metrics[k]) entry.metrics[k] = [];
-        entry.metrics[k].push(v);
+      if (['device_id', 'device', 'timestamp', 'ts', 'status', 'parent', 'uplink', 'upstream', 'ip', 'device_type', 'role', 'location'].includes(k)) return;
+      const canonical = CSV_METRIC_ALIASES[normKeyClient(k)] || k;
+      const numVal = typeof v === 'number' ? v : parseNumericMetricCell(v);
+      if (typeof numVal === 'number' && Number.isFinite(numVal)) {
+        if (!entry.metrics[canonical]) entry.metrics[canonical] = [];
+        entry.metrics[canonical].push(numVal);
       }
     });
   });
 
+  const links = rawLinks;
   const impairedSet = new Set((reportObj && reportObj.affected_devices) || []);
   const topRank = reportObj && Array.isArray(reportObj.ranking) && reportObj.ranking[0] ? reportObj.ranking[0] : null;
   const rootDeviceId = (reportObj && reportObj.status === 'diagnosed' && topRank) ? topRank.device_id : null;
 
   const avg = (arr) => (arr && arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null);
+  const peak = (arr, lowerWorse = false) => (arr && arr.length ? (lowerWorse ? Math.min(...arr) : Math.max(...arr)) : null);
 
   const devices = [...devMap.values()].map((d) => {
     const lastSample = d.samples[d.samples.length - 1] || {};
@@ -317,7 +519,6 @@ function summarizeTelemetryDataset(telemetryInput, reportObj = null) {
     const isRoot = rootDeviceId === d.id;
     const isImpaired = impairedSet.has(d.id) || rawStatus === 'down' || rawStatus === 'degraded' || dnsFailed || tcpDown;
 
-    // Find upstream from links
     const parentLink = links.find((l) => (l.to || l.downstream || l.child) === d.id);
     const upstream = parentLink ? (parentLink.from || parentLink.upstream || parentLink.parent) : null;
 
@@ -331,14 +532,16 @@ function summarizeTelemetryDataset(telemetryInput, reportObj = null) {
       isRoot,
       isImpaired,
       avgLatency: avg(d.metrics.latency_ms),
+      peakLatency: peak(d.metrics.latency_ms),
       avgJitter: avg(d.metrics.jitter_ms),
       avgLoss: avgLossVal,
       avgDns: avg(d.metrics.dns_latency_ms) ?? d.dns_latency_ms ?? null,
       avgDnsFail: avgDnsFailVal,
       avgCpu: avg(d.metrics.cpu_pct),
       avgMem: avg(d.metrics.mem_pct || d.metrics.memory_pct),
-      avgUtil: avg(d.metrics.utilization_pct),
-      avgRssi: avg(d.metrics.wifi_rssi_dbm),
+      avgUtil: avg(d.metrics.link_utilization_pct || d.metrics.utilization_pct),
+      avgRssi: avg(d.metrics.signal_dbm || d.metrics.wifi_rssi_dbm),
+      avgRetry: avg(d.metrics.retransmission_pct),
       avgDrops: avg(d.metrics.queue_drops),
       avgErrors: avg(d.metrics.interface_errors)
     };
@@ -347,14 +550,151 @@ function summarizeTelemetryDataset(telemetryInput, reportObj = null) {
   return { devices, links, sampleCount: rawSamples.length };
 }
 
+function csvEscape(val) {
+  if (val == null) return '';
+  const s = String(val);
+  if (/[",\r\n;]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+
+function downloadCsvFile(filename, headers, rows) {
+  const csvBody = [
+    headers.map(csvEscape).join(','),
+    ...rows.map((r) => r.map(csvEscape).join(','))
+  ].join('\r\n');
+  // Prepend UTF-8 BOM so Microsoft Excel / Google Sheets / Numbers open symbols cleanly
+  const blob = new Blob(['\uFEFF' + csvBody], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  toast('CSV Exported', `Saved ${filename} (${rows.length} rows)`, 'ok');
+}
+
+function convertTelemetryObjectToCsv(telemetryInput) {
+  const obj = parseRawTelemetryToObject(telemetryInput);
+  if (!obj) return '';
+  const rawSamples = Array.isArray(obj.samples) ? obj.samples : (Array.isArray(obj) ? obj : []);
+  if (!rawSamples.length) return '';
+
+  const devLookup = new Map();
+  (obj.devices || []).forEach((d) => {
+    const id = d.id || d.device_id;
+    if (id) devLookup.set(id, d);
+  });
+  const parentLookup = new Map();
+  if (obj.topology && Array.isArray(obj.topology.links)) {
+    obj.topology.links.forEach((l) => {
+      const p = l.from || l.upstream || l.parent;
+      const c = l.to || l.downstream || l.child;
+      if (p && c && !parentLookup.has(c)) parentLookup.set(c, p);
+    });
+  }
+  (obj.devices || []).forEach((d) => {
+    const id = d.id || d.device_id;
+    const p = d.parent || d.uplink || d.upstream;
+    if (id && p && !parentLookup.has(id)) parentLookup.set(id, p);
+  });
+
+  const metricColSet = new Set();
+  rawSamples.forEach((s) => {
+    const m = s.metrics || s;
+    Object.keys(m).forEach((k) => {
+      if (['device_id', 'device', 'timestamp', 'ts', 'status', 'parent', 'uplink', 'upstream', 'ip', 'device_type', 'role', 'location', 'mem_pct'].includes(k)) return;
+      metricColSet.add(k);
+    });
+  });
+
+  const metricCols = [...metricColSet];
+  const headers = ['timestamp', 'device_id', 'ip_address', 'device_type', 'uplink', 'status', ...metricCols];
+  const rows = rawSamples.map((s) => {
+    const id = s.device_id || s.device || '';
+    const dMeta = devLookup.get(id) || {};
+    const m = s.metrics || s;
+    return [
+      s.timestamp || s.ts || '',
+      id,
+      s.ip || dMeta.ip || '',
+      s.device_type || dMeta.type || '',
+      s.parent || s.uplink || parentLookup.get(id) || '',
+      s.status || 'up',
+      ...metricCols.map((mc) => (m[mc] !== undefined && m[mc] !== null ? m[mc] : ''))
+    ];
+  });
+
+  return [
+    headers.map(csvEscape).join(','),
+    ...rows.map((r) => r.map(csvEscape).join(','))
+  ].join('\n');
+}
+
+function renderCsvGridPreview() {
+  const wrap = $('#nc-csv-grid-wrap');
+  const rawEl = $('#nc-raw');
+  if (!wrap || !rawEl) return;
+  const text = rawEl.value.trim();
+  if (!text) {
+    wrap.innerHTML = `<div class="panel__body"><p class="small muted" style="margin:0">Paste or load CSV/JSON telemetry to preview tabular columns.</p></div>`;
+    return;
+  }
+
+  let csvSource = text;
+  if (/^[{[]/.test(text)) {
+    csvSource = convertTelemetryObjectToCsv(text);
+  }
+  const { headers, rows, delimiter } = parseCsvClient(csvSource);
+  if (!headers.length || !rows.length) {
+    wrap.innerHTML = `<div class="panel__body"><p class="small muted" style="margin:0">Unable to render table preview — verify CSV columns or JSON samples.</p></div>`;
+    return;
+  }
+
+  const delimLabel = delimiter === '\t' ? 'TSV (Tab)' : delimiter === ';' ? 'CSV (Semicolon)' : delimiter === '|' ? 'Pipe-delimited' : 'CSV (Comma)';
+  const previewRows = rows.slice(0, 60);
+
+  wrap.innerHTML = `
+    <div style="padding:7px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;background:var(--surface-2);font-size:11.5px">
+      <span class="mono"><b>${esc(delimLabel)}</b> &middot; ${rows.length} data rows &times; ${headers.length} columns</span>
+      <span class="muted">${rows.length > 60 ? 'Showing first 60 rows' : 'All rows shown'} &middot; Auto-mapped to canonical schema</span>
+    </div>
+    <div class="table-wrap">
+      <table class="table" style="font-size:11.5px">
+        <thead>
+          <tr>
+            <th class="num">#</th>
+            ${headers.map((h) => {
+              const nk = normKeyClient(h);
+              const mapped = CSV_METRIC_ALIASES[nk] || (['uplink', 'parent', 'upstream'].includes(nk) ? 'topology.parent' : '');
+              return `<th><div>${esc(h)}</div>${mapped && mapped !== h ? `<div class="mono" style="font-size:10px;color:var(--accent);font-weight:400">&rarr; ${esc(mapped)}</div>` : ''}</th>`;
+            }).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          ${previewRows.map((r, idx) => `
+            <tr>
+              <td class="num muted mono">${idx + 1}</td>
+              ${headers.map((h) => `<td class="mono">${esc(r[h] !== '' ? r[h] : '-')}</td>`).join('')}
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
 // ─── Update Payload Metadata Badge ──────────────────────────────────────────
 function updatePayloadMeta() {
   const metaEl = $('#nc-payload-meta');
   const rawEl = $('#nc-raw');
+  const gridWrap = $('#nc-csv-grid-wrap');
   if (!metaEl || !rawEl) return;
   const text = rawEl.value.trim();
   if (!text) {
     metaEl.textContent = '0 samples';
+    if (gridWrap && gridWrap.style.display !== 'none') renderCsvGridPreview();
     return;
   }
   try {
@@ -366,10 +706,20 @@ function updatePayloadMeta() {
     const topoCount = $('#tab-topo-count');
     if (topoCount && devs) topoCount.textContent = String(devs);
   } catch (_e) {
-    const lines = text.split('\n').filter((l) => l.trim()).length;
-    const isCsv = text.split('\n')[0].includes(',');
-    metaEl.textContent = `${lines} lines · ${isCsv ? 'CSV' : 'NDJSON'}`;
+    const parsedObj = parseRawTelemetryToObject(text);
+    if (parsedObj && Array.isArray(parsedObj.samples) && parsedObj.samples.length) {
+      const devs = new Set(parsedObj.samples.map((s) => s.device_id).filter(Boolean)).size;
+      const fmtName = parsedObj.format === 'ndjson' ? 'NDJSON' : (parsedObj.delimiter === '\t' ? 'TSV' : 'CSV');
+      metaEl.textContent = `${parsedObj.samples.length} rows · ${devs} nodes · ${fmtName}`;
+      appState.currentTelemetry = parsedObj;
+      const topoCount = $('#tab-topo-count');
+      if (topoCount && devs) topoCount.textContent = String(devs);
+    } else {
+      const lines = text.split('\n').filter((l) => l.trim()).length;
+      metaEl.textContent = `${lines} lines`;
+    }
   }
+  if (gridWrap && gridWrap.style.display !== 'none') renderCsvGridPreview();
 }
 
 // ─── Device Telemetry Inspector Modal ───────────────────────────────────────
@@ -448,6 +798,7 @@ function inspectDeviceModal(deviceId) {
     bodyHtml,
     wide: true,
     footHtml: `
+      <button class="btn" id="modal-csv-dev">${icon('download')} Export Node (.csv)</button>
       <button class="btn" id="modal-copy-dev">${icon('copy')} Copy Node JSON</button>
       <button class="btn btn--primary" id="modal-cancel-btn">Close</button>
     `
@@ -455,6 +806,30 @@ function inspectDeviceModal(deviceId) {
 
   const copyBtn = $('#modal-copy-dev');
   if (copyBtn) copyBtn.onclick = () => copyText(JSON.stringify(dev.samples, null, 2), copyBtn);
+
+  const csvNodeBtn = $('#modal-csv-dev');
+  if (csvNodeBtn) {
+    csvNodeBtn.onclick = () => {
+      const csvStr = convertTelemetryObjectToCsv({
+        devices: [{ id: dev.id, type: dev.type, ip: dev.ip !== '-' ? dev.ip : '', parent: dev.upstream || '' }],
+        samples: dev.samples
+      });
+      if (!csvStr) {
+        toast('Export notice', 'No tabular samples available for this node', 'error');
+        return;
+      }
+      const blob = new Blob(['\uFEFF' + csvStr], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${dev.id.toLowerCase().replace(/[^a-z0-9-_]/g, '-')}-samples.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      toast('Node CSV Exported', `Saved ${dev.id} time-series samples`, 'ok');
+    };
+  }
 }
 
 // ─── Paint System Runtime Live Table & KPIs (#tab-boot) ─────────────────────
@@ -774,8 +1149,152 @@ async function runDiagnosis(opts = {}) {
   }
 }
 
+function exportLiveProbeCsv() {
+  const tele = appState.liveProbeTelemetry || appState.currentTelemetry;
+  const diag = appState.liveProbeDiagnosis || appState.result;
+  if (!tele) {
+    toast('No live telemetry', 'Run Probe Live Network first', 'error');
+    return;
+  }
+  const hostInfo = tele.host_info || {};
+  const ce = hostInfo.client_edge || null;
+  const r = (diag && diag.report) || {};
+  const summary = summarizeTelemetryDataset(tele, r);
+
+  const headers = [
+    'timestamp_utc', 'node_id', 'role_tier', 'resolved_ip_endpoint', 'upstream_parent',
+    'samples_count', 'dns_lookup_ms', 'tcp_rtt_avg_ms', 'tcp_rtt_peak_ms', 'jitter_ms',
+    'packet_loss_pct', 'cpu_pct', 'memory_pct', 'status'
+  ];
+  const nowIso = new Date().toISOString();
+  const rows = [];
+
+  if (ce && (ce.client_ip || ce.http_rtt_ms != null)) {
+    rows.push([
+      nowIso,
+      'CLIENT_BROWSER_EDGE',
+      `Client Browser Session${ce.effective_type ? ` (${String(ce.effective_type).toUpperCase()})` : ''}`,
+      [ce.client_ip, ce.location, ce.edge_region].filter(Boolean).join(' · '),
+      '',
+      2,
+      '',
+      ce.http_rtt_ms != null ? fmtDec(ce.http_rtt_ms, 2) : '',
+      ce.http_rtt_ms != null ? fmtDec(ce.http_rtt_ms, 2) : '',
+      ce.http_jitter_ms != null ? fmtDec(ce.http_jitter_ms, 2) : '',
+      0,
+      '',
+      ce.downlink_mbps != null ? `${fmtDec(ce.downlink_mbps, 1)} Mbps` : '',
+      'Connected'
+    ]);
+  }
+
+  summary.devices.forEach((d) => {
+    const statusLabel = d.dnsFailed ? 'DNS_FAIL' : d.tcpDown ? 'TCP_DOWN' : d.isRoot ? 'ROOT_CAUSE' : d.isImpaired ? 'DEGRADED' : 'ONLINE';
+    rows.push([
+      nowIso,
+      d.id,
+      d.role,
+      d.ip || '',
+      d.upstream || '',
+      d.sampleCount,
+      d.avgDns != null ? fmtDec(d.avgDns, 2) : '',
+      d.avgLatency != null ? fmtDec(d.avgLatency, 2) : '',
+      d.peakLatency != null ? fmtDec(d.peakLatency, 2) : '',
+      d.avgJitter != null ? fmtDec(d.avgJitter, 2) : '',
+      d.avgLoss != null ? fmtDec(d.avgLoss, 1) : '0.0',
+      d.avgCpu != null ? fmtDec(d.avgCpu, 1) : '',
+      d.avgMem != null ? fmtDec(d.avgMem, 1) : '',
+      statusLabel
+    ]);
+  });
+
+  const stamp = nowIso.slice(0, 19).replace(/[:T]/g, '-');
+  downloadCsvFile(`netcoop-live-probe-${stamp}.csv`, headers, rows);
+}
+
+function exportDiagnosisResultCsv() {
+  const { result } = appState;
+  if (!result || !result.report) {
+    toast('No diagnostic report', 'Run a diagnosis first to export CSV results', 'error');
+    return;
+  }
+  const r = result.report;
+  const groq = r.llm_synthesis || result.groq || null;
+  const cliLine = groq && Array.isArray(groq.cli_commands)
+    ? groq.cli_commands.filter((c) => !String(c).trim().startsWith('#')).join(' ; ')
+    : '';
+  const summary = summarizeTelemetryDataset(result.normalized_telemetry || appState.currentTelemetry, r);
+  const evList = r.supporting_evidence || [];
+  const actions = r.recommended_actions || [];
+  const primaryAction = actions[0] ? (typeof actions[0] === 'string' ? actions[0] : JSON.stringify(actions[0])) : '';
+
+  const headers = [
+    'incident_id', 'run_id', 'timestamp_utc', 'verdict_status', 'suspected_root_cause',
+    'confidence_pct', 'confidence_band', 'device_id', 'role_type', 'ip_endpoint',
+    'upstream_parent', 'node_diagnostic_state', 'samples_count', 'avg_latency_ms',
+    'peak_latency_ms', 'avg_jitter_ms', 'packet_loss_pct', 'dns_latency_ms',
+    'dns_failure_pct', 'link_utilization_pct', 'queue_drops', 'interface_errors',
+    'wifi_signal_dbm', 'wifi_retry_pct', 'cpu_pct', 'memory_pct',
+    'node_anomalous_evidence', 'primary_recommended_action', 'cli_remediation_sequence'
+  ];
+
+  const confPct = Math.round((r.confidence || 0) * 100);
+  const rows = summary.devices.map((d) => {
+    const devEv = evList
+      .filter((e) => e.device_id === d.id)
+      .map((e) => `${e.metric}=${e.value}${e.unit ? e.unit : ''} (${e.level})`)
+      .join(' | ');
+    const stateLabel = d.isRoot ? 'SUSPECTED_ROOT_CAUSE' : d.isImpaired ? 'IMPAIRED_DOWNSTREAM' : 'HEALTHY';
+    return [
+      r.incident_id || '',
+      r.run_id || '',
+      r.timestamp || new Date().toISOString(),
+      r.status || '',
+      r.suspected_root_cause || '',
+      confPct,
+      r.confidence_category || '',
+      d.id,
+      d.role || '',
+      d.ip && d.ip !== '-' ? d.ip : '',
+      d.upstream || '',
+      stateLabel,
+      d.sampleCount,
+      d.avgLatency != null ? fmtDec(d.avgLatency, 2) : '',
+      d.peakLatency != null ? fmtDec(d.peakLatency, 2) : '',
+      d.avgJitter != null ? fmtDec(d.avgJitter, 2) : '',
+      d.avgLoss != null ? fmtDec(d.avgLoss, 2) : '',
+      d.avgDns != null ? fmtDec(d.avgDns, 2) : '',
+      d.avgDnsFail != null ? fmtDec(d.avgDnsFail, 2) : '',
+      d.avgUtil != null ? fmtDec(d.avgUtil, 2) : '',
+      d.avgDrops != null ? fmtDec(d.avgDrops, 1) : '',
+      d.avgErrors != null ? fmtDec(d.avgErrors, 1) : '',
+      d.avgRssi != null ? fmtDec(d.avgRssi, 1) : '',
+      d.avgRetry != null ? fmtDec(d.avgRetry, 1) : '',
+      d.avgCpu != null ? fmtDec(d.avgCpu, 1) : '',
+      d.avgMem != null ? fmtDec(d.avgMem, 1) : '',
+      devEv,
+      d.isRoot || d.isImpaired ? primaryAction : 'Nominal — continue baseline monitoring',
+      d.isRoot ? cliLine : ''
+    ];
+  });
+
+  const inc = (r.incident_id || 'netcoop-report').toLowerCase().replace(/[^a-z0-9-_]/g, '-');
+  downloadCsvFile(`${inc}-diagnostic-result.csv`, headers, rows);
+}
+
 function applyDiagnosisResult(result) {
   appState.result = result;
+  if (result.normalized_telemetry) {
+    // Preserve host_info from liveProbeTelemetry when present while adopting normalized samples/links
+    const prevHostInfo = appState.currentTelemetry && appState.currentTelemetry.host_info;
+    appState.currentTelemetry = prevHostInfo
+      ? { ...result.normalized_telemetry, host_info: prevHostInfo, source: appState.currentTelemetry.source || result.normalized_telemetry.source }
+      : result.normalized_telemetry;
+    const topoCount = $('#tab-topo-count');
+    if (topoCount && result.normalized_telemetry.devices) {
+      topoCount.textContent = String(result.normalized_telemetry.devices.length);
+    }
+  }
   const msgs = result.messages || [];
   appState.messages = msgs;
 
@@ -788,7 +1307,8 @@ function applyDiagnosisResult(result) {
   const r = result.report || {};
   const statusEl = $('#nc-status');
   if (statusEl) {
-    statusEl.textContent = `Completed in ${meta.elapsed_ms ?? '-'} ms · ${msgs.length} JSON-RPC messages`;
+    const fmtTag = meta.format ? ` · ${String(meta.format).toUpperCase()}` : '';
+    statusEl.textContent = `Completed in ${meta.elapsed_ms ?? '-'} ms · ${msgs.length} JSON-RPC messages${fmtTag}`;
   }
 
   const pct = Math.round((r.confidence || 0) * 100);
@@ -835,7 +1355,8 @@ function paintResults() {
   const dq = r.data_quality || q;
 
   const [outcomeClass, outcomeText] = OUTCOME[r.status] || OUTCOME.inconclusive;
-  const summary = summarizeTelemetryDataset(appState.currentTelemetry, r);
+  const summary = summarizeTelemetryDataset(result.normalized_telemetry || appState.currentTelemetry, r);
+  const srcFormat = (meta.format || (dq && dq.format) || 'telemetry').toUpperCase();
 
   let html = '';
 
@@ -845,7 +1366,7 @@ function paintResults() {
     <div class="verdict__top">
       <span class="verdict__label">${esc(outcomeText)}</span>
       <span class="verdict__conf">Confidence ${confidence}% (${esc(r.confidence_category || 'calibrated')})</span>
-      <span class="verdict__id">Incident ${esc(r.incident_id || '-')} &middot; ${meta.elapsed_ms ?? '-'} ms &middot; ${meta.messages || msgs.length} bus msgs</span>
+      <span class="verdict__id">Incident ${esc(r.incident_id || '-')} &middot; ${esc(srcFormat)} &middot; ${meta.elapsed_ms ?? '-'} ms &middot; ${meta.messages || msgs.length} bus msgs</span>
     </div>
     <p class="verdict__summary" style="font-size:14px;color:var(--ink);font-weight:500;margin-top:8px">${esc(rootCause)}</p>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
@@ -858,7 +1379,8 @@ function paintResults() {
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <button class="btn btn--sm" id="res-view-topo-btn">${icon('network')} View in Topology</button>
         <button class="btn btn--sm" id="res-view-bus-btn">${icon('layers')} Inspect ${msgs.length} Bus Envelopes</button>
-        <button class="btn btn--sm btn--primary" id="res-export-json-btn">${icon('download')} Export Report (.json)</button>
+        <button class="btn btn--sm btn--primary" id="res-export-csv-btn">${icon('download')} Export Result (.csv)</button>
+        <button class="btn btn--sm" id="res-export-json-btn">${icon('download')} Export JSON</button>
       </div>
     </div>
   </div>`;
@@ -869,37 +1391,49 @@ function paintResults() {
     <section class="panel">
       <div class="panel__head">
         <h2 class="panel__title"><i data-icon="server"></i> Per-Node Telemetry Summary (${summary.devices.length} Nodes)</h2>
-        <span class="panel__meta">Click any node to inspect raw time-series samples</span>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+          <span class="panel__meta">Click any node to inspect raw samples</span>
+          <button class="panel__link" id="res-table-csv-btn">${icon('download')} Download Node CSV</button>
+        </div>
       </div>
       <div class="table-wrap">
         <table class="table">
           <thead>
             <tr>
               <th>Device ID</th>
-              <th>Role / Type</th>
+              <th>Role / Upstream</th>
               <th class="num">Samples</th>
               <th class="num">Avg Latency</th>
-              <th class="num">Jitter</th>
               <th class="num">Packet Loss</th>
               <th class="num">DNS Latency</th>
+              <th class="num">Util / RF / Errors</th>
               <th class="num">CPU / Mem</th>
               <th>Diagnostic Status</th>
             </tr>
           </thead>
           <tbody class="rows-in">
-            ${summary.devices.map((d, i) => `
+            ${summary.devices.map((d, i) => {
+              const extraParts = [];
+              if (d.avgUtil != null) extraParts.push(`${fmtDec(d.avgUtil, 1)}% util`);
+              if (d.avgDrops != null && d.avgDrops > 0) extraParts.push(`${fmtDec(d.avgDrops, 0)} drops`);
+              if (d.avgErrors != null && d.avgErrors > 0) extraParts.push(`${fmtDec(d.avgErrors, 0)} CRC`);
+              if (d.avgRssi != null) extraParts.push(`${fmtDec(d.avgRssi, 1)} dBm`);
+              if (d.avgRetry != null && d.avgRetry > 0) extraParts.push(`${fmtDec(d.avgRetry, 1)}% retry`);
+              const extraCell = extraParts.length ? extraParts.join(' · ') : '-';
+              const roleUp = d.upstream ? `${d.role} → ${d.upstream}` : d.role;
+              return `
               <tr class="is-clickable nc-dev-summary-row" data-dev="${esc(d.id)}" style="--i:${i}">
                 <td class="mono"><b>${esc(d.id)}</b></td>
-                <td class="small muted">${esc(d.role)}</td>
+                <td class="small muted">${esc(roleUp)}</td>
                 <td class="num">${d.sampleCount}</td>
                 <td class="num">${d.avgLatency != null ? fmtDec(d.avgLatency, 1) + ' ms' : '-'}</td>
-                <td class="num">${d.avgJitter != null ? fmtDec(d.avgJitter, 1) + ' ms' : '-'}</td>
                 <td class="num">${d.avgLoss != null ? fmtDec(d.avgLoss, 1) + '%' : '-'}</td>
                 <td class="num">${d.avgDns != null ? fmtDec(d.avgDns, 1) + ' ms' : '-'}</td>
+                <td class="num small mono">${esc(extraCell)}</td>
                 <td class="num">${d.avgCpu != null ? `${fmtDec(d.avgCpu, 0)}% / ${fmtDec(d.avgMem, 0)}%` : '-'}</td>
                 <td>${pill(d.isRoot ? 'CONFIRMED' : d.isImpaired ? 'INVESTIGATING' : 'CONTAINED', d.isRoot ? 'Suspected Root Cause' : d.isImpaired ? 'Impaired' : 'Normal')}</td>
-              </tr>
-            `).join('')}
+              </tr>`;
+            }).join('')}
           </tbody>
         </table>
       </div>
@@ -1085,6 +1619,12 @@ function paintResults() {
 
   const viewBusBtn = $('#res-view-bus-btn', wrap);
   if (viewBusBtn) viewBusBtn.onclick = () => switchTab('bus');
+
+  const exportCsvBtn = $('#res-export-csv-btn', wrap);
+  if (exportCsvBtn) exportCsvBtn.onclick = () => exportDiagnosisResultCsv();
+
+  const tableCsvBtn = $('#res-table-csv-btn', wrap);
+  if (tableCsvBtn) tableCsvBtn.onclick = () => exportDiagnosisResultCsv();
 
   const exportJsonBtn = $('#res-export-json-btn', wrap);
   if (exportJsonBtn) {
@@ -1577,6 +2117,8 @@ function openCommandPalette() {
 
   const items = [
     { group: 'Live Actions', icon: 'zap', label: 'Probe & Diagnose Live Network Now', sub: 'Run real DNS + TCP RTT probe and 6-agent diagnosis', run: () => probeLiveSystem({ runDiag: true, switchToStudio: true }) },
+    { group: 'Live Actions', icon: 'download', label: 'Export Diagnostic Result (.csv)', sub: 'Download multi-column Excel/Sheets CSV of nodes, metrics, evidence & CLI', run: () => exportDiagnosisResultCsv() },
+    { group: 'Live Actions', icon: 'download', label: 'Export Live Network Probe (.csv)', sub: 'Download live DNS + TCP socket probe table as CSV', run: () => exportLiveProbeCsv() },
     { group: 'Live Actions', icon: 'download', label: 'Export Latest Diagnostic Report (.json)', sub: 'Download Section 6 JSON report to disk', run: () => {
       if (appState.result) downloadJsonFile('netcoop-diagnosis-report.json', appState.result);
       else toast('No report yet', 'Run a diagnosis first', 'error');
@@ -2005,6 +2547,9 @@ function initExternalHandlers() {
   const rtOpenStudio = $('#rt-open-in-studio');
   if (rtOpenStudio) rtOpenStudio.onclick = () => switchTab('studio');
 
+  const rtExportCsv = $('#rt-export-csv-btn');
+  if (rtExportCsv) rtExportCsv.onclick = () => exportLiveProbeCsv();
+
   // Target input Enter key
   const targetsInput = $('#nc-probe-targets');
   if (targetsInput) {
@@ -2016,13 +2561,97 @@ function initExternalHandlers() {
     };
   }
 
-  // Preset chips
-  $$('.nc-preset-chip').forEach((chip) => {
+  // Live Target Preset chips (excluding CSV preset chips)
+  $$('.nc-preset-chip:not(.nc-csv-preset)').forEach((chip) => {
     chip.onclick = () => {
       if (targetsInput) targetsInput.value = chip.dataset.targets || '';
       probeLiveSystem({ runDiag: true, customTargets: chip.dataset.targets });
     };
   });
+
+  // CSV Template Preset chips
+  $$('.nc-csv-preset').forEach((chip) => {
+    chip.onclick = () => {
+      const key = chip.dataset.csvPreset;
+      const csvText = CSV_PRESETS[key];
+      if (!csvText) return;
+      const rawEl = $('#nc-raw');
+      if (rawEl) rawEl.value = csvText;
+      appState.activeScenarioKey = null;
+      $$('.nc-sc').forEach((b) => { b.style.background = ''; });
+      updatePayloadMeta();
+      toast('CSV Telemetry Loaded', `Loaded ${chip.textContent} — running 6-agent diagnosis`, 'ok');
+      runDiagnosis();
+    };
+  });
+
+  // JSON <-> CSV Bidirectional Converter
+  const convertCsvBtn = $('#nc-convert-csv-btn');
+  if (convertCsvBtn) {
+    convertCsvBtn.onclick = () => {
+      const rawEl = $('#nc-raw');
+      if (!rawEl || !rawEl.value.trim()) {
+        toast('Empty payload', 'Load or paste telemetry first', 'error');
+        return;
+      }
+      const trimmed = rawEl.value.trim();
+      if (/^[{[]/.test(trimmed)) {
+        const csvOut = convertTelemetryObjectToCsv(trimmed);
+        if (!csvOut) {
+          toast('Conversion notice', 'JSON object contains no sample rows to convert', 'error');
+          return;
+        }
+        rawEl.value = csvOut;
+        updatePayloadMeta();
+        toast('Converted to CSV', 'Telemetry converted from JSON to RFC-4180 CSV', 'ok');
+      } else {
+        const parsedObj = parseRawTelemetryToObject(trimmed);
+        if (!parsedObj || !Array.isArray(parsedObj.samples) || !parsedObj.samples.length) {
+          toast('Conversion notice', 'Could not parse CSV rows into JSON', 'error');
+          return;
+        }
+        const summary = summarizeTelemetryDataset(parsedObj);
+        const canonicalJson = {
+          schema: 'netcoop.telemetry/1.0',
+          source: 'Converted from CSV Telemetry',
+          devices: summary.devices.map((d) => ({
+            id: d.id,
+            device_id: d.id,
+            type: d.type,
+            role: d.role,
+            ...(d.ip && d.ip !== '-' ? { ip: d.ip } : {}),
+            ...(d.upstream ? { parent: d.upstream } : {})
+          })),
+          topology: { links: summary.links },
+          samples: parsedObj.samples
+        };
+        rawEl.value = JSON.stringify(canonicalJson, null, 2);
+        updatePayloadMeta();
+        toast('Converted to JSON', 'CSV normalized to netcoop.telemetry/1.0 JSON', 'ok');
+      }
+    };
+  }
+
+  // Interactive CSV Spreadsheet Grid Preview Toggle
+  const gridToggleBtn = $('#nc-csv-grid-toggle');
+  if (gridToggleBtn) {
+    gridToggleBtn.onclick = () => {
+      const gridWrap = $('#nc-csv-grid-wrap');
+      const rawEl = $('#nc-raw');
+      if (!gridWrap || !rawEl) return;
+      const isHidden = gridWrap.style.display === 'none';
+      if (isHidden) {
+        renderCsvGridPreview();
+        gridWrap.style.display = 'block';
+        rawEl.style.display = 'none';
+        gridToggleBtn.textContent = 'Raw Editor';
+      } else {
+        gridWrap.style.display = 'none';
+        rawEl.style.display = '';
+        gridToggleBtn.textContent = 'Grid Preview';
+      }
+    };
+  }
 
   // 2. Format & Download Input buttons
   const fmtBtn = $('#nc-format-btn');
@@ -2035,8 +2664,41 @@ function initExternalHandlers() {
         updatePayloadMeta();
         toast('Formatted JSON', '', 'ok');
       } catch (_e) {
-        toast('Format notice', 'Input is CSV/NDJSON or non-JSON text', 'info');
+        const csvClean = convertTelemetryObjectToCsv(rawEl.value);
+        if (csvClean) {
+          rawEl.value = csvClean;
+          updatePayloadMeta();
+          toast('Normalized CSV', 'Cleaned columns & canonical metric headers', 'ok');
+        } else {
+          toast('Format notice', 'Input is NDJSON or custom text', 'info');
+        }
       }
+    };
+  }
+
+  const dlCsvBtn = $('#nc-download-csv-btn');
+  if (dlCsvBtn) {
+    dlCsvBtn.onclick = () => {
+      const raw = $('#nc-raw') ? $('#nc-raw').value.trim() : '';
+      if (!raw) {
+        toast('Empty input', 'Nothing to download', 'error');
+        return;
+      }
+      const csvText = /^[{[]/.test(raw) ? convertTelemetryObjectToCsv(raw) : raw;
+      if (!csvText) {
+        toast('CSV export failed', 'No telemetry rows available', 'error');
+        return;
+      }
+      const blob = new Blob(['\uFEFF' + csvText], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'netcoop-telemetry-dataset.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      toast('CSV Downloaded', 'Saved netcoop-telemetry-dataset.csv', 'ok');
     };
   }
 
@@ -2048,7 +2710,21 @@ function initExternalHandlers() {
         toast('Empty input', 'Nothing to download', 'error');
         return;
       }
-      downloadJsonFile('netcoop-telemetry-input.json', raw);
+      const isJson = /^[{[]/.test(raw);
+      if (isJson) {
+        downloadJsonFile('netcoop-telemetry-input.json', raw);
+      } else {
+        const blob = new Blob(['\uFEFF' + raw], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'netcoop-telemetry-input.csv';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        toast('Downloaded', 'Saved netcoop-telemetry-input.csv', 'ok');
+      }
     };
   }
 
