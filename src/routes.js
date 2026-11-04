@@ -59,7 +59,7 @@ function formatDiagnosisAsCsv(result) {
   const rows = devices.map((d) => {
     const id = d.id || d.device_id;
     const devSamples = samplesByDev.get(id) || [];
-    const metricVals = (mKey) => devSamples.map((s) => (s.metrics ? s.metrics[mKey] : undefined));
+    const metricVals = (mKey) => devSamples.map((s) => (s.metrics ? s.metrics[mKey] : s[mKey]));
     const isRoot = r.status === 'diagnosed' && rootText.includes(id);
     const isImpaired = impairedSet.has(id) || isRoot;
     const stateLabel = isRoot ? 'SUSPECTED_ROOT_CAUSE' : isImpaired ? 'IMPAIRED_DOWNSTREAM' : 'HEALTHY';

@@ -206,6 +206,7 @@ async function runTests() {
   assert.ok(csvRes.text.includes('incident_id,run_id,timestamp_utc,verdict_status'));
   assert.ok(csvRes.text.includes('MUMBAI_DIST_SW_07'));
   assert.ok(csvRes.text.includes('SUSPECTED_ROOT_CAUSE'));
+  assert.ok(csvRes.text.includes('97.57'), 'CSV export must include computed numeric metric averages');
   console.log('  ✓ Direct HTTP text/csv upload & ?format=csv diagnostic spreadsheet export verified');
 
   console.log('\n======================================================');
