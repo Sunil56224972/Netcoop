@@ -2330,13 +2330,11 @@ function ensureHandcraftedBootDOM() {
           </div>
         </div>
         <div class="nc-cine-center">
-          <img src="images/netcoop-logo-light.png" alt="NetCoop — Multi-Agent Network Intelligence" class="nc-cine-logo" width="168" />
+          <img src="images/netcoop-logo-light.png" alt="NetCoop — Multi-Agent Network Intelligence" class="nc-cine-logo" width="156" />
           <button type="button" class="nc-cine-counter" id="boot-percent" title="Boot progress">[ 00% ]</button>
         </div>
         <div class="nc-cine-right">
-          <div class="nc-cine-typewriter" id="boot-typewriter">
-            <span id="boot-typewriter-text"></span><span class="nc-cine-cursor" aria-hidden="true">&#9608;</span>
-          </div>
+          <div class="nc-cine-typewriter" id="boot-typewriter"><span id="boot-typewriter-text"></span><span class="nc-cine-cursor" aria-hidden="true">&#9608;</span></div>
         </div>
       </div>
       <button type="button" class="nc-cine-skip" id="boot-skip-btn">[ SKIP ]</button>
