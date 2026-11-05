@@ -4,7 +4,7 @@
   <p><strong>Cooperative Multi-Agent Network Fault Diagnosis, Live Socket Probing &amp; Root-Cause Localization</strong></p>
 
   <p>
-    <a href="https://m8ven.ai/mcp/sunil56224972/netcoop?s=readme"><img src="https://m8ven.ai/badge/mcp/sunil56224972/netcoop" alt="M8ven Score" /></a>
+    <a href="https://m8ven.ai/mcp/sunil56224972-netcoop-1nir0d?s=readme"><img src="https://m8ven.ai/badge/mcp/sunil56224972-netcoop-1nir0d?v=a9c68a336c8daa8c65d4a33c7d3da0ef" alt="M8ven Score" /></a>
     <a href="https://netcoop.vercel.app/"><img src="https://img.shields.io/badge/Live_Deployment-netcoop.vercel.app-2563EB?style=flat-square&logo=vercel" alt="Live Deployment" /></a>
     <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-%3E%3D18.0.0-339933?style=flat-square&logo=node.js" alt="Node.js" /></a>
     <a href="SECURITY.md"><img src="https://img.shields.io/badge/MCP_Security-Zero--Exfiltration_%26_Read--Only-10B981?style=flat-square" alt="MCP Security" /></a>
@@ -286,6 +286,8 @@ npm run mcp
 ---
 
 ## Model Context Protocol (MCP) Server & Security Architecture
+
+[![M8ven Score](https://m8ven.ai/badge/mcp/sunil56224972-netcoop-1nir0d?v=a9c68a336c8daa8c65d4a33c7d3da0ef)](https://m8ven.ai/mcp/sunil56224972-netcoop-1nir0d?s=readme)
 
 NetCoop AI ships a hardened JSON-RPC 2.0 **Model Context Protocol (`mcp.js`)** server designed for maximum user trust across Claude Desktop, Cursor, ChatGPT, Windsurf, and VS Code:
 
