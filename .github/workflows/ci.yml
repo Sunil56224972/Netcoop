@@ -1,0 +1,30 @@
+name: NetCoop CI & MCP Security Suite
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify Multi-Agent & MCP Security Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install clean dependencies
+        run: npm ci
+
+      - name: Run 9-stage diagnostic, MCP annotation & security suite
+        run: npm test
