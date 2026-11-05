@@ -80,9 +80,9 @@ function showModal({ title, bodyHtml, footHtml = '', wide = false }) {
   root.innerHTML = `
     <div class="scrim" id="modal-scrim"></div>
     <div class="modal ${wide ? 'modal--wide' : ''}" role="dialog" aria-modal="true">
-      <div class="modal__head" style="display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;border-bottom:1px solid var(--line)">
-        <h3 class="modal__title" style="display:inline-flex;align-items:center;gap:8px;font-size:14.5px">${title}</h3>
-        <button class="icon-btn" id="modal-close" style="width:26px;height:26px" aria-label="Close modal">${icon('x')}</button>
+      <div class="modal__head nc-modal-head">
+        <h3 class="modal__title nc-modal-title">${title}</h3>
+        <button class="icon-btn nc-modal-close" id="modal-close" aria-label="Close modal">${icon('x')}</button>
       </div>
       <div class="modal__body">${bodyHtml}</div>
       ${footHtml ? `<div class="modal__foot">${footHtml}</div>` : ''}
@@ -182,12 +182,21 @@ function initTheme() {
 export function switchTab(target) {
   const tabs = $$('.tab');
   appState.activeTab = target;
+  let activeTabEl = null;
 
   tabs.forEach((t) => {
     const on = t.dataset.tab === target;
     t.classList.toggle('is-on', on);
     t.setAttribute('aria-selected', on ? 'true' : 'false');
+    if (on) activeTabEl = t;
   });
+
+  if (activeTabEl && typeof activeTabEl.scrollIntoView === 'function') {
+    activeTabEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
+  if (typeof window !== 'undefined' && window.innerWidth <= 768 && window.scrollY > 180) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
   $$('.tab-pane').forEach((pane) => {
     pane.style.display = pane.id === `tab-${target}` ? '' : 'none';
@@ -660,7 +669,7 @@ function renderCsvGridPreview() {
   const previewRows = rows.slice(0, 60);
 
   wrap.innerHTML = `
-    <div style="padding:7px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;background:var(--surface-2);font-size:11.5px">
+    <div style="padding:7px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px 10px;background:var(--surface-2);font-size:11.5px">
       <span class="mono"><b>${esc(delimLabel)}</b> &middot; ${rows.length} data rows &times; ${headers.length} columns</span>
       <span class="muted">${rows.length > 60 ? 'Showing first 60 rows' : 'All rows shown'} &middot; Auto-mapped to canonical schema</span>
     </div>
@@ -1023,12 +1032,12 @@ function paintScenarios() {
     const isAct = appState.activeScenarioKey === s.key;
     return `
     <div class="list__item is-clickable nc-sc" style="--i:${i};${isAct ? 'background:var(--accent-soft)' : ''}" data-key="${esc(s.key)}">
-      <span style="width:96px">${pill(pState, pText)}</span>
-      <div style="min-width:0">
+      <span class="nc-sc__badge">${pill(pState, pText)}</span>
+      <div class="nc-sc__main" style="min-width:0">
         <div class="list__title">${esc(s.name)}</div>
         <div class="list__sub">${esc(s.description)}</div>
       </div>
-      <span class="btn btn--sm" style="pointer-events:none">${icon('play')} Diagnose</span>
+      <span class="btn btn--sm nc-sc__cta" style="pointer-events:none">${icon('play')} Diagnose</span>
     </div>`;
   }).join('')}</div>`;
   hydrateIcons(wrap);
@@ -1373,14 +1382,14 @@ function paintResults() {
       <span class="verdict__id">Incident ${esc(r.incident_id || '-')} &middot; ${esc(srcFormat)} &middot; ${meta.elapsed_ms ?? '-'} ms &middot; ${meta.messages || msgs.length} bus msgs</span>
     </div>
     <p class="verdict__summary" style="font-size:14px;color:var(--ink);font-weight:500;margin-top:8px">${esc(rootCause)}</p>
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
+    <div class="nc-verdict-foot" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
       <div class="facts" style="margin-top:0">
         <div><span>Monitored Nodes</span><b>${meta.devices || summary.devices.length || '-'}</b></div>
         <div><span>Impaired Nodes</span><b>${impaired.length} of ${meta.devices || summary.devices.length || '-'}</b></div>
         <div><span>Active Agents</span><b>${meta.agents || 6} workers</b></div>
         <div><span>Telemetry Samples</span><b class="mono">${num(meta.samples || summary.sampleCount)}</b></div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <div class="nc-verdict-actions" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <button class="btn btn--sm" id="res-view-topo-btn">${icon('network')} View in Topology</button>
         <button class="btn btn--sm" id="res-view-bus-btn">${icon('layers')} Inspect ${msgs.length} Bus Envelopes</button>
         <button class="btn btn--sm btn--primary" id="res-export-csv-btn">${icon('download')} Export Result (.csv)</button>
@@ -1502,7 +1511,7 @@ function paintResults() {
             <pre class="code" style="padding:6px 8px;font-size:11.5px;margin:0;line-height:1.5;overflow-x:auto"><code>${esc(gCommands.join('\n'))}</code></pre>
           </div>
         ` : ''}
-        <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <div class="nc-hitl-row" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
           <span class="small mono" style="color:var(--ink-3);font-size:11px">Operator Change Control</span>
           <button class="btn btn--sm" id="hitl-ack-btn">${icon('shieldCheck')} Authorize Runbook</button>
         </div>
@@ -1752,6 +1761,7 @@ function renderTopologySvg(summary) {
   }).join('');
 
   return `
+    <div class="nc-topo-touch-hint">&harr; Swipe horizontally to pan graph &middot; Tap any node to inspect telemetry</div>
     <div class="nc-topo-svg-wrap">
       <svg class="nc-topo-svg" style="max-height:${height}px" viewBox="0 0 ${width} ${height}" aria-label="Network Topology Dependency Graph">
         ${linkLines}
@@ -2164,7 +2174,7 @@ function openCommandPalette() {
       <div class="palette__input">
         ${icon('search')}
         <input type="text" id="palette-q" placeholder="Type a command, scenario, node ID, or tab name…" autocomplete="off" />
-        <span class="kbd">ESC</span>
+        <button type="button" class="kbd nc-palette-esc" id="palette-esc-btn" aria-label="Close command palette">ESC</button>
       </div>
       <div class="palette__results" id="palette-results"></div>
       <div class="palette__foot">
@@ -2178,6 +2188,8 @@ function openCommandPalette() {
 
   const close = () => { root.innerHTML = ''; };
   $('#palette-scrim').onclick = close;
+  const escBtn = $('#palette-esc-btn', root);
+  if (escBtn) escBtn.onclick = close;
 
   const inputEl = $('#palette-q', root);
   const resEl = $('#palette-results', root);
@@ -2226,7 +2238,9 @@ function openCommandPalette() {
   };
 
   renderList();
-  inputEl.focus();
+  if (typeof window === 'undefined' || !window.matchMedia || window.matchMedia('(pointer: fine)').matches) {
+    inputEl.focus();
+  }
 
   inputEl.oninput = () => {
     selIdx = 0;

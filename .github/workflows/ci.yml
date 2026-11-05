@@ -28,3 +28,4 @@ jobs:
 
       - name: Run 9-stage diagnostic, MCP annotation & security suite
         run: npm test
+

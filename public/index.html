@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>NetCoop AI — Multi-Agent Network Fault Diagnosis</title>
   <meta name="description" content="Multi-agent cooperative network fault diagnosis and root cause localization for enterprise and campus infrastructure.">
   <link rel="icon" type="image/png" sizes="128x128" href="images/favicon.png">
@@ -10,12 +10,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/base.css?v=11">
-  <link rel="stylesheet" href="css/layout.css?v=11">
-  <link rel="stylesheet" href="css/components.css?v=11">
-  <link rel="stylesheet" href="css/views.css?v=11">
-  <link rel="stylesheet" href="css/boot.css?v=11">
-  <script src="js/theme-init.js?v=12"></script>
+  <link rel="stylesheet" href="css/base.css?v=13">
+  <link rel="stylesheet" href="css/layout.css?v=13">
+  <link rel="stylesheet" href="css/components.css?v=13">
+  <link rel="stylesheet" href="css/views.css?v=13">
+  <link rel="stylesheet" href="css/boot.css?v=13">
+  <script src="js/theme-init.js?v=13"></script>
 </head>
 <body>
   <!-- NetCoop AI Minimalist 3-Column Boot Screen (White Theme) -->
@@ -135,9 +135,9 @@
           <div class="nc-boot-summary-cell">
             <div class="panel__head">
               <h2 class="panel__title"><i data-icon="cpu"></i> Cooperative Multi-Agent Diagnostic Runtime</h2>
-              <span class="panel__meta" style="display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap">
-                <a href="https://m8ven.ai/mcp/sunil56224972/netcoop?s=webapp" target="_blank" rel="noopener noreferrer" title="M8ven Live Verified MCP Server" style="display:inline-flex;align-items:center;line-height:0">
-                  <img src="https://m8ven.ai/badge/mcp/sunil56224972/netcoop?variant=verified" alt="M8ven Live: continuously verified" height="20" style="display:block;border-radius:3px" />
+              <span class="panel__meta nc-runtime-badges">
+                <a href="https://m8ven.ai/mcp/sunil56224972/netcoop?s=webapp" target="_blank" rel="noopener noreferrer" title="M8ven Live Verified MCP Server" class="nc-m8ven-link">
+                  <img src="https://m8ven.ai/badge/mcp/sunil56224972/netcoop?variant=verified" alt="M8ven Live: continuously verified" height="20" class="nc-m8ven-badge" />
                 </a>
                 <span class="pill pill--CONTAINED" id="runtime-health-pill">6 / 6 Agents Online</span>
               </span>
@@ -348,12 +348,12 @@
               </div>
               <textarea id="nc-raw" class="textarea" rows="12" spellcheck="false" placeholder="Paste CSV (comma, semicolon, or tab-separated), JSON, or NDJSON telemetry here, drag & drop a .csv/.json file, or click a CSV template above…"></textarea>
               <div id="nc-csv-grid-wrap" style="display:none;max-height:285px;overflow:auto;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface)"></div>
-              <div class="row wrap" style="display:flex;align-items:center;margin-top:10px;gap:8px;flex-wrap:wrap">
+              <div class="row wrap nc-studio-actions">
                 <button class="btn btn--primary" id="nc-run"><i data-icon="play"></i> Run 6-Agent Diagnosis</button>
                 <button class="btn" id="nc-download-csv-btn" title="Download current telemetry as CSV spreadsheet"><i data-icon="download"></i> Download (.csv)</button>
                 <button class="btn" id="nc-export-telemetry-btn" title="Download current telemetry raw file"><i data-icon="download"></i> Download Raw</button>
                 <button class="btn btn--ghost" id="nc-clear"><i data-icon="x"></i> Clear</button>
-                <span class="small mono" style="color:var(--ink-3);margin-left:auto" id="nc-status"></span>
+                <span class="small mono nc-studio-status" id="nc-status"></span>
               </div>
             </div>
           </section>
@@ -363,7 +363,7 @@
               <h2 class="panel__title"><i data-icon="layers"></i> Benchmark Fault Scenarios</h2>
               <span class="panel__meta">IIT Bhubaneswar &middot; Click to diagnose</span>
             </div>
-            <div id="nc-scenarios" style="overflow-y:auto;max-height:405px;scrollbar-width:thin">
+            <div id="nc-scenarios" class="nc-scenarios-list">
               <div class="skeleton" style="height:200px;margin:14px"></div>
             </div>
           </section>
@@ -395,12 +395,12 @@
               <button class="panel__link" id="bus-clear-btn">Clear Log</button>
             </div>
           </div>
-          <div class="toolbar">
-            <div class="input-icon">
+          <div class="toolbar nc-bus-toolbar">
+            <div class="input-icon nc-bus-search">
               <i data-icon="search"></i>
               <input type="text" id="bus-filter-q" class="input" placeholder="Filter messages by summary, device, or ID…" />
             </div>
-            <select id="bus-filter-agent" class="select" style="width:190px" aria-label="Filter by agent">
+            <select id="bus-filter-agent" class="select nc-bus-select nc-bus-select--agent" aria-label="Filter by agent">
               <option value="">All Agents</option>
               <option value="orchestrator">orchestrator</option>
               <option value="performance_agent">performance_agent</option>
@@ -410,7 +410,7 @@
               <option value="reporting_agent">reporting_agent</option>
               <option value="groq_llm_agent">groq_llm_agent</option>
             </select>
-            <select id="bus-filter-type" class="select" style="width:170px" aria-label="Filter by message type">
+            <select id="bus-filter-type" class="select nc-bus-select nc-bus-select--type" aria-label="Filter by message type">
               <option value="">All Envelope Types</option>
               <option value="task">task</option>
               <option value="finding">finding</option>
@@ -447,6 +447,6 @@
   <div class="toasts" id="toasts"></div>
 
   <!-- Frontend Logic -->
-  <script type="module" src="js/app.js?v=11"></script>
+  <script type="module" src="js/app.js?v=13"></script>
 </body>
 </html>
