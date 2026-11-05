@@ -2,6 +2,7 @@
 
 NetCoop AI is engineered as a **zero-exfiltration, read-only, deterministic** Model Context Protocol (MCP) diagnostic server and hardened web application.
 
+[![M8ven Verified](https://m8ven.ai/badge/mcp/sunil56224972/netcoop?variant=verified)](https://m8ven.ai/mcp/sunil56224972/netcoop?s=security)
 [![M8ven Score](https://m8ven.ai/badge/mcp/sunil56224972-netcoop-1nir0d?v=a9c68a336c8daa8c65d4a33c7d3da0ef)](https://m8ven.ai/mcp/sunil56224972-netcoop-1nir0d?s=readme)
 
 ---

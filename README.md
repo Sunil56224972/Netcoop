@@ -4,6 +4,7 @@
   <p><strong>Cooperative Multi-Agent Network Fault Diagnosis, Live Socket Probing &amp; Root-Cause Localization</strong></p>
 
   <p>
+    <a href="https://m8ven.ai/mcp/sunil56224972/netcoop?s=readme"><img src="https://m8ven.ai/badge/mcp/sunil56224972/netcoop?variant=verified" alt="M8ven Verified MCP" /></a>
     <a href="https://m8ven.ai/mcp/sunil56224972-netcoop-1nir0d?s=readme"><img src="https://m8ven.ai/badge/mcp/sunil56224972-netcoop-1nir0d?v=a9c68a336c8daa8c65d4a33c7d3da0ef" alt="M8ven Score" /></a>
     <a href="https://netcoop.vercel.app/"><img src="https://img.shields.io/badge/Live_Deployment-netcoop.vercel.app-2563EB?style=flat-square&logo=vercel" alt="Live Deployment" /></a>
     <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-%3E%3D18.0.0-339933?style=flat-square&logo=node.js" alt="Node.js" /></a>
