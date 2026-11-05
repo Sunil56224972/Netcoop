@@ -35,6 +35,15 @@
   ],
   "author": "Sunil",
   "license": "MIT",
+  "mcpName": "io.github.sunil56224972/netcoop",
+  "homepage": "https://netcoop.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sunil56224972/Netcoop.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Sunil56224972/Netcoop/issues"
+  },
   "engines": {
     "node": ">=18.0.0"
   },
