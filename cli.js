@@ -15,6 +15,9 @@
 const fs = require('fs');
 const path = require('path');
 const { diagnose, generateScenario, listScenarios } = require('./src/orchestrator');
+const { redactSecrets } = require('./src/groq');
+
+const MAX_CLI_FILE_BYTES = 5 * 1024 * 1024; // 5 MB safety limit
 
 const args = process.argv.slice(2);
 const isJson = args.includes('--json');
@@ -59,12 +62,27 @@ async function main() {
       process.exit(1);
     }
   } else {
-    // Check for file argument or stdin
+    // Check for file argument or stdin with size and regular-file validation
     const fileArg = args.find(a => !a.startsWith('--'));
-    if (fileArg && fs.existsSync(fileArg)) {
-      rawTelemetry = fs.readFileSync(fileArg, 'utf8');
+    if (fileArg) {
+      const resolvedPath = path.resolve(process.cwd(), fileArg);
+      if (!fs.existsSync(resolvedPath)) {
+        console.error(`${c.red}Error:${c.reset} Telemetry file not found: "${fileArg}"`);
+        process.exit(1);
+      }
+      const st = fs.statSync(resolvedPath);
+      if (!st.isFile() || st.size > MAX_CLI_FILE_BYTES) {
+        console.error(`${c.red}Error:${c.reset} Input must be a regular file under 5 MB.`);
+        process.exit(1);
+      }
+      rawTelemetry = fs.readFileSync(resolvedPath, 'utf8');
     } else if (!process.stdin.isTTY) {
-      rawTelemetry = fs.readFileSync(0, 'utf-8');
+      const buf = fs.readFileSync(0);
+      if (buf.length > MAX_CLI_FILE_BYTES) {
+        console.error(`${c.red}Error:${c.reset} Stdin telemetry exceeds 5 MB limit.`);
+        process.exit(1);
+      }
+      rawTelemetry = buf.toString('utf8');
     }
   }
 
@@ -171,6 +189,6 @@ function printTerminalReport(res, elapsed) {
 }
 
 main().catch(err => {
-  console.error(`${c.red}Execution failed:${c.reset}`, err);
+  console.error(`${c.red}Execution failed:${c.reset} ${redactSecrets((err && err.message) || err)}`);
   process.exit(1);
 });

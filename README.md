@@ -4,9 +4,10 @@
   <p><strong>Cooperative Multi-Agent Network Fault Diagnosis, Live Socket Probing &amp; Root-Cause Localization</strong></p>
 
   <p>
+    <a href="https://m8ven.ai/mcp/sunil56224972/netcoop?s=readme"><img src="https://m8ven.ai/badge/mcp/sunil56224972/netcoop" alt="M8ven Score" /></a>
     <a href="https://netcoop.vercel.app/"><img src="https://img.shields.io/badge/Live_Deployment-netcoop.vercel.app-2563EB?style=flat-square&logo=vercel" alt="Live Deployment" /></a>
     <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-%3E%3D18.0.0-339933?style=flat-square&logo=node.js" alt="Node.js" /></a>
-    <a href="https://groq.com/"><img src="https://img.shields.io/badge/Inference-Groq_LPU_(openai%2Fgpt--oss--120b)-F55036?style=flat-square" alt="Groq LPU" /></a>
+    <a href="SECURITY.md"><img src="https://img.shields.io/badge/MCP_Security-Zero--Exfiltration_%26_Read--Only-10B981?style=flat-square" alt="MCP Security" /></a>
     <a href="https://github.com/Sunil56224972/Netcoop"><img src="https://img.shields.io/badge/Protocol-JSON--RPC_v1.0.0-0F172A?style=flat-square" alt="JSON-RPC v1.0.0" /></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-F59E0B?style=flat-square" alt="MIT License" /></a>
   </p>
@@ -284,9 +285,30 @@ npm run mcp
 
 ---
 
+## Model Context Protocol (MCP) Server & Security Architecture
+
+NetCoop AI ships a hardened JSON-RPC 2.0 **Model Context Protocol (`mcp.js`)** server designed for maximum user trust across Claude Desktop, Cursor, ChatGPT, Windsurf, and VS Code:
+
+- **Zero Credentials Required & Zero Telemetry Exfiltration**: `mcp.js` runs strictly in deterministic local mode (`{ offline: true }`). Connecting NetCoop MCP requires **zero API keys** and never transmits your network telemetry to any external cloud service.
+- **Complete Boolean Tool Annotations**: All 4 tools (`diagnose_network_fault`, `list_test_scenarios`, `generate_scenario_telemetry`, `get_protocol_specification`) explicitly declare `readOnlyHint: true`, `destructiveHint: false`, `idempotentHint: true`, and `openWorldHint: false` with `additionalProperties: false` schemas.
+- **Zero Shell Execution & Minimal Supply Chain**: Zero `child_process` shell-outs, zero `eval()`, prototype-pollution sanitization, `2 MB` stdio frame caps, SSRF/DNS-rebinding protection (`169.254.169.254` / RFC-1918 / IPv6), hardware MAC redaction, strict `Content-Security-Policy` (`script-src 'self'`), and CSV formula-injection neutralization. See [`SECURITY.md`](SECURITY.md) for the full threat model.
+
+```json
+{
+  "mcpServers": {
+    "netcoop": {
+      "command": "node",
+      "args": ["/absolute/path/to/Netcoop/mcp.js"]
+    }
+  }
+}
+```
+
+---
+
 ## Automated Verification Suite
 
-Run the 7-stage verification suite covering protocol schema, JSON/CSV/NDJSON normalization, all 8 campus fault scenarios, insufficient-evidence guardrails, Section 6 schema compliance, and live host/network probing:
+Run the 9-stage verification & security suite covering protocol schema, JSON/CSV/NDJSON normalization, all 8 campus fault scenarios, insufficient-evidence guardrails, Section 6 schema compliance, live host/network probing, 100% MCP tool & annotation coverage (`4/4` tools), and SSRF/credential/CSP security controls:
 
 ```bash
 npm test
@@ -294,42 +316,30 @@ npm test
 
 ```text
 ======================================================
-   NetCoop AI — Automated Test Suite
+   NetCoop AI — Automated Test & Security Suite
 ======================================================
 
-[1/7] Verifying Protocol Schema & Metadata...
+[1/9] Verifying Protocol Schema & Metadata...
   ✓ Protocol v1.0.0 and 16 metric definitions verified
-
-[2/7] Testing Telemetry Input Normalization...
-  ✓ JSON telemetry parsed correctly
-  ✓ CSV telemetry parsed correctly
-
-[3/7] Testing Scenario Registry...
+[2/9] Testing Telemetry Input Normalization...
+  ✓ JSON & CSV telemetry parsed correctly
+[3/9] Testing Scenario Registry...
   ✓ Loaded 8 built-in test scenarios
-
-[4/7] Running Multi-Agent Diagnosis on all 8 Scenarios...
-  • normal               -> no_fault_detected  [90%] | No fault detected: all reported metrics are normal
-  • link_congestion      -> diagnosed          [95%] | Likely link congestion on HOSTEL_CORE_SW_01
-  • weak_wifi            -> diagnosed          [88%] | Likely weak Wi-Fi signal at STUDENT_LAPTOP_14
-  • interface_fault      -> diagnosed          [65%] | Likely physical or interface fault on DEPT_CS_SW_02
-  • dns_failure          -> diagnosed          [95%] | Likely DNS resolution failure or slowness seen at CAMPUS_DNS_01
-  • dhcp_failure         -> diagnosed          [60%] | Possible DHCP failure or slowness seen at CAMPUS_DHCP_01
-  • interop_failure      -> error              [0%]  | Input validation failed: Incompatible schema version
-  • device_overload      -> diagnosed          [95%] | Likely resource overload on IITBBS_CORE_SW_01
-
-[5/7] Testing Guardrails (Must not claim exact root cause with insufficient evidence)...
+[4/9] Running Multi-Agent Diagnosis on all 8 Scenarios...
+  ✓ All 8 benchmark scenarios diagnosed with calibrated confidence
+[5/9] Testing Guardrails (Must not claim exact root cause with insufficient evidence)...
   ✓ System correctly reports no false alarms when telemetry is clean/sparse
-
-[6/7] Verifying Exact Section 6 Output Schema Compliance...
+[6/9] Verifying Exact Section 6 Output Schema Compliance...
   ✓ Report schema precisely satisfies Problem Statement Section 6 specifications
-
-[7/7] Testing External Arbitrary Telemetry & Live Host Probing...
-  ✓ Live host network probe captured 20 real measurements
-  ✓ Arbitrary external CSV with custom devices diagnosed with real computed evidence
-  ✓ Arbitrary external NDJSON normalized and unit-converted without canned responses
+[7/9] Testing External Arbitrary Telemetry & Live Host Probing...
+  ✓ Live host probe, multi-delimiter CSV, NDJSON & ?format=csv export verified
+[8/9] Verifying MCP Server Tools, Annotations & JSON-RPC 2.0 Lifecycle...
+  ✓ All 4 MCP tools tested with readOnlyHint, destructiveHint, idempotentHint & openWorldHint
+[9/9] Verifying Security Controls (Credential Isolation, SSRF, CSP & CSV Formula Guard)...
+  ✓ Credential isolation, 14 SSRF/IMDS/port vectors, MAC redaction, CSP & CSV guard verified
 
 ======================================================
-   ALL NETCOOP TESTS PASSED SUCCESSFULLY (100%)
+   ALL 9 NETCOOP TEST & SECURITY SUITES PASSED (100%)
 ======================================================
 ```
 

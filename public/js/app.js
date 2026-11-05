@@ -552,7 +552,11 @@ function summarizeTelemetryDataset(telemetryInput, reportObj = null) {
 
 function csvEscape(val) {
   if (val == null) return '';
-  const s = String(val);
+  let s = String(val);
+  // Neutralize CSV/Excel DDE formula injection while preserving negative numeric telemetry (e.g. -82.5 dBm)
+  if (/^[=+\-@\t\r]/.test(s) && !/^-\d+(?:\.\d+)?$/.test(s)) {
+    s = `'${s}`;
+  }
   if (/[",\r\n;]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
   return s;
 }

@@ -6,7 +6,7 @@
 
 const { normalizeInput, REPORT_SCHEMA } = require('./schema');
 const { MessageBus, createAgents, PROTOCOL, SCORING, ROLES } = require('./agents');
-const { synthesizeWithGroq } = require('./groq');
+const { synthesizeWithGroq, redactSecrets } = require('./groq');
 const scenarios = require('./scenarios');
 const { probeLiveTelemetry } = require('./probe');
 
@@ -187,7 +187,8 @@ async function diagnose(input, opts = {}) {
     };
   }
 
-  // ── 8. Groq LLM reasoning & technical action synthesis ────────
+  // ── 8. CLI & reasoning synthesis (deterministic offline in MCP mode) ──
+  const offlineMode = Boolean(opts.offline);
   try {
     const rootCause = report.suspected_root_cause || report.root_cause || 'undetermined';
     const confidence = report.confidence || 0;
@@ -196,7 +197,9 @@ async function diagnose(input, opts = {}) {
     const alternatives = report.alternative_cause_details || report.alternative_causes || report.alternatives || [];
 
     if (rootCause !== 'undetermined' && report.status !== 'error') {
-      const llm = await synthesizeWithGroq({ rootCause, confidence, evidence, affectedDevices, alternatives }, bus);
+      const llm = offlineMode
+        ? null
+        : await synthesizeWithGroq({ rootCause, confidence, evidence, affectedDevices, alternatives }, bus, { offline: offlineMode });
       if (llm) {
         report.llm_synthesis = llm;
         if (llm.reasoning) report.llm_reasoning = llm.reasoning;
@@ -216,7 +219,9 @@ async function diagnose(input, opts = {}) {
       }
     }
   } catch (err) {
-    console.warn('[NetCoop] Groq synthesis fallback:', err.message);
+    if (!offlineMode) {
+      process.stderr.write(`[NetCoop] Synthesis fallback: ${redactSecrets(err && err.message)}\n`);
+    }
   }
 
   // attach agent failures if any
